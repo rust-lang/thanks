@@ -5,3 +5,7 @@ authors = ["Mark Rousskov <mark.simulacrum@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+reqwest = "0.9"
+hyperx = "0.14"
+dotenv = "0.13"
+diesel = "1.4"
