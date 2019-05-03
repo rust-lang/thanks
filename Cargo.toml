@@ -8,4 +8,11 @@ edition = "2018"
 reqwest = "0.9"
 hyperx = "0.14"
 dotenv = "0.13"
-diesel = "1.4"
+
+[dependencies.diesel]
+version = "1.4"
+features = ["sqlite"]
+
+[dependencies.serde]
+version = "1"
+features = ["derive"]
