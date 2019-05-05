@@ -2,7 +2,7 @@ language: rust
 dist: xenial
 
 env:
-  RUSTINFRA_DEPLOY_DIR: _site
+  RUSTINFRA_DEPLOY_DIR: output
 import:
   - rust-lang/simpleinfra/travis-configs/static-websites.yml
 
