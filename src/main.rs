@@ -1,15 +1,15 @@
-use git2::Oid;
+use git2::{Commit, Oid, Repository};
 use semver::Version;
-use std::cmp;
 use std::collections::HashMap;
-use std::fmt;
 use std::io::Read;
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
-use std::str;
+use std::{cmp, fmt, str};
 
+use config::Config;
 use mailmap::{Author, Mailmap};
 
+mod config;
 mod mailmap;
 
 fn git(args: &[&str]) -> String {
@@ -42,10 +42,11 @@ fn update_repo(slug: &str) -> PathBuf {
     let path_s = format!("repos/{}", slug);
     let path = PathBuf::from(&path_s);
     if path.exists() {
-        git(&["-C", &path_s, "pull"]);
+        git(&["-C", &path_s, "fetch", "origin", "master:master"]);
     } else {
         git(&[
             "clone",
+            "--bare",
             &format!("https://github.com/{}.git", slug),
             &path_s,
         ]);
@@ -56,6 +57,7 @@ fn update_repo(slug: &str) -> PathBuf {
 struct VersionTag {
     version: Version,
     raw_tag: String,
+    commit: Oid,
 }
 
 impl cmp::Eq for VersionTag {}
@@ -101,6 +103,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             Version::parse(&tag).ok().map(|v| VersionTag {
                 version: v,
                 raw_tag: tag.clone(),
+                commit: repo
+                    .revparse_single(&tag)
+                    .unwrap()
+                    .peel_to_commit()
+                    .unwrap()
+                    .id(),
             })
         })
         .collect::<Vec<_>>();
@@ -116,6 +124,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let mut walker = repo.revwalk()?;
         walker.push_range(&format!("{}..{}", previous.raw_tag, version.raw_tag))?;
 
+        eprintln!("submodules for {:?}", previous);
+        let previous_commit = repo.find_commit(previous.commit)?;
+        let s = get_submodules(&repo, &previous_commit)?;
+        eprintln!("{:?}", s);
+
         let mut author_map = HashMap::new();
         for oid in walker {
             let oid = oid?;
@@ -128,4 +141,81 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     Ok(())
+}
+
+fn traverse_entry(
+    r: &str,
+    entry: &git2::TreeEntry,
+    _repo: &Repository,
+    path_to_url: &HashMap<String, String>,
+) -> Result<Option<Submodule>, Box<dyn std::error::Error>> {
+    if entry.kind().unwrap() == git2::ObjectType::Commit {
+        let path_s = format!("{}{}", r, entry.name().unwrap());
+        let path = PathBuf::from(&path_s);
+        return Ok(Some(Submodule {
+            path,
+            commit: entry.id(),
+            repository: path_to_url[&path_s].to_owned(),
+        }));
+    }
+    Ok(None)
+}
+
+#[derive(Debug)]
+struct Submodule {
+    path: PathBuf,
+    commit: Oid,
+    // url
+    repository: String,
+}
+
+fn get_submodules(
+    repo: &Repository,
+    at: &Commit,
+) -> Result<Vec<Submodule>, Box<dyn std::error::Error>> {
+    let submodule_cfg = modules_file(&repo, &at)?;
+    let submodule_cfg = Config::parse(&submodule_cfg)?;
+    let mut path_to_url = HashMap::new();
+    let entries = submodule_cfg.entries(None)?;
+    for entry in &entries {
+        let entry = entry?;
+        let name = entry.name().unwrap();
+        if name.ends_with(".path") {
+            let url = name.replace(".path", ".url");
+            let url = submodule_cfg.get_string(&url).unwrap();
+            path_to_url.insert(entry.value().unwrap().to_owned(), url);
+        }
+    }
+    let mut err = None;
+    let mut submodules = Vec::new();
+    at.tree()?.walk(
+        git2::TreeWalkMode::PreOrder,
+        |r, entry| match traverse_entry(r, entry, repo, &path_to_url) {
+            Ok(Some(submodule)) => {
+                submodules.push(submodule);
+                git2::TreeWalkResult::Ok
+            }
+            Ok(None) => git2::TreeWalkResult::Ok,
+            Err(e) => {
+                err = Some(e);
+                git2::TreeWalkResult::Abort
+            }
+        },
+    )?;
+    if let Some(err) = err {
+        panic!("tree walk failed: {:?}", err);
+    }
+    Ok(submodules)
+}
+
+fn modules_file(repo: &Repository, at: &Commit) -> Result<String, Box<dyn std::error::Error>> {
+    Ok(String::from_utf8(
+        at.tree()?
+            .get_name(".gitmodules")
+            .unwrap()
+            .to_object(&repo)?
+            .peel_to_blob()?
+            .content()
+            .into(),
+    )?)
 }
