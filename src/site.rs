@@ -3,7 +3,7 @@ use handlebars::Handlebars;
 use semver::Version;
 use std::collections::BTreeMap;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 pub fn render(
     by_version: BTreeMap<Version, AuthorMap>,
@@ -79,8 +79,7 @@ fn about() -> Result<(), Box<dyn std::error::Error>> {
 
     let res = hb.render("about", &About { maintenance: false })?;
 
-    create_dir("output/about")?;
-    fs::write("output/about/index.html", res)?;
+    fs::write("output/about.html", res)?;
     Ok(())
 }
 
@@ -139,8 +138,7 @@ fn releases(
         },
     )?;
 
-    fs::create_dir_all("output/rust/all-time")?;
-    fs::write("output/rust/all-time/index.html", res)?;
+    fs::write("output/all-time.html", res)?;
 
     for (version, map) in by_version {
         let scores = author_map_to_scores(&map);
@@ -155,9 +153,7 @@ fn releases(
             },
         )?;
 
-        let dir = PathBuf::from(format!("output/rust/{}", version));
-        fs::create_dir_all(&dir)?;
-        fs::write(dir.join("index.html"), res)?;
+        fs::write(format!("output/{}.html", version), res)?;
     }
     Ok(())
 }
