@@ -1,164 +1,131 @@
-#[macro_use]
-extern crate diesel;
+use git2::Oid;
+use semver::Version;
+use std::cmp;
+use std::collections::HashMap;
+use std::fmt;
+use std::io::Read;
+use std::path::PathBuf;
+use std::process::{Command, Stdio};
+use std::str;
 
-use diesel::prelude::*;
-use hyperx::header::Header;
-use serde::Deserialize;
-use std::env;
+use mailmap::{Author, Mailmap};
 
-#[derive(Clone)]
-struct Client {
-    http: reqwest::Client,
-}
+mod mailmap;
 
-impl Client {
-    fn new() -> Client {
-        Client {
-            http: reqwest::Client::new(),
-        }
-    }
-
-    fn github(&self) -> GithubClient<'_> {
-        GithubClient { client: self }
-    }
-}
-
-struct GithubClient<'a> {
-    client: &'a Client,
-}
-
-impl<'a> GithubClient<'a> {
-    fn commits(&self, repo_slug: &str, until: &str, stop_at: Option<&str>) -> Vec<models::Commit> {
-        fn deserialize_request(resp: &mut reqwest::Response) -> Vec<models::Commit> {
-            #[derive(Deserialize)]
-            struct ApiResponse {
-                commit: ApiCommit,
-                sha: String,
-            }
-
-            #[derive(Deserialize)]
-            struct ApiCommit {
-                author: ApiPerson,
-            }
-
-            #[derive(Deserialize)]
-            struct ApiPerson {
-                name: String,
-                email: String,
-            }
-
-            let v: Vec<ApiResponse> = resp.json().unwrap();
-
-            v.into_iter()
-                .map(|ApiResponse { commit: c, sha }| models::Commit {
-                    sha,
-                    author: c.author.name,
-                    email: c.author.email,
-                })
-                .collect()
-        }
-
-        let mut commits: Vec<models::Commit> = Vec::new();
-        let mut next_url = format!(
-            "https://api.github.com/repos/{}/commits?sha={}&per_page=100",
-            repo_slug, until,
-        );
-        loop {
-            // check if commits contains stop commit and truncate at it
-            if let Some(stop) = stop_at {
-                if let Some(idx) = commits.iter().rposition(|c| c.sha == stop) {
-                    commits.truncate(idx);
-                    break;
-                }
-            }
-
-            eprintln!("get: {:?}, {} commits so far", next_url, commits.len());
-            let req = self.client.http.get(&next_url).header(
-                "Authorization",
-                format!("token {}", env::var("GH_TOKEN").unwrap()),
-            );
-            let mut resp = match req.send() {
-                Ok(v) => v,
-                Err(err) => {
-                    panic!("failed to get commits with err: {:?}", err);
-                }
-            };
-            commits.extend(deserialize_request(&mut resp));
-
-            if let Some(link) = resp.headers().get(reqwest::header::LINK) {
-                let link = hyperx::header::Link::parse_header(&link).unwrap();
-                if let Some(next) = next_link(&link) {
-                    next_url = next.to_owned();
-                    continue;
-                }
-            }
-
-            break;
-        }
-
-        commits
-    }
-}
-
-fn next_link(link: &hyperx::header::Link) -> Option<&str> {
-    link.values()
-        .iter()
-        .find(|lv| lv.rel() == Some(&[hyperx::header::RelationType::Next]))
-        .map(|lv| lv.link())
-}
-
-pub mod models;
-pub mod schema;
-
-fn main() {
-    dotenv::dotenv().ok();
-    let client = Client::new();
-
-    handle_repo(&client, "rust-lang/rls");
-    handle_repo(&client, "rust-lang/cargo");
-    handle_repo(&client, "rust-lang/rust");
-}
-
-fn handle_repo(client: &Client, slug: &str) {
-    let db_url = std::env::var("DATABASE_URL").expect("`DATABASE_URL` must be set");
-    let conn =
-        SqliteConnection::establish(&db_url).expect(&format!("Error connecting to `{}`", db_url));
-    let repo: Option<models::Repository> = schema::repositories::table
-        .find(slug)
-        .get_result(&conn)
-        .optional()
-        .unwrap();
-
-    let repo = match repo {
-        Some(r) => r,
-        None => {
-            let default = models::Repository {
-                name: String::from(slug),
-                latest_commit: None,
-            };
-            diesel::insert_into(schema::repositories::table)
-                .values(&default)
-                .execute(&conn)
-                .unwrap();
-            default
+fn git(args: &[&str]) -> String {
+    let mut cmd = Command::new("git");
+    cmd.args(args);
+    cmd.stdout(Stdio::piped());
+    let out = cmd.spawn();
+    let mut out = match out {
+        Ok(v) => v,
+        Err(err) => {
+            panic!("Failed to spawn command `{:?}`: {:?}", cmd, err);
         }
     };
 
-    let commits = client.github().commits(
-        slug,
-        "master",
-        repo.latest_commit.as_ref().map(|s| s.as_str()),
+    let status = out.wait().expect("waited");
+
+    assert!(
+        status.success(),
+        "failed to run `git {:?}`: {:?}",
+        args,
+        status
     );
 
-    if !commits.is_empty() {
-        diesel::update(schema::repositories::table.filter(schema::repositories::name.eq(slug)))
-            .set(schema::repositories::latest_commit.eq(commits.first().map(|c| c.sha.as_str())))
-            .execute(&conn)
-            .unwrap();
+    let mut stdout = Vec::new();
+    out.stdout.unwrap().read_to_end(&mut stdout).unwrap();
+    String::from_utf8_lossy(&stdout).into_owned()
+}
+
+fn update_repo(slug: &str) -> PathBuf {
+    let path_s = format!("repos/{}", slug);
+    let path = PathBuf::from(&path_s);
+    if path.exists() {
+        git(&["-C", &path_s, "pull"]);
+    } else {
+        git(&[
+            "clone",
+            &format!("https://github.com/{}.git", slug),
+            &path_s,
+        ]);
+    }
+    path
+}
+
+struct VersionTag {
+    version: Version,
+    raw_tag: String,
+}
+
+impl cmp::Eq for VersionTag {}
+impl cmp::PartialEq for VersionTag {
+    fn eq(&self, other: &Self) -> bool {
+        self.version == other.version
+    }
+}
+
+impl cmp::PartialOrd for VersionTag {
+    fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
+        Some(self.cmp(&other))
+    }
+}
+
+impl cmp::Ord for VersionTag {
+    fn cmp(&self, other: &Self) -> cmp::Ordering {
+        self.version.cmp(&other.version)
+    }
+}
+
+impl fmt::Debug for VersionTag {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.version)
+    }
+}
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let path = update_repo("rust-lang/rust");
+    let repo = git2::Repository::open(&path)?;
+    let mailmap = Mailmap::read_from_repo(&path)?;
+    let mailmap = Mailmap::from_str(&mailmap)?;
+
+    let tags = repo
+        .tag_names(None)?
+        .into_iter()
+        .filter_map(|v| v)
+        .map(|v| v.to_owned())
+        .collect::<Vec<_>>();
+    let mut versions = tags
+        .iter()
+        .filter_map(|tag| {
+            Version::parse(&tag).ok().map(|v| VersionTag {
+                version: v,
+                raw_tag: tag.clone(),
+            })
+        })
+        .collect::<Vec<_>>();
+    versions.sort();
+
+    for (idx, version) in versions.iter().enumerate() {
+        let previous = if let Some(v) = idx.checked_sub(1).map(|idx| &versions[idx]) {
+            v
+        } else {
+            continue;
+        };
+
+        let mut walker = repo.revwalk()?;
+        walker.push_range(&format!("{}..{}", previous.raw_tag, version.raw_tag))?;
+
+        let mut author_map = HashMap::new();
+        for oid in walker {
+            let oid = oid?;
+            let commit = repo.find_commit(oid)?;
+            let commit_author = Author::new(commit.author());
+            let author = mailmap.canonicalize(&commit_author);
+            let entry = author_map.entry(author).or_insert(0);
+            *entry += 1;
+        }
     }
 
-    diesel::insert_or_ignore_into(schema::commits::dsl::commits)
-        .values(&commits)
-        .execute(&conn)
-        .expect("insert success");
+    Ok(())
 }

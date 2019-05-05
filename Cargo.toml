@@ -5,14 +5,8 @@ authors = ["Mark Rousskov <mark.simulacrum@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-reqwest = "0.9"
-hyperx = "0.14"
-dotenv = "0.13"
+git2 = "0.8"
+semver = "0.9"
 
-[dependencies.diesel]
-version = "1.4"
-features = ["sqlite"]
-
-[dependencies.serde]
-version = "1"
-features = ["derive"]
+[profile.release]
+debug = 2
