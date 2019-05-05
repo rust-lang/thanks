@@ -1,13 +1,13 @@
-use crate::mailmap::Author;
+use crate::AuthorMap;
 use handlebars::Handlebars;
 use semver::Version;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
 pub fn render(
-    by_version: BTreeMap<Version, HashMap<Author, u32>>,
-    all_time_map: HashMap<Author, u32>,
+    by_version: BTreeMap<Version, AuthorMap>,
+    all_time_map: AuthorMap,
 ) -> Result<(), Box<dyn std::error::Error>> {
     copy_public()?;
     index(&by_version)?;
@@ -50,9 +50,7 @@ fn copy_public() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn index(
-    by_version: &BTreeMap<Version, HashMap<Author, u32>>,
-) -> Result<(), Box<dyn std::error::Error>> {
+fn index(by_version: &BTreeMap<Version, AuthorMap>) -> Result<(), Box<dyn std::error::Error>> {
     #[derive(serde::Serialize)]
     struct Index {
         maintenance: bool,
@@ -90,21 +88,21 @@ fn about() -> Result<(), Box<dyn std::error::Error>> {
 struct Entry {
     rank: u32,
     author: String,
-    commits: u32,
+    commits: usize,
 }
 
-fn author_map_to_scores(map: &HashMap<Author, u32>) -> Vec<Entry> {
+fn author_map_to_scores(map: &AuthorMap) -> Vec<Entry> {
     let mut scores = map
         .iter()
         .map(|(author, commits)| Entry {
             rank: 0,
             author: author.name.clone(),
-            commits: *commits,
+            commits: commits,
         })
         .collect::<Vec<_>>();
     scores.sort_by_key(|e| std::cmp::Reverse((e.commits, e.author.clone())));
     let mut last_rank = 0;
-    let mut last_commits = u32::max_value();
+    let mut last_commits = usize::max_value();
     for entry in &mut scores {
         if entry.commits < last_commits {
             last_commits = entry.commits;
@@ -116,8 +114,8 @@ fn author_map_to_scores(map: &HashMap<Author, u32>) -> Vec<Entry> {
 }
 
 fn releases(
-    by_version: &BTreeMap<Version, HashMap<Author, u32>>,
-    all_time: &HashMap<Author, u32>,
+    by_version: &BTreeMap<Version, AuthorMap>,
+    all_time: &AuthorMap,
 ) -> Result<(), Box<dyn std::error::Error>> {
     #[derive(serde::Serialize)]
     struct Release {

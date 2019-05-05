@@ -14,6 +14,40 @@ mod config;
 mod mailmap;
 mod site;
 
+#[derive(Clone)]
+pub struct AuthorMap {
+    // author -> [commits]
+    map: HashMap<Author, HashSet<Oid>>,
+}
+
+impl AuthorMap {
+    fn new() -> Self {
+        AuthorMap {
+            map: HashMap::new(),
+        }
+    }
+
+    fn add(&mut self, author: Author, commit: Oid) {
+        self.map
+            .entry(author)
+            .or_insert_with(HashSet::new)
+            .insert(commit);
+    }
+
+    fn iter(&self) -> impl Iterator<Item = (&Author, usize)> {
+        self.map.iter().map(|(k, v)| (k, v.len()))
+    }
+
+    fn extend(&mut self, other: Self) {
+        for (author, set) in other.map {
+            self.map
+                .entry(author)
+                .or_insert_with(HashSet::new)
+                .extend(set);
+        }
+    }
+}
+
 fn git(args: &[&str]) -> Result<String, Box<dyn std::error::Error>> {
     let mut cmd = Command::new("git");
     cmd.args(args);
@@ -139,30 +173,27 @@ fn build_author_map(
     mailmap: &Mailmap,
     from: &str,
     to: &str,
-) -> Result<HashMap<Author, u32>, Box<dyn std::error::Error>> {
+) -> Result<AuthorMap, Box<dyn std::error::Error>> {
     let mut walker = repo.revwalk()?;
-    walker.push_range(&format!("{}..{}", from, to))?;
+    if from == "" {
+        let to = repo.revparse_single(to)?.peel_to_commit()?.id();
+        walker.push(to)?;
+    } else {
+        walker.push_range(&format!("{}..{}", from, to))?;
+    }
 
-    let mut author_map = HashMap::new();
+    let mut author_map = AuthorMap::new();
     for oid in walker {
         let oid = oid?;
         let commit = repo.find_commit(oid)?;
         let commit_author = Author::new(commit.author());
         let author = mailmap.canonicalize(&commit_author);
-        let entry = author_map.entry(author).or_insert(0);
-        *entry += 1;
+        author_map.add(author, oid);
     }
     Ok(author_map)
 }
 
-fn extend_author_map(map1: &mut HashMap<Author, u32>, map2: HashMap<Author, u32>) {
-    for (author, count) in map2 {
-        *map1.entry(author).or_insert(0) += count;
-    }
-}
-
-fn generate_thanks() -> Result<BTreeMap<Version, HashMap<Author, u32>>, Box<dyn std::error::Error>>
-{
+fn generate_thanks() -> Result<BTreeMap<Version, AuthorMap>, Box<dyn std::error::Error>> {
     let path = update_repo("https://github.com/rust-lang/rust.git")?;
     let repo = git2::Repository::open(&path)?;
     let mailmap = Mailmap::read_from_repo(&path)?;
@@ -176,6 +207,8 @@ fn generate_thanks() -> Result<BTreeMap<Version, HashMap<Author, u32>>, Box<dyn 
         let previous = if let Some(v) = idx.checked_sub(1).map(|idx| &versions[idx]) {
             v
         } else {
+            let author_map = build_author_map(&repo, &mailmap, "", &version.raw_tag)?;
+            version_map.insert(version.version.clone(), author_map);
             continue;
         };
 
@@ -212,13 +245,13 @@ fn generate_thanks() -> Result<BTreeMap<Version, HashMap<Author, u32>>, Box<dyn 
                         &previous.commit.to_string(),
                         &current.commit.to_string(),
                     )?;
-                    extend_author_map(&mut author_map, submap);
+                    author_map.extend(submap);
                 }
                 (None, Some(current)) => {
                     let subrepo = Repository::open(&path)?;
                     let submap =
                         build_author_map(&subrepo, &mailmap, "", &current.commit.to_string())?;
-                    extend_author_map(&mut author_map, submap);
+                    author_map.extend(submap);
                 }
                 (None, None) => unreachable!(),
                 (Some(_), None) => {
@@ -238,7 +271,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let by_version = generate_thanks()?;
     let mut all_time = by_version.values().next().unwrap().clone();
     for map in by_version.values().skip(1) {
-        extend_author_map(&mut all_time, map.clone());
+        all_time.extend(map.clone());
     }
 
     site::render(by_version, all_time)?;
