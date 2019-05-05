@@ -120,6 +120,27 @@ fn get_versions(repo: &Repository) -> Result<Vec<VersionTag>, Box<dyn std::error
     Ok(versions)
 }
 
+fn build_author_map(
+    repo: &Repository,
+    mailmap: &Mailmap,
+    from: &str,
+    to: &str,
+) -> Result<HashMap<Author, u32>, Box<dyn std::error::Error>> {
+    let mut walker = repo.revwalk()?;
+    walker.push_range(&format!("{}..{}", from, to))?;
+
+    let mut author_map = HashMap::new();
+    for oid in walker {
+        let oid = oid?;
+        let commit = repo.find_commit(oid)?;
+        let commit_author = Author::new(commit.author());
+        let author = mailmap.canonicalize(&commit_author);
+        let entry = author_map.entry(author).or_insert(0);
+        *entry += 1;
+    }
+    Ok(author_map)
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let path = update_repo("rust-lang/rust");
     let repo = git2::Repository::open(&path)?;
@@ -135,9 +156,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             continue;
         };
 
-        let mut walker = repo.revwalk()?;
-        walker.push_range(&format!("{}..{}", previous.raw_tag, version.raw_tag))?;
-
         eprintln!("submodules for {:?}", previous);
         let previous_commit = repo.find_commit(previous.commit)?;
         let previous_modules = get_submodules(&repo, &previous_commit)?;
@@ -145,15 +163,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             update_repo(to_slug(&module.repository));
         }
 
-        let mut author_map = HashMap::new();
-        for oid in walker {
-            let oid = oid?;
-            let commit = repo.find_commit(oid)?;
-            let commit_author = Author::new(commit.author());
-            let author = mailmap.canonicalize(&commit_author);
-            let entry = author_map.entry(author).or_insert(0);
-            *entry += 1;
+        let current_commit = repo.find_commit(version.commit)?;
+        let current_modules = get_submodules(&repo, &current_commit)?;
+        for module in &current_modules {
+            update_repo(to_slug(&module.repository));
         }
+
+        let _author_map = build_author_map(&repo, &mailmap, &previous.raw_tag, &version.raw_tag)?;
     }
 
     Ok(())
