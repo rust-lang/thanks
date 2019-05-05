@@ -1,0 +1,19 @@
+language: rust
+
+env:
+  RUSTINFRA_DEPLOY_DIR: output
+
+import:
+ - rust-lang/simpleinfra/travis-configs/static-websites.yml
+
+cache:
+  directories:
+    # cache: cargo
+    - $HOME/.cargo
+    - $TRAVIS_BUILD_DIR/target
+
+script:
+  - cargo run --release
+branches:
+  only:
+- master
