@@ -8,6 +8,7 @@ edition = "2018"
 git2 = "0.8"
 semver = "0.9"
 tempfile = "3"
+lazy_static = "1"
 
 [profile.release]
 debug = 2

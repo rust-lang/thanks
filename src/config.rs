@@ -3,7 +3,7 @@ use tempfile::NamedTempFile;
 
 pub struct Config {
     cfg: git2::Config,
-    file: NamedTempFile,
+    _file: NamedTempFile,
 }
 
 impl std::ops::Deref for Config {
@@ -18,6 +18,6 @@ impl Config {
         let mut file = NamedTempFile::new()?;
         file.write_all(cfg.as_bytes())?;
         let cfg = git2::Config::open(file.path())?;
-        Ok(Config { cfg, file })
+        Ok(Config { cfg, _file: file })
     }
 }

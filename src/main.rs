@@ -1,9 +1,10 @@
 use git2::{Commit, Oid, Repository};
 use semver::Version;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::io::Read;
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
+use std::sync::Mutex;
 use std::{cmp, fmt, str};
 
 use config::Config;
@@ -16,6 +17,7 @@ fn git(args: &[&str]) -> String {
     let mut cmd = Command::new("git");
     cmd.args(args);
     cmd.stdout(Stdio::piped());
+    eprintln!("running {:?}", cmd);
     let out = cmd.spawn();
     let mut out = match out {
         Ok(v) => v,
@@ -38,9 +40,16 @@ fn git(args: &[&str]) -> String {
     String::from_utf8_lossy(&stdout).into_owned()
 }
 
+lazy_static::lazy_static! {
+    static ref UPDATED: Mutex<HashSet<String>> = Mutex::new(HashSet::new());
+}
+
 fn update_repo(slug: &str) -> PathBuf {
     let path_s = format!("repos/{}", slug);
     let path = PathBuf::from(&path_s);
+    if !UPDATED.lock().unwrap().insert(slug.to_string()) {
+        return path;
+    }
     if path.exists() {
         git(&["-C", &path_s, "fetch", "origin", "master:master"]);
     } else {
@@ -85,12 +94,7 @@ impl fmt::Debug for VersionTag {
     }
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let path = update_repo("rust-lang/rust");
-    let repo = git2::Repository::open(&path)?;
-    let mailmap = Mailmap::read_from_repo(&path)?;
-    let mailmap = Mailmap::from_str(&mailmap)?;
-
+fn get_versions(repo: &Repository) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
     let tags = repo
         .tag_names(None)?
         .into_iter()
@@ -113,6 +117,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         })
         .collect::<Vec<_>>();
     versions.sort();
+    Ok(versions)
+}
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let path = update_repo("rust-lang/rust");
+    let repo = git2::Repository::open(&path)?;
+    let mailmap = Mailmap::read_from_repo(&path)?;
+    let mailmap = Mailmap::from_str(&mailmap)?;
+
+    let versions = get_versions(&repo)?;
 
     for (idx, version) in versions.iter().enumerate() {
         let previous = if let Some(v) = idx.checked_sub(1).map(|idx| &versions[idx]) {
@@ -126,8 +140,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         eprintln!("submodules for {:?}", previous);
         let previous_commit = repo.find_commit(previous.commit)?;
-        let s = get_submodules(&repo, &previous_commit)?;
-        eprintln!("{:?}", s);
+        let previous_modules = get_submodules(&repo, &previous_commit)?;
+        for module in &previous_modules {
+            update_repo(to_slug(&module.repository));
+        }
 
         let mut author_map = HashMap::new();
         for oid in walker {
@@ -218,4 +234,15 @@ fn modules_file(repo: &Repository, at: &Commit) -> Result<String, Box<dyn std::e
             .content()
             .into(),
     )?)
+}
+
+fn to_slug(mut url: &str) -> &str {
+    let prefix = "https://github.com/";
+    assert!(url.starts_with(prefix), "{}", url);
+    url = &url[prefix.len()..];
+    let suffix = ".git";
+    if url.ends_with(suffix) {
+        url = &url[..url.len() - suffix.len()];
+    }
+    url
 }
