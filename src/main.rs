@@ -341,6 +341,25 @@ fn get_submodules(
     if let Some(err) = err {
         panic!("tree walk failed: {:?}", err);
     }
+    submodules.retain(|s| {
+        let is_rust =
+            s.repository.contains("rust-lang") || s.repository.contains("rust-lang-nursery");
+        let exclude = vec![
+            "https://github.com/rust-lang/llvm.git",
+            "https://github.com/rust-lang/llvm-project.git",
+            "https://github.com/rust-lang/lld.git",
+            "https://github.com/rust-lang-nursery/clang.git",
+            "https://github.com/rust-lang-nursery/lldb.git",
+            "https://github.com/rust-lang/libuv.git",
+            "https://github.com/rust-lang/gyp.git",
+            "https://github.com/rust-lang/jemalloc.git",
+            "https://github.com/rust-lang/compiler-rt.git",
+            "https://github.com/rust-lang/hoedown.git",
+        ];
+        is_rust
+            && !exclude.contains(&s.repository.as_str())
+            && !exclude.contains(&&*format!("{}.git", s.repository))
+    });
     Ok(submodules)
 }
 
