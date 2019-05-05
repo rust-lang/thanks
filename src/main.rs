@@ -14,7 +14,7 @@ mod config;
 mod mailmap;
 mod site;
 
-fn git(args: &[&str]) -> String {
+fn git(args: &[&str]) -> Result<String, Box<dyn std::error::Error>> {
     let mut cmd = Command::new("git");
     cmd.args(args);
     cmd.stdout(Stdio::piped());
@@ -28,39 +28,50 @@ fn git(args: &[&str]) -> String {
 
     let status = out.wait().expect("waited");
 
-    assert!(
-        status.success(),
-        "failed to run `git {:?}`: {:?}",
-        args,
-        status
-    );
+    if !status.success() {
+        eprintln!("failed to run `git {:?}`: {:?}", args, status);
+        return Err(std::io::Error::from(std::io::ErrorKind::Other).into());
+    }
 
     let mut stdout = Vec::new();
     out.stdout.unwrap().read_to_end(&mut stdout).unwrap();
-    String::from_utf8_lossy(&stdout).into_owned()
+    Ok(String::from_utf8_lossy(&stdout).into_owned())
 }
 
 lazy_static::lazy_static! {
     static ref UPDATED: Mutex<HashSet<String>> = Mutex::new(HashSet::new());
 }
 
-fn update_repo(slug: &str) -> PathBuf {
+fn update_repo(url: &str) -> Result<PathBuf, Box<dyn std::error::Error>> {
+    let mut slug = url;
+    let prefix = "https://github.com/";
+    if slug.starts_with(prefix) {
+        slug = &slug[prefix.len()..];
+    }
+    let prefix = "git://github.com/";
+    if slug.starts_with(prefix) {
+        slug = &slug[prefix.len()..];
+    }
+    let prefix = "https://git.chromium.org/";
+    if slug.starts_with(prefix) {
+        slug = &slug[prefix.len()..];
+    }
+    let suffix = ".git";
+    if slug.ends_with(suffix) {
+        slug = &slug[..slug.len() - suffix.len()];
+    }
+
     let path_s = format!("repos/{}", slug);
     let path = PathBuf::from(&path_s);
     if !UPDATED.lock().unwrap().insert(slug.to_string()) {
-        return path;
+        return Ok(path);
     }
     if path.exists() {
-        git(&["-C", &path_s, "fetch", "origin", "master:master"]);
+        git(&["-C", &path_s, "fetch", "origin", "master:master"])?;
     } else {
-        git(&[
-            "clone",
-            "--bare",
-            &format!("https://github.com/{}.git", slug),
-            &path_s,
-        ]);
+        git(&["clone", "--bare", &url, &path_s])?;
     }
-    path
+    Ok(path)
 }
 
 struct VersionTag {
@@ -104,16 +115,19 @@ fn get_versions(repo: &Repository) -> Result<Vec<VersionTag>, Box<dyn std::error
     let mut versions = tags
         .iter()
         .filter_map(|tag| {
-            Version::parse(&tag).ok().map(|v| VersionTag {
-                version: v,
-                raw_tag: tag.clone(),
-                commit: repo
-                    .revparse_single(&tag)
-                    .unwrap()
-                    .peel_to_commit()
-                    .unwrap()
-                    .id(),
-            })
+            Version::parse(&tag)
+                .or_else(|_| Version::parse(&format!("{}.0", tag)))
+                .ok()
+                .map(|v| VersionTag {
+                    version: v,
+                    raw_tag: tag.clone(),
+                    commit: repo
+                        .revparse_single(&tag)
+                        .unwrap()
+                        .peel_to_commit()
+                        .unwrap()
+                        .id(),
+                })
         })
         .collect::<Vec<_>>();
     versions.sort();
@@ -149,7 +163,7 @@ fn extend_author_map(map1: &mut HashMap<Author, u32>, map2: HashMap<Author, u32>
 
 fn generate_thanks() -> Result<BTreeMap<Version, HashMap<Author, u32>>, Box<dyn std::error::Error>>
 {
-    let path = update_repo("rust-lang/rust");
+    let path = update_repo("https://github.com/rust-lang/rust.git")?;
     let repo = git2::Repository::open(&path)?;
     let mailmap = Mailmap::read_from_repo(&path)?;
     let mailmap = Mailmap::from_str(&mailmap)?;
@@ -172,15 +186,17 @@ fn generate_thanks() -> Result<BTreeMap<Version, HashMap<Author, u32>>, Box<dyn 
         let previous_commit = repo.find_commit(previous.commit)?;
         let previous_modules = get_submodules(&repo, &previous_commit)?;
         for module in &previous_modules {
-            let path = update_repo(to_slug(&module.repository));
-            modules.insert(path, (Some(module), None));
+            if let Ok(path) = update_repo(&module.repository) {
+                modules.insert(path, (Some(module), None));
+            }
         }
 
         let current_commit = repo.find_commit(version.commit)?;
         let current_modules = get_submodules(&repo, &current_commit)?;
         for module in &current_modules {
-            let path = update_repo(to_slug(&module.repository));
-            modules.entry(path).or_insert((None, None)).1 = Some(module);
+            if let Ok(path) = update_repo(&module.repository) {
+                modules.entry(path).or_insert((None, None)).1 = Some(module);
+            }
         }
 
         let mut author_map =
@@ -305,15 +321,4 @@ fn modules_file(repo: &Repository, at: &Commit) -> Result<String, Box<dyn std::e
             .content()
             .into(),
     )?)
-}
-
-fn to_slug(mut url: &str) -> &str {
-    let prefix = "https://github.com/";
-    assert!(url.starts_with(prefix), "{}", url);
-    url = &url[prefix.len()..];
-    let suffix = ".git";
-    if url.ends_with(suffix) {
-        url = &url[..url.len() - suffix.len()];
-    }
-    url
 }
