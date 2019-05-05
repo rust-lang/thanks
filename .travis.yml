@@ -1,10 +1,10 @@
 language: rust
+dist: xenial
 
 env:
-  RUSTINFRA_DEPLOY_DIR: output
-
+  RUSTINFRA_DEPLOY_DIR: _site
 import:
- - rust-lang/simpleinfra/travis-configs/static-websites.yml
+  - rust-lang/simpleinfra/travis-configs/static-websites.yml
 
 cache:
   directories:
@@ -16,4 +16,4 @@ script:
   - cargo run --release
 branches:
   only:
-- master
+  - master
