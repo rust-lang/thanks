@@ -1,6 +1,6 @@
 use git2::{Commit, Oid, Repository};
 use semver::Version;
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::io::Read;
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
@@ -17,7 +17,6 @@ fn git(args: &[&str]) -> String {
     let mut cmd = Command::new("git");
     cmd.args(args);
     cmd.stdout(Stdio::piped());
-    eprintln!("running {:?}", cmd);
     let out = cmd.spawn();
     let mut out = match out {
         Ok(v) => v,
@@ -141,13 +140,22 @@ fn build_author_map(
     Ok(author_map)
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn extend_author_map(map1: &mut HashMap<Author, u32>, map2: HashMap<Author, u32>) {
+    for (author, count) in map2 {
+        *map1.entry(author).or_insert(0) += count;
+    }
+}
+
+fn generate_thanks() -> Result<BTreeMap<Version, HashMap<Author, u32>>, Box<dyn std::error::Error>>
+{
     let path = update_repo("rust-lang/rust");
     let repo = git2::Repository::open(&path)?;
     let mailmap = Mailmap::read_from_repo(&path)?;
     let mailmap = Mailmap::from_str(&mailmap)?;
 
     let versions = get_versions(&repo)?;
+
+    let mut version_map = BTreeMap::new();
 
     for (idx, version) in versions.iter().enumerate() {
         let previous = if let Some(v) = idx.checked_sub(1).map(|idx| &versions[idx]) {
@@ -156,22 +164,65 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             continue;
         };
 
-        eprintln!("submodules for {:?}", previous);
+        eprintln!("Processing {:?} to {:?}", previous, version);
+
+        let mut modules: HashMap<PathBuf, (Option<&Submodule>, Option<&Submodule>)> =
+            HashMap::new();
         let previous_commit = repo.find_commit(previous.commit)?;
         let previous_modules = get_submodules(&repo, &previous_commit)?;
         for module in &previous_modules {
-            update_repo(to_slug(&module.repository));
+            let path = update_repo(to_slug(&module.repository));
+            modules.insert(path, (Some(module), None));
         }
 
         let current_commit = repo.find_commit(version.commit)?;
         let current_modules = get_submodules(&repo, &current_commit)?;
         for module in &current_modules {
-            update_repo(to_slug(&module.repository));
+            let path = update_repo(to_slug(&module.repository));
+            modules.entry(path).or_insert((None, None)).1 = Some(module);
         }
 
-        let _author_map = build_author_map(&repo, &mailmap, &previous.raw_tag, &version.raw_tag)?;
+        let mut author_map =
+            build_author_map(&repo, &mailmap, &previous.raw_tag, &version.raw_tag)?;
+
+        for (path, (pre, cur)) in &modules {
+            match (pre, cur) {
+                (Some(previous), Some(current)) => {
+                    let subrepo = Repository::open(&path)?;
+                    let submap = build_author_map(
+                        &subrepo,
+                        &mailmap,
+                        &previous.commit.to_string(),
+                        &current.commit.to_string(),
+                    )?;
+                    extend_author_map(&mut author_map, submap);
+                }
+                (None, Some(current)) => {
+                    let subrepo = Repository::open(&path)?;
+                    let submap =
+                        build_author_map(&subrepo, &mailmap, "", &current.commit.to_string())?;
+                    extend_author_map(&mut author_map, submap);
+                }
+                (None, None) => unreachable!(),
+                (Some(_), None) => {
+                    // nothing, if submodule was deleted then we presume no changes since then
+                    // affect us
+                }
+            }
+        }
+
+        version_map.insert(version.version.clone(), author_map);
     }
 
+    Ok(version_map)
+}
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let by_version = generate_thanks()?;
+    let mut all_time = by_version.values().next().unwrap().clone();
+    for map in by_version.values().skip(1) {
+        extend_author_map(&mut all_time, map.clone());
+    }
     Ok(())
 }
 
