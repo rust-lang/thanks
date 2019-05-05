@@ -1,5 +1,4 @@
 use std::fmt;
-use std::path::Path;
 
 #[derive(Default)]
 pub struct Mailmap<'a> {
@@ -41,17 +40,18 @@ impl Author {
 }
 
 impl<'a> Mailmap<'a> {
-    pub fn read_from_repo(repo: &Path) -> Result<String, std::io::Error> {
-        match std::fs::read_to_string(repo.join(".mailmap")) {
-            Ok(v) => Ok(v),
-            Err(e) => {
-                if e.kind() == std::io::ErrorKind::NotFound {
-                    return Ok(String::new());
-                } else {
-                    return Err(e.into());
-                }
-            }
-        }
+    pub fn read_from_repo(repo: &git2::Repository) -> Result<String, Box<dyn std::error::Error>> {
+        Ok(String::from_utf8(
+            repo.revparse_single("master")?
+                .peel_to_commit()?
+                .tree()?
+                .get_name(".mailmap")
+                .unwrap()
+                .to_object(&repo)?
+                .peel_to_blob()?
+                .content()
+                .into(),
+        )?)
     }
 
     pub fn from_str(file: &str) -> Result<Mailmap<'_>, Box<dyn std::error::Error>> {
