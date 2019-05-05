@@ -1,0 +1,21 @@
+{{#*inline "content"}}
+<section class="white">
+  <div class="w-100 mw-none ph3 mw8-m mw8-l center f3">
+    <header>
+      <h2>Thanks for Rust {{release}}!</h2>
+      <div class="highlight"></div>
+    </header>
+    <p><a href="../">Back to all releases</a></p>
+    <p>We had {{ count }} individuals contribute to {{ release }}. Thank you so much!</p>
+
+    <ul class="collapse w-100 f2-l f2-m f3-s">
+      {{#each names as |name| }}
+      <li>
+        {{ name }}
+      </li>
+      {{/each}}
+    </ul>
+  </div>
+</section>
+{{/inline}}
+{{~> container ~}}

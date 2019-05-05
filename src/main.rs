@@ -12,6 +12,7 @@ use mailmap::{Author, Mailmap};
 
 mod config;
 mod mailmap;
+mod site;
 
 fn git(args: &[&str]) -> String {
     let mut cmd = Command::new("git");
@@ -223,6 +224,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     for map in by_version.values().skip(1) {
         extend_author_map(&mut all_time, map.clone());
     }
+
+    site::render(by_version, all_time)?;
+
     Ok(())
 }
 
