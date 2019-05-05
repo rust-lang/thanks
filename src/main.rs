@@ -328,12 +328,7 @@ fn get_submodules(
         git2::TreeWalkMode::PreOrder,
         |r, entry| match traverse_entry(r, entry, repo, &path_to_url) {
             Ok(Some(submodule)) => {
-                if !submodule.repository.contains("llvm")
-                    && !submodule.repository.contains("clang")
-                    && submodule.repository.contains("rust")
-                {
-                    submodules.push(submodule);
-                }
+                submodules.push(submodule);
                 git2::TreeWalkResult::Ok
             }
             Ok(None) => git2::TreeWalkResult::Ok,
