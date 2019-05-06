@@ -4,6 +4,7 @@
         "X-Content-Type-Options": "nosniff",
         "X-Frame-Options": "DENY",
         "X-XSS-Protection": "1; mode=block",
-        "Referrer-Policy": "no-referrer, strict-origin-when-cross-origin"
+        "Referrer-Policy": "no-referrer, strict-origin-when-cross-origin",
+        "Content-Security-Policy": "default-src 'none'; style-src 'self'; img-src 'self'; font-src 'self'"
     }
 }
