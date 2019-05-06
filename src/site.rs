@@ -164,7 +164,7 @@ fn releases(
     let scores = author_map_to_scores(&all_time);
 
     let res = hb.render(
-        "all-time",
+        "stats",
         &Release {
             maintenance: false,
             show_thanks_in_logo: true,
@@ -180,7 +180,7 @@ fn releases(
     for (version, map) in by_version {
         let scores = author_map_to_scores(&map);
         let res = hb.render(
-            "all-time",
+            "stats",
             &Release {
                 maintenance: false,
                 show_thanks_in_logo: true,
