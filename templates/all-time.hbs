@@ -1,32 +1,35 @@
 {{#*inline "content"}}
 <section class="white">
-  <div class="w-100 mw-none ph3 mw8-m mw8-l center f3">
-    <header>
-      <h2>{{ release_title }} Contributors</h2>
-      <div class="highlight"></div>
-    </header>
-    <p><a href="/">Back to all releases</a></p>
-    <p>We have had {{ count }} individuals contribute to {{ release }}. Thank you so much!</p>
+    <div class="w-100 mw-none ph3 mw8-m mw8-l center f3">
+        <header class="pb0">
+            <h2>{{ release_title }} Contributors</h2>
+            <div class="highlight"></div>
+        </header>
+        <p class="mb3"><a href="/">Back to all releases</a></p>
+        <p class="mb3">
+            We have had {{ count }} individuals contribute to {{ release }}.
+            Thank you so much!
+        </p>
 
-    <table class="post-list collapse w-100 f2-l f2-m f3-s">
-      <thead>
-        <tr>
-          <th>Rank</th>
-          <th>Name</th>
-          <th>Commits</th>
-        </tr>
-      </thead>
-      <tbody>
-        {{#each scores as |score| }}
-        <tr>
-          <td class="bn">{{score.rank}}</td>
-          <td class="bn">{{score.author}}</td>
-          <td class="bn">{{score.commits}}</td>
-        </tr>
-        {{/each}}
-      </tbody>
-    </table>
-  </div>
+        <table class="post-list collapse w-100">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Name</th>
+                    <th>Commits</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each scores as |score| }}
+                <tr>
+                    <td class="bn">{{score.rank}}</td>
+                    <td class="bn">{{score.author}}</td>
+                    <td class="bn">{{score.commits}}</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
 </section>
 {{/inline}}
 {{~> container ~}}
