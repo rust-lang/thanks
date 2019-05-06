@@ -17,6 +17,26 @@ pub fn render(
     Ok(())
 }
 
+#[derive(serde::Serialize)]
+struct CommonData {
+    title: String,
+    show_thanks_in_logo: bool,
+}
+
+impl CommonData {
+    fn new(title: String) -> Self {
+        CommonData {
+            title,
+            show_thanks_in_logo: true,
+        }
+    }
+
+    fn without_thanks_in_logo(mut self) -> Self {
+        self.show_thanks_in_logo = false;
+        self
+    }
+}
+
 fn hb() -> Result<Handlebars, Box<dyn std::error::Error>> {
     let mut handlebars = Handlebars::new();
     handlebars.set_strict_mode(true);
@@ -63,8 +83,7 @@ fn index(
     }
     #[derive(serde::Serialize)]
     struct Index {
-        maintenance: bool,
-        show_thanks_in_logo: bool,
+        common: CommonData,
         releases: Vec<Release>,
     }
     let hb = hb()?;
@@ -88,8 +107,7 @@ fn index(
     let res = hb.render(
         "index",
         &Index {
-            maintenance: false,
-            show_thanks_in_logo: false,
+            common: CommonData::new("Rust Contributors".into()).without_thanks_in_logo(),
             releases,
         },
     )?;
@@ -101,16 +119,14 @@ fn index(
 fn about() -> Result<(), Box<dyn std::error::Error>> {
     #[derive(serde::Serialize)]
     struct About {
-        maintenance: bool,
-        show_thanks_in_logo: bool,
+        common: CommonData,
     }
     let hb = hb()?;
 
     let res = hb.render(
         "about",
         &About {
-            maintenance: false,
-            show_thanks_in_logo: true,
+            common: CommonData::new("About - Rust Contributors".into()),
         },
     )?;
 
@@ -153,8 +169,7 @@ fn releases(
 ) -> Result<(), Box<dyn std::error::Error>> {
     #[derive(serde::Serialize)]
     struct Release {
-        maintenance: bool,
-        show_thanks_in_logo: bool,
+        common: CommonData,
         release_title: String,
         release: String,
         count: usize,
@@ -166,8 +181,7 @@ fn releases(
     let res = hb.render(
         "stats",
         &Release {
-            maintenance: false,
-            show_thanks_in_logo: true,
+            common: CommonData::new("All-time Rust Contributors".into()),
             release_title: String::from("All-time"),
             release: String::from("all of Rust"),
             count: scores.len(),
@@ -182,8 +196,7 @@ fn releases(
         let res = hb.render(
             "stats",
             &Release {
-                maintenance: false,
-                show_thanks_in_logo: true,
+                common: CommonData::new(format!("Rust {} Contributors", version)),
                 release_title: version.to_string(),
                 release: version.to_string(),
                 count: scores.len(),
