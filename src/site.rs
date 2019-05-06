@@ -10,7 +10,7 @@ pub fn render(
     all_time_map: AuthorMap,
 ) -> Result<(), Box<dyn std::error::Error>> {
     copy_public()?;
-    index(&by_version)?;
+    index(&all_time_map, &by_version)?;
     about()?;
     releases(&by_version, &all_time_map)?;
 
@@ -50,19 +50,47 @@ fn copy_public() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn index(by_version: &BTreeMap<Version, AuthorMap>) -> Result<(), Box<dyn std::error::Error>> {
+fn index(
+    all_time: &AuthorMap,
+    by_version: &BTreeMap<Version, AuthorMap>,
+) -> Result<(), Box<dyn std::error::Error>> {
+    #[derive(serde::Serialize)]
+    struct Release {
+        name: String,
+        url: String,
+        people: usize,
+        commits: usize,
+    }
     #[derive(serde::Serialize)]
     struct Index {
         maintenance: bool,
-        releases: Vec<String>,
+        show_thanks_in_logo: bool,
+        releases: Vec<Release>,
     }
     let hb = hb()?;
+
+    let mut releases = Vec::new();
+    releases.push(Release {
+        name: "All the time".into(),
+        url: "/all-time.html".into(),
+        people: all_time.iter().count(),
+        commits: all_time.iter().map(|(_, count)| count).sum(),
+    });
+    for (version, stats) in by_version.iter().rev() {
+        releases.push(Release {
+            name: format!("Rust {}", version),
+            url: format!("/{}.html", version),
+            people: stats.iter().count(),
+            commits: stats.iter().map(|(_, count)| count).sum(),
+        });
+    }
 
     let res = hb.render(
         "index",
         &Index {
             maintenance: false,
-            releases: by_version.keys().rev().map(|v| v.to_string()).collect(),
+            show_thanks_in_logo: false,
+            releases,
         },
     )?;
 
@@ -74,10 +102,17 @@ fn about() -> Result<(), Box<dyn std::error::Error>> {
     #[derive(serde::Serialize)]
     struct About {
         maintenance: bool,
+        show_thanks_in_logo: bool,
     }
     let hb = hb()?;
 
-    let res = hb.render("about", &About { maintenance: false })?;
+    let res = hb.render(
+        "about",
+        &About {
+            maintenance: false,
+            show_thanks_in_logo: true,
+        },
+    )?;
 
     fs::write("output/about.html", res)?;
     Ok(())
@@ -119,6 +154,7 @@ fn releases(
     #[derive(serde::Serialize)]
     struct Release {
         maintenance: bool,
+        show_thanks_in_logo: bool,
         release_title: String,
         release: String,
         count: usize,
@@ -131,6 +167,7 @@ fn releases(
         "all-time",
         &Release {
             maintenance: false,
+            show_thanks_in_logo: true,
             release_title: String::from("All-time"),
             release: String::from("all of Rust"),
             count: scores.len(),
@@ -146,6 +183,7 @@ fn releases(
             "all-time",
             &Release {
                 maintenance: false,
+                show_thanks_in_logo: true,
                 release_title: version.to_string(),
                 release: version.to_string(),
                 count: scores.len(),
