@@ -1,31 +1,31 @@
 {{#*inline "content"}}
-<header class="mt3 mt0-ns mb6-ns">
-    <div class="container flex flex-column flex-row-l justify-between-l">
-      <h1>Thanks</h1>
+<header class="mv3 mb4-ns">
+    <div class="w-100 mw-none ph3 mw8-m mw9-l center">
+        <h1>Thanks</h1>
     </div>
 </header>
 <section class="purple">
-  <div class="w-100 mw-none ph3 mw8-m mw9-l center f3">
-    <p>
-      Rust is a community project and is very thankful for the many community
-      contributions it receives. <a href="/about.html">See this page for more
-        information</a>.
-    </p>
-    <p>Here's a list of Rust releases; click the name to see a list of contributors for that release.</p>
+    <div class="w-100 mw-none ph3 mw8-m mw9-l center f3">
+        <p>
+            Rust is a community project and is very thankful for the many community
+            contributions it receives. <a href="/about.html">See this page for more
+            information</a>.
+        </p>
 
-    <table class="post-list collapse w-100 f2-l f2-m f3-s">
-      <tr>
-        <td class="bn"><a href="/all-time.html">All time</a></td>
-      </tr>
-
-      {{#each releases as |release| }}
-      <tr>
-        <td class="bn"><a href="/{{release}}.html">{{release}}</a></td>
-      </tr>
-      {{/each}}
-    </table>
-
-  </div>
+        <div class="flex flex-wrap justify-center tc">
+            {{#each releases}}
+            <a href="{{url}}" class="db w-100 w-33-m w-25-l mb4 ph2 rust-version">
+                <h2 class="f1 f2-ns mb2">{{name}}</h2>
+                <div>
+                    <b>{{people}}</b> people
+                </div>
+                <div>
+                    <b>{{commits}}</b> commits
+                </div>
+            </a>
+            {{/each}}
+        </div>
+    </div>
 </section>
 {{/inline}}
 {{~> container ~}}

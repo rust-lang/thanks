@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Rust Contributors</title>
+    <title>{{common.title}}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- styles -->
     <link rel="stylesheet" href="/styles/vendor.css" />
     <link rel="stylesheet" href="/styles/fonts.css" />
     <link rel="stylesheet" href="/styles/app.css" />
+    <link rel="stylesheet" href="/styles/thanks.css" />
 
     <!-- favicon -->
     <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
@@ -26,7 +27,9 @@
         <div class="brand flex-auto w-100 w-auto-l self-start tc tl-l">
             <a href="/">
                 <img class="v-mid ml0-l" alt="Rust Logo" src="/images/rust-logo-blk.svg">
+                {{#if common.show_thanks_in_logo}}
                 <span class="dib ml1 ml0-l">Rust Thanks</span>
+                {{/if}}
             </a>
         </div>
 
