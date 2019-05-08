@@ -90,7 +90,7 @@ fn index(
 
     let mut releases = Vec::new();
     releases.push(Release {
-        name: "All the time".into(),
+        name: "All time".into(),
         url: "/all-time.html".into(),
         people: all_time.iter().count(),
         commits: all_time.iter().map(|(_, count)| count).sum(),
