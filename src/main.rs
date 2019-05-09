@@ -108,10 +108,19 @@ fn update_repo(url: &str) -> Result<PathBuf, Box<dyn std::error::Error>> {
     Ok(path)
 }
 
-struct VersionTag {
+#[derive(Clone)]
+pub struct VersionTag {
+    name: String,
     version: Version,
     raw_tag: String,
     commit: Oid,
+    in_progress: bool,
+}
+
+impl fmt::Display for VersionTag {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.version)
+    }
 }
 
 impl cmp::Eq for VersionTag {}
@@ -153,6 +162,7 @@ fn get_versions(repo: &Repository) -> Result<Vec<VersionTag>, Box<dyn std::error
                 .or_else(|_| Version::parse(&format!("{}.0", tag)))
                 .ok()
                 .map(|v| VersionTag {
+                    name: format!("Rust {}", v),
                     version: v,
                     raw_tag: tag.clone(),
                     commit: repo
@@ -161,6 +171,7 @@ fn get_versions(repo: &Repository) -> Result<Vec<VersionTag>, Box<dyn std::error
                         .peel_to_commit()
                         .unwrap()
                         .id(),
+                    in_progress: false,
                 })
         })
         .collect::<Vec<_>>();
@@ -193,13 +204,46 @@ fn build_author_map(
     Ok(author_map)
 }
 
-fn generate_thanks() -> Result<BTreeMap<Version, AuthorMap>, Box<dyn std::error::Error>> {
+fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::error::Error>> {
     let path = update_repo("https://github.com/rust-lang/rust.git")?;
     let repo = git2::Repository::open(&path)?;
     let mailmap = Mailmap::read_from_repo(&repo)?;
     let mailmap = Mailmap::from_str(&mailmap)?;
 
-    let versions = get_versions(&repo)?;
+    let mut versions = get_versions(&repo)?;
+    versions.push(VersionTag {
+        name: String::from("Beta"),
+        version: {
+            let mut last = versions.last().unwrap().version.clone();
+            last.increment_minor();
+            last
+        },
+        raw_tag: String::from("beta"),
+        commit: repo
+            .revparse_single("beta")
+            .unwrap()
+            .peel_to_commit()
+            .unwrap()
+            .id(),
+        in_progress: true,
+    });
+    versions.push(VersionTag {
+        name: String::from("Master"),
+        version: {
+            // master is plus 1 minor versions off of beta, which we just pushed
+            let mut last = versions.last().unwrap().version.clone();
+            last.increment_minor();
+            last
+        },
+        raw_tag: String::from("master"),
+        commit: repo
+            .revparse_single("master")
+            .unwrap()
+            .peel_to_commit()
+            .unwrap()
+            .id(),
+        in_progress: true,
+    });
 
     let mut version_map = BTreeMap::new();
 
@@ -208,7 +252,7 @@ fn generate_thanks() -> Result<BTreeMap<Version, AuthorMap>, Box<dyn std::error:
             v
         } else {
             let author_map = build_author_map(&repo, &mailmap, "", &version.raw_tag)?;
-            version_map.insert(version.version.clone(), author_map);
+            version_map.insert(version.clone(), author_map);
             continue;
         };
 
@@ -261,7 +305,7 @@ fn generate_thanks() -> Result<BTreeMap<Version, AuthorMap>, Box<dyn std::error:
             }
         }
 
-        version_map.insert(version.version.clone(), author_map);
+        version_map.insert(version.clone(), author_map);
     }
 
     Ok(version_map)

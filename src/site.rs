@@ -1,12 +1,11 @@
-use crate::AuthorMap;
+use crate::{AuthorMap, VersionTag};
 use handlebars::Handlebars;
-use semver::Version;
 use std::collections::BTreeMap;
 use std::fs;
 use std::path::Path;
 
 pub fn render(
-    by_version: BTreeMap<Version, AuthorMap>,
+    by_version: BTreeMap<VersionTag, AuthorMap>,
     all_time_map: AuthorMap,
 ) -> Result<(), Box<dyn std::error::Error>> {
     copy_public()?;
@@ -72,7 +71,7 @@ fn copy_public() -> Result<(), Box<dyn std::error::Error>> {
 
 fn index(
     all_time: &AuthorMap,
-    by_version: &BTreeMap<Version, AuthorMap>,
+    by_version: &BTreeMap<VersionTag, AuthorMap>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     #[derive(serde::Serialize)]
     struct Release {
@@ -97,8 +96,8 @@ fn index(
     });
     for (version, stats) in by_version.iter().rev() {
         releases.push(Release {
-            name: format!("Rust {}", version),
-            url: format!("/{}.html", version),
+            name: version.name.clone(),
+            url: format!("/{}.html", version.version),
             people: stats.iter().count(),
             commits: stats.iter().map(|(_, count)| count).sum(),
         });
@@ -164,7 +163,7 @@ fn author_map_to_scores(map: &AuthorMap) -> Vec<Entry> {
 }
 
 fn releases(
-    by_version: &BTreeMap<Version, AuthorMap>,
+    by_version: &BTreeMap<VersionTag, AuthorMap>,
     all_time: &AuthorMap,
 ) -> Result<(), Box<dyn std::error::Error>> {
     #[derive(serde::Serialize)]
@@ -174,6 +173,7 @@ fn releases(
         release: String,
         count: usize,
         scores: Vec<Entry>,
+        in_progress: bool,
     }
     let hb = hb()?;
     let scores = author_map_to_scores(&all_time);
@@ -186,6 +186,7 @@ fn releases(
             release: String::from("all of Rust"),
             count: scores.len(),
             scores,
+            in_progress: true,
         },
     )?;
 
@@ -197,10 +198,11 @@ fn releases(
             "stats",
             &Release {
                 common: CommonData::new(format!("Rust {} Contributors", version)),
-                release_title: version.to_string(),
+                release_title: version.name.clone(),
                 release: version.to_string(),
                 count: scores.len(),
                 scores,
+                in_progress: version.in_progress,
             },
         )?;
 

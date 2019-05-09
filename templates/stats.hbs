@@ -7,8 +7,13 @@
         </header>
         <p class="mb3"><a href="/">Back to all releases</a></p>
         <p class="mb3">
+            {{#if in_progress }}
+            We have had {{ count }} individuals contribute to {{ release }} so far.
+            Thank you so much!
+            {{else}}
             We have had {{ count }} individuals contribute to {{ release }}.
             Thank you so much!
+            {{/if}}
         </p>
 
         <table class="post-list collapse w-100">
