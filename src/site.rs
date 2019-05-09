@@ -90,14 +90,14 @@ fn index(
     let mut releases = Vec::new();
     releases.push(Release {
         name: "All time".into(),
-        url: "/rust/all-time".into(),
+        url: "/rust/all-time/index.html".into(),
         people: all_time.iter().count(),
         commits: all_time.iter().map(|(_, count)| count).sum(),
     });
     for (version, stats) in by_version.iter().rev() {
         releases.push(Release {
             name: version.name.clone(),
-            url: format!("/rust/{}", version.version),
+            url: format!("/rust/{}/index.html", version.version),
             people: stats.iter().count(),
             commits: stats.iter().map(|(_, count)| count).sum(),
         });
