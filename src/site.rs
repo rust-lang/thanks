@@ -44,7 +44,7 @@ fn hb() -> Result<Handlebars, Box<dyn std::error::Error>> {
 }
 
 fn create_dir<P: AsRef<Path>>(p: P) -> Result<(), std::io::Error> {
-    match fs::create_dir(p) {
+    match fs::create_dir_all(p) {
         Ok(()) => {}
         Err(ref e) if e.kind() == std::io::ErrorKind::AlreadyExists => {}
         Err(e) => return Err(e.into()),
