@@ -90,14 +90,14 @@ fn index(
     let mut releases = Vec::new();
     releases.push(Release {
         name: "All time".into(),
-        url: "/all-time.html".into(),
+        url: "/rust/all-time".into(),
         people: all_time.iter().count(),
         commits: all_time.iter().map(|(_, count)| count).sum(),
     });
     for (version, stats) in by_version.iter().rev() {
         releases.push(Release {
             name: version.name.clone(),
-            url: format!("/{}.html", version.version),
+            url: format!("/rust/{}", version.version),
             people: stats.iter().count(),
             commits: stats.iter().map(|(_, count)| count).sum(),
         });
@@ -129,7 +129,8 @@ fn about() -> Result<(), Box<dyn std::error::Error>> {
         },
     )?;
 
-    fs::write("output/about.html", res)?;
+    create_dir("output/about")?;
+    fs::write("output/about/index.html", res)?;
     Ok(())
 }
 
@@ -190,7 +191,8 @@ fn releases(
         },
     )?;
 
-    fs::write("output/all-time.html", res)?;
+    create_dir("output/rust/all-time")?;
+    fs::write("output/rust/all-time/index.html", res)?;
 
     for (version, map) in by_version {
         let scores = author_map_to_scores(&map);
@@ -206,7 +208,8 @@ fn releases(
             },
         )?;
 
-        fs::write(format!("output/{}.html", version), res)?;
+        create_dir(format!("output/rust/{}", version))?;
+        fs::write(format!("output/rust/{}/index.html", version), res)?;
     }
     Ok(())
 }
