@@ -101,7 +101,7 @@ fn update_repo(url: &str) -> Result<PathBuf, Box<dyn std::error::Error>> {
         return Ok(path);
     }
     if path.exists() {
-        git(&["-C", &path_s, "fetch", "origin", "master:master"])?;
+        git(&["-C", &path_s, "fetch", "--quiet", "--tags"])?;
     } else {
         git(&["clone", "--bare", &url, &path_s])?;
     }
