@@ -197,9 +197,12 @@ fn build_author_map(
     for oid in walker {
         let oid = oid?;
         let commit = repo.find_commit(oid)?;
-        let commit_author = Author::new(commit.author());
-        let author = mailmap.canonicalize(&commit_author);
-        author_map.add(author, oid);
+        // Commits with more than one parent are merge commits and should not be counted.
+        if commit.parents().count() <= 1 {
+            let commit_author = Author::new(commit.author());
+            let author = mailmap.canonicalize(&commit_author);
+            author_map.add(author, oid);
+        }
     }
     Ok(author_map)
 }
