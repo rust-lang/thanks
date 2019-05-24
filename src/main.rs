@@ -194,16 +194,45 @@ fn build_author_map(
     }
 
     let mut author_map = AuthorMap::new();
+    let mut rollup_merge_chain = false;
+
     for oid in walker {
         let oid = oid?;
         let commit = repo.find_commit(oid)?;
-        // Commits with more than one parent are merge commits and should not be counted.
-        if commit.parents().count() <= 1 {
-            let commit_author = Author::new(commit.author());
-            let author = mailmap.canonicalize(&commit_author);
-            author_map.add(author, oid);
+        let commit_author = Author::new(commit.author());
+        let author = mailmap.canonicalize(&commit_author);
+
+        // Commits with one or fewer parents are normal commits and should be counted normally.
+        // Commits with more than one parent are merge commits. In rust-lang/rust, these are either
+        // @bors commits, or rollup commits; but in other repositories, merging is often done by
+        // other contributors. We want to count a rollup (of any size) as a single commit, but
+        // other merge commits to be ignored. This means we need to look for chains of rollup merge
+        // commits and count only the first one. We keep track of chains by treating @bors as a
+        // separator (as @bors always commits one merge commit between each set of commits).
+        // In git, there's not a distinction between the two kinds of merge commits, so we check by
+        // examining the commit summary.
+
+        let is_bors = author.name == "bors" && author.email == "bors@rust-lang.org";
+        if is_bors {
+            // If @bors makes a commit, that resets any existing merge chain.
+            rollup_merge_chain = false;
+            // @bors doesn't count as a contributor.
+            continue;
+        }
+        let parents = commit.parents().count();
+        let is_rollup_merge = commit.summary().unwrap_or_default().starts_with("Rollup merge of #");
+
+        if parents <= 1 || !rollup_merge_chain && is_rollup_merge {
+            // Add the author if it's their commit, or if this is the start of a rollup (we want to
+            // count rollups in some form, as they take time and effort to produce).
+            author_map.add(author.clone(), oid);
+        }
+
+        if parents > 1 && is_rollup_merge {
+            rollup_merge_chain = true;
         }
     }
+
     Ok(author_map)
 }
 
