@@ -1,4 +1,5 @@
 use git2::{Commit, Oid, Repository};
+use regex::{Regex, RegexBuilder};
 use semver::Version;
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::io::Read;
@@ -179,6 +180,29 @@ fn get_versions(repo: &Repository) -> Result<Vec<VersionTag>, Box<dyn std::error
     Ok(versions)
 }
 
+fn commit_coauthors(commit: &Commit) -> Vec<Author> {
+    let mut coauthors = vec![];
+    if let Some(msg) = commit.message_raw() {
+        lazy_static::lazy_static! {
+            static ref RE: Regex =
+                RegexBuilder::new(r"^Co-authored-by: (?P<name>.*) <(?P<email>.*)>")
+                    .case_insensitive(true)
+                    .build()
+                    .unwrap();
+        }
+
+        for line in msg.lines().rev() {
+            if let Some(caps) = RE.captures(line) {
+                coauthors.push(Author {
+                    name: caps["name"].to_string(),
+                    email: caps["email"].to_string(),
+                });
+            }
+        }
+    }
+    coauthors
+}
+
 fn build_author_map(
     repo: &Repository,
     mailmap: &Mailmap,
@@ -197,9 +221,12 @@ fn build_author_map(
     for oid in walker {
         let oid = oid?;
         let commit = repo.find_commit(oid)?;
-        let commit_author = Author::new(commit.author());
-        let author = mailmap.canonicalize(&commit_author);
-        author_map.add(author, oid);
+        let mut commit_authors = commit_coauthors(&commit);
+        commit_authors.push(Author::new(commit.author()));
+        for author in commit_authors {
+            let author = mailmap.canonicalize(&author);
+            author_map.add(author, oid);
+        }
     }
     Ok(author_map)
 }
