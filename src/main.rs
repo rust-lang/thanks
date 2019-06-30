@@ -102,7 +102,20 @@ fn update_repo(url: &str) -> Result<PathBuf, Box<dyn std::error::Error>> {
         return Ok(path);
     }
     if path.exists() {
-        git(&["-C", &path_s, "fetch", "--quiet", "--tags"])?;
+        // we know for sure the path_s does *not* contain .git as we strip it, so this is a safe
+        // temp directory
+        let tmp = format!("{}.git", path_s);
+        std::fs::rename(&path, &tmp)?;
+        git(&[
+            "clone",
+            "--bare",
+            "--dissociate",
+            "--reference",
+            &tmp,
+            &url,
+            &path_s,
+        ])?;
+        std::fs::remove_dir_all(&tmp)?;
     } else {
         git(&["clone", "--bare", &url, &path_s])?;
     }
