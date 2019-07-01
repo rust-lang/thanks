@@ -3,7 +3,7 @@ use regex::{Regex, RegexBuilder};
 use semver::Version;
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::io::Read;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::Mutex;
 use std::{cmp, fmt, str};
@@ -385,24 +385,6 @@ fn main() {
     }
 }
 
-fn traverse_entry(
-    r: &str,
-    entry: &git2::TreeEntry,
-    _repo: &Repository,
-    path_to_url: &HashMap<String, String>,
-) -> Result<Option<Submodule>, Box<dyn std::error::Error>> {
-    if entry.kind().unwrap() == git2::ObjectType::Commit {
-        let path_s = format!("{}{}", r, entry.name().unwrap());
-        let path = PathBuf::from(&path_s);
-        return Ok(Some(Submodule {
-            path,
-            commit: entry.id(),
-            repository: path_to_url[&path_s].to_owned(),
-        }));
-    }
-    Ok(None)
-}
-
 #[derive(Debug)]
 struct Submodule {
     path: PathBuf,
@@ -428,24 +410,22 @@ fn get_submodules(
             path_to_url.insert(entry.value().unwrap().to_owned(), url);
         }
     }
-    let mut err = None;
     let mut submodules = Vec::new();
-    at.tree()?.walk(
-        git2::TreeWalkMode::PreOrder,
-        |r, entry| match traverse_entry(r, entry, repo, &path_to_url) {
-            Ok(Some(submodule)) => {
-                submodules.push(submodule);
-                git2::TreeWalkResult::Ok
-            }
-            Ok(None) => git2::TreeWalkResult::Ok,
-            Err(e) => {
-                err = Some(e);
-                git2::TreeWalkResult::Abort
-            }
-        },
-    )?;
-    if let Some(err) = err {
-        panic!("tree walk failed: {:?}", err);
+    let tree = at.tree()?;
+    for (path, url) in &path_to_url {
+        let path = Path::new(&path);
+        let entry = tree.get_path(&path);
+        // the submodule may not actually exist
+        let entry = match entry {
+            Ok(e) => e,
+            Err(_) => continue,
+        };
+        assert_eq!(entry.kind().unwrap(), git2::ObjectType::Commit);
+        submodules.push(Submodule {
+            path: path.to_owned(),
+            commit: entry.id(),
+            repository: url.to_owned(),
+        });
     }
     submodules.retain(|s| {
         let is_rust =
