@@ -245,6 +245,70 @@ fn build_author_map(
     }
 }
 
+// Note this is not the bors merge commit of a rollup
+fn is_rollup_commit(commit: &Commit) -> bool {
+    let summary = commit.summary().unwrap_or("");
+    summary.starts_with("Rollup merge of #")
+}
+
+fn parse_bors_reviewer(repo: &Repository, commit: &Commit) -> Option<Vec<Author>> {
+    if commit.author().name_bytes() != b"bors" || commit.committer().name_bytes() != b"bors" {
+        return None;
+    }
+
+    let to_author = |list: &str| -> Vec<Author> {
+        list.trim_end_matches('.')
+            .split(|c| c == ',' || c == '+')
+            .map(|r| r.trim_start_matches('@'))
+            .map(|r| r.trim_end_matches('`'))
+            .map(|r| r.trim())
+            .inspect(|r| {
+                if !r
+                    .chars()
+                    .all(|c| c.is_alphabetic() || c.is_digit(10) || c == '-' || c == '_')
+                {
+                    panic!(
+                        "to_author for {} contained non-alphabetic characters: {:?}",
+                        commit.id(),
+                        r
+                    );
+                }
+            })
+            .map(|r| Author {
+                name: r.into(),
+                email: String::new(),
+            })
+            .collect::<Vec<_>>()
+    };
+
+    let message = commit.message().unwrap_or("");
+    let mut reviewers = if let Some(line) = message.lines().find(|l| l.contains(" r=")) {
+        let start = line.find("r=").unwrap() + 2;
+        let end = line[start..]
+            .find(' ')
+            .map(|pos| pos + start)
+            .unwrap_or(line.len());
+        to_author(&line[start..end])
+    } else if let Some(line) = message.lines().find(|l| l.starts_with("Reviewed-by: ")) {
+        let line = &line["Reviewed-by: ".len()..];
+        to_author(&line)
+    } else {
+        // old bors didn't include r=
+        if message != "automated merge\n" {
+            panic!(
+                "expected reviewer for bors merge commit {} in {:?}, message: {:?}",
+                commit.id(),
+                repo.path(),
+                message
+            );
+        }
+        return None;
+    };
+    reviewers.sort();
+    reviewers.dedup();
+    Some(reviewers)
+}
+
 fn build_author_map_(
     repo: &Repository,
     mailmap: &Mailmap,
@@ -263,8 +327,21 @@ fn build_author_map_(
     for oid in walker {
         let oid = oid?;
         let commit = repo.find_commit(oid)?;
-        let mut commit_authors = commit_coauthors(&commit);
-        commit_authors.push(Author::new(commit.author()));
+        let mut commit_authors = Vec::new();
+        if !is_rollup_commit(&commit) {
+            // We ignore the author of rollup-merge commits, and account for
+            // that author once by counting the reviewer of all bors merges. For
+            // rollups, we consider that this is the most relevant person, which
+            // is usually the case.
+            //
+            // Otherwise, a single rollup with N PRs attributes N commits to the author of the
+            // rollup, which isn't fair.
+            commit_authors.push(Author::new(commit.author()));
+        }
+        if let Some(reviewers) = parse_bors_reviewer(&repo, &commit) {
+            commit_authors.extend(reviewers);
+        }
+        commit_authors.extend(commit_coauthors(&commit));
         for author in commit_authors {
             let author = mailmap.canonicalize(&author);
             author_map.add(author, oid);
