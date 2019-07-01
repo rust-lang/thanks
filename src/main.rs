@@ -10,10 +10,12 @@ use std::{cmp, fmt, str};
 
 use config::Config;
 use mailmap::{Author, Mailmap};
+use reviewers::Reviewers;
 
 mod config;
 mod error;
 mod mailmap;
+mod reviewers;
 mod site;
 
 use error::ErrorContext;
@@ -227,11 +229,12 @@ fn commit_coauthors(commit: &Commit) -> Vec<Author> {
 
 fn build_author_map(
     repo: &Repository,
+    reviewers: &Reviewers,
     mailmap: &Mailmap,
     from: &str,
     to: &str,
 ) -> Result<AuthorMap, Box<dyn std::error::Error>> {
-    match build_author_map_(repo, mailmap, from, to) {
+    match build_author_map_(repo, reviewers, mailmap, from, to) {
         Ok(o) => Ok(o),
         Err(err) => Err(ErrorContext(
             format!(
@@ -251,7 +254,11 @@ fn is_rollup_commit(commit: &Commit) -> bool {
     summary.starts_with("Rollup merge of #")
 }
 
-fn parse_bors_reviewer(repo: &Repository, commit: &Commit) -> Option<Vec<Author>> {
+fn parse_bors_reviewer(
+    reviewers: &Reviewers,
+    repo: &Repository,
+    commit: &Commit,
+) -> Option<Vec<Author>> {
     if commit.author().name_bytes() != b"bors" || commit.committer().name_bytes() != b"bors" {
         return None;
     }
@@ -274,10 +281,7 @@ fn parse_bors_reviewer(repo: &Repository, commit: &Commit) -> Option<Vec<Author>
                     );
                 }
             })
-            .map(|r| Author {
-                name: r.into(),
-                email: String::new(),
-            })
+            .map(|r| reviewers.to_author(r))
             .collect::<Vec<_>>()
     };
 
@@ -311,6 +315,7 @@ fn parse_bors_reviewer(repo: &Repository, commit: &Commit) -> Option<Vec<Author>
 
 fn build_author_map_(
     repo: &Repository,
+    reviewers: &Reviewers,
     mailmap: &Mailmap,
     from: &str,
     to: &str,
@@ -338,7 +343,7 @@ fn build_author_map_(
             // rollup, which isn't fair.
             commit_authors.push(Author::new(commit.author()));
         }
-        if let Some(reviewers) = parse_bors_reviewer(&repo, &commit) {
+        if let Some(reviewers) = parse_bors_reviewer(&reviewers, &repo, &commit) {
             commit_authors.extend(reviewers);
         }
         commit_authors.extend(commit_coauthors(&commit));
@@ -355,6 +360,7 @@ fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::err
     let repo = git2::Repository::open(&path)?;
     let mailmap = Mailmap::read_from_repo(&repo)?;
     let mailmap = Mailmap::from_str(&mailmap)?;
+    let reviewers = Reviewers::new();
 
     let mut versions = get_versions(&repo)?;
     versions.push(VersionTag {
@@ -397,7 +403,7 @@ fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::err
         let previous = if let Some(v) = idx.checked_sub(1).map(|idx| &versions[idx]) {
             v
         } else {
-            let author_map = build_author_map(&repo, &mailmap, "", &version.raw_tag)?;
+            let author_map = build_author_map(&repo, &reviewers, &mailmap, "", &version.raw_tag)?;
             version_map.insert(version.clone(), author_map);
             continue;
         };
@@ -431,8 +437,14 @@ fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::err
             }
         }
 
-        let mut author_map = build_author_map(&repo, &mailmap, &previous.raw_tag, &version.raw_tag)
-            .map_err(|e| ErrorContext(format!("From {} to {}", previous, version), e))?;
+        let mut author_map = build_author_map(
+            &repo,
+            &reviewers,
+            &mailmap,
+            &previous.raw_tag,
+            &version.raw_tag,
+        )
+        .map_err(|e| ErrorContext(format!("From {} to {}", previous, version), e))?;
 
         for (path, (pre, cur)) in &modules {
             match (pre, cur) {
@@ -440,6 +452,7 @@ fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::err
                     let subrepo = Repository::open(&path)?;
                     let submap = build_author_map(
                         &subrepo,
+                        &reviewers,
                         &mailmap,
                         &previous.commit.to_string(),
                         &current.commit.to_string(),
@@ -448,8 +461,13 @@ fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::err
                 }
                 (None, Some(current)) => {
                     let subrepo = Repository::open(&path)?;
-                    let submap =
-                        build_author_map(&subrepo, &mailmap, "", &current.commit.to_string())?;
+                    let submap = build_author_map(
+                        &subrepo,
+                        &reviewers,
+                        &mailmap,
+                        "",
+                        &current.commit.to_string(),
+                    )?;
                     author_map.extend(submap);
                 }
                 (None, None) => unreachable!(),
