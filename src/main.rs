@@ -353,8 +353,9 @@ fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::err
     Ok(version_map)
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn run() -> Result<(), Box<dyn std::error::Error>> {
     let by_version = generate_thanks()?;
+
     let mut all_time = by_version.values().next().unwrap().clone();
     for map in by_version.values().skip(1) {
         all_time.extend(map.clone());
@@ -363,6 +364,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     site::render(by_version, all_time)?;
 
     Ok(())
+}
+
+fn main() {
+    if let Err(err) = run() {
+        eprintln!("Error: {}", err);
+        let mut cur = &*err;
+        while let Some(cause) = cur.source() {
+            eprintln!("\tcaused by: {}", cause);
+            cur = cause;
+        }
+        std::mem::drop(cur);
+        std::process::exit(1);
+    }
 }
 
 fn traverse_entry(
