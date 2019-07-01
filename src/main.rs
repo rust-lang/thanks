@@ -450,13 +450,11 @@ fn get_submodules(
 }
 
 fn modules_file(repo: &Repository, at: &Commit) -> Result<String, Box<dyn std::error::Error>> {
-    Ok(String::from_utf8(
-        at.tree()?
-            .get_name(".gitmodules")
-            .unwrap()
-            .to_object(&repo)?
-            .peel_to_blob()?
-            .content()
-            .into(),
-    )?)
+    if let Some(modules) = at.tree()?.get_name(".gitmodules") {
+        Ok(String::from_utf8(
+            modules.to_object(&repo)?.peel_to_blob()?.content().into(),
+        )?)
+    } else {
+        return Ok(String::new());
+    }
 }
