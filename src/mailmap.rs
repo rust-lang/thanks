@@ -1,16 +1,48 @@
 use std::fmt;
+use std::pin::Pin;
+use std::ptr::NonNull;
 
-#[derive(Default)]
-pub struct Mailmap<'a> {
-    entries: Vec<MapEntry<'a>>,
+pub struct Mailmap {
+    buffer: Pin<Box<str>>,
+    entries: Vec<RawMapEntry>,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Copy, Clone)]
+struct RawMapEntry {
+    canonical_name: Option<NonNull<str>>,
+    canonical_email: Option<NonNull<str>>,
+    current_name: Option<NonNull<str>>,
+    current_email: Option<NonNull<str>>,
+}
+
+impl RawMapEntry {
+    unsafe fn to_entry<'a>(self, _: &'a str) -> MapEntry<'a> {
+        MapEntry {
+            canonical_name: self.canonical_name.map(|v| &*v.as_ptr()),
+            canonical_email: self.canonical_email.map(|v| &*v.as_ptr()),
+            current_name: self.current_name.map(|v| &*v.as_ptr()),
+            current_email: self.current_email.map(|v| &*v.as_ptr()),
+        }
+    }
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 struct MapEntry<'a> {
     canonical_name: Option<&'a str>,
     canonical_email: Option<&'a str>,
     current_name: Option<&'a str>,
     current_email: Option<&'a str>,
+}
+
+impl<'a> MapEntry<'a> {
+    fn to_raw_entry(self) -> RawMapEntry {
+        RawMapEntry {
+            canonical_name: self.canonical_name.map(|v| v.into()),
+            canonical_email: self.canonical_email.map(|v| v.into()),
+            current_name: self.current_name.map(|v| v.into()),
+            current_email: self.current_email.map(|v| v.into()),
+        }
+    }
 }
 
 #[derive(Clone, PartialEq, PartialOrd, Ord, Eq, Hash)]
@@ -39,8 +71,8 @@ impl Author {
     }
 }
 
-impl<'a> Mailmap<'a> {
-    pub fn read_from_repo(repo: &git2::Repository) -> Result<String, Box<dyn std::error::Error>> {
+impl Mailmap {
+    fn read_from_repo(repo: &git2::Repository) -> Result<String, Box<dyn std::error::Error>> {
         Ok(String::from_utf8(
             repo.revparse_single("master")?
                 .peel_to_commit()?
@@ -54,19 +86,28 @@ impl<'a> Mailmap<'a> {
         )?)
     }
 
-    pub fn from_str(file: &str) -> Result<Mailmap<'_>, Box<dyn std::error::Error>> {
-        let lines = file.lines().count();
-        let mut entries = Vec::with_capacity(lines);
+    pub fn from_repo(repo: &git2::Repository) -> Result<Mailmap, Box<dyn std::error::Error>> {
+        Self::from_string(Self::read_from_repo(repo)?)
+    }
+
+    fn from_string(file: String) -> Result<Mailmap, Box<dyn std::error::Error>> {
+        let file = Pin::new(file.into_boxed_str());
+        let mut entries = Vec::with_capacity(file.lines().count());
         for (idx, line) in file.lines().enumerate() {
             if let Some(entry) = parse_line(&line, idx + 1) {
-                entries.push(entry);
+                entries.push(entry.to_raw_entry());
             }
         }
-        Ok(Mailmap { entries })
+        Ok(Mailmap {
+            buffer: file,
+            entries,
+        })
     }
 
     pub fn canonicalize(&self, author: &Author) -> Author {
         for entry in &self.entries {
+            // these entries were created from this buffer
+            let entry = unsafe { entry.to_entry(&self.buffer) };
             if let Some(email) = entry.current_email {
                 if let Some(name) = entry.current_name {
                     if author.name == name && author.email == email {

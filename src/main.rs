@@ -358,8 +358,7 @@ fn build_author_map_(
 fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::error::Error>> {
     let path = update_repo("https://github.com/rust-lang/rust.git")?;
     let repo = git2::Repository::open(&path)?;
-    let mailmap = Mailmap::read_from_repo(&repo)?;
-    let mailmap = Mailmap::from_str(&mailmap)?;
+    let mailmap = Mailmap::from_repo(&repo)?;
     let reviewers = Reviewers::new();
 
     let mut versions = get_versions(&repo)?;
