@@ -15,6 +15,8 @@ mod config;
 mod mailmap;
 mod site;
 
+use error::ErrorContext;
+
 #[derive(Clone)]
 pub struct AuthorMap {
     // author -> [commits]
