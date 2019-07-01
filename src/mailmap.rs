@@ -7,6 +7,18 @@ pub struct Mailmap {
     entries: Vec<RawMapEntry>,
 }
 
+impl fmt::Debug for Mailmap {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut list = f.debug_list();
+        for entry in &self.entries {
+            // these entries were created from this buffer
+            let entry = unsafe { entry.to_entry(&self.buffer) };
+            list.entry(&entry);
+        }
+        list.finish()
+    }
+}
+
 #[derive(Copy, Clone)]
 struct RawMapEntry {
     canonical_name: Option<NonNull<str>>,
@@ -90,7 +102,7 @@ impl Mailmap {
         Self::from_string(Self::read_from_repo(repo)?)
     }
 
-    fn from_string(file: String) -> Result<Mailmap, Box<dyn std::error::Error>> {
+    pub fn from_string(file: String) -> Result<Mailmap, Box<dyn std::error::Error>> {
         let file = Pin::new(file.into_boxed_str());
         let mut entries = Vec::with_capacity(file.lines().count());
         for (idx, line) in file.lines().enumerate() {

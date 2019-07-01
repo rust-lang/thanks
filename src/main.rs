@@ -258,17 +258,18 @@ fn parse_bors_reviewer(
     reviewers: &Reviewers,
     repo: &Repository,
     commit: &Commit,
-) -> Option<Vec<Author>> {
+) -> Result<Option<Vec<Author>>, Box<dyn std::error::Error>> {
     if commit.author().name_bytes() != b"bors" || commit.committer().name_bytes() != b"bors" {
-        return None;
+        return Ok(None);
     }
 
-    let to_author = |list: &str| -> Vec<Author> {
+    let to_author = |list: &str| -> Result<Vec<Author>, ErrorContext> {
         list.trim_end_matches('.')
             .split(|c| c == ',' || c == '+')
             .map(|r| r.trim_start_matches('@'))
             .map(|r| r.trim_end_matches('`'))
             .map(|r| r.trim())
+            .filter(|r| !r.is_empty())
             .inspect(|r| {
                 if !r
                     .chars()
@@ -281,8 +282,16 @@ fn parse_bors_reviewer(
                     );
                 }
             })
-            .map(|r| reviewers.to_author(r))
-            .collect::<Vec<_>>()
+            .map(|r| {
+                reviewers.to_author(r).map_err(|e| {
+                    ErrorContext(
+                        format!("reviewer: {:?}, commit: {}", r, commit.id()),
+                        e.into(),
+                    )
+                })
+            })
+            .flat_map(|r| r.transpose())
+            .collect::<Result<Vec<_>, ErrorContext>>()
     };
 
     let message = commit.message().unwrap_or("");
@@ -292,10 +301,10 @@ fn parse_bors_reviewer(
             .find(' ')
             .map(|pos| pos + start)
             .unwrap_or(line.len());
-        to_author(&line[start..end])
+        to_author(&line[start..end])?
     } else if let Some(line) = message.lines().find(|l| l.starts_with("Reviewed-by: ")) {
         let line = &line["Reviewed-by: ".len()..];
-        to_author(&line)
+        to_author(&line)?
     } else {
         // old bors didn't include r=
         if message != "automated merge\n" {
@@ -306,11 +315,11 @@ fn parse_bors_reviewer(
                 message
             );
         }
-        return None;
+        return Ok(None);
     };
     reviewers.sort();
     reviewers.dedup();
-    Some(reviewers)
+    Ok(Some(reviewers))
 }
 
 fn build_author_map_(
@@ -343,7 +352,7 @@ fn build_author_map_(
             // rollup, which isn't fair.
             commit_authors.push(Author::new(commit.author()));
         }
-        if let Some(reviewers) = parse_bors_reviewer(&reviewers, &repo, &commit) {
+        if let Some(reviewers) = parse_bors_reviewer(&reviewers, &repo, &commit)? {
             commit_authors.extend(reviewers);
         }
         commit_authors.extend(commit_coauthors(&commit));
@@ -359,7 +368,7 @@ fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::err
     let path = update_repo("https://github.com/rust-lang/rust.git")?;
     let repo = git2::Repository::open(&path)?;
     let mailmap = Mailmap::from_repo(&repo)?;
-    let reviewers = Reviewers::new();
+    let reviewers = Reviewers::new()?;
 
     let mut versions = get_versions(&repo)?;
     versions.push(VersionTag {
