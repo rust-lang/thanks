@@ -12,6 +12,7 @@ use config::Config;
 use mailmap::{Author, Mailmap};
 
 mod config;
+mod error;
 mod mailmap;
 mod site;
 
@@ -230,6 +231,26 @@ fn build_author_map(
     from: &str,
     to: &str,
 ) -> Result<AuthorMap, Box<dyn std::error::Error>> {
+    match build_author_map_(repo, mailmap, from, to) {
+        Ok(o) => Ok(o),
+        Err(err) => Err(ErrorContext(
+            format!(
+                "build_author_map(repo={}, from={:?}, to={:?})",
+                repo.path().display(),
+                from,
+                to
+            ),
+            err,
+        ))?,
+    }
+}
+
+fn build_author_map_(
+    repo: &Repository,
+    mailmap: &Mailmap,
+    from: &str,
+    to: &str,
+) -> Result<AuthorMap, Box<dyn std::error::Error>> {
     let mut walker = repo.revwalk()?;
     if from == "" {
         let to = repo.revparse_single(to)?.peel_to_commit()?.id();
@@ -308,7 +329,16 @@ fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::err
 
         let mut modules: HashMap<PathBuf, (Option<&Submodule>, Option<&Submodule>)> =
             HashMap::new();
-        let previous_commit = repo.find_commit(previous.commit)?;
+        let previous_commit = repo.find_commit(previous.commit).map_err(|e| {
+            ErrorContext(
+                format!(
+                    "find_commit: repo={}, commit={}",
+                    repo.path().display(),
+                    previous.commit
+                ),
+                Box::new(e),
+            )
+        })?;
         let previous_modules = get_submodules(&repo, &previous_commit)?;
         for module in &previous_modules {
             if let Ok(path) = update_repo(&module.repository) {
@@ -324,8 +354,8 @@ fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::err
             }
         }
 
-        let mut author_map =
-            build_author_map(&repo, &mailmap, &previous.raw_tag, &version.raw_tag)?;
+        let mut author_map = build_author_map(&repo, &mailmap, &previous.raw_tag, &version.raw_tag)
+            .map_err(|e| ErrorContext(format!("From {} to {}", previous, version), e))?;
 
         for (path, (pre, cur)) in &modules {
             match (pre, cur) {
