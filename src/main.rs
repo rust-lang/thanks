@@ -258,7 +258,7 @@ fn parse_bors_reviewer(
     reviewers: &Reviewers,
     repo: &Repository,
     commit: &Commit,
-) -> Result<Option<Vec<Author>>, Box<dyn std::error::Error>> {
+) -> Result<Option<Vec<Author>>, ErrorContext> {
     if commit.author().name_bytes() != b"bors" || commit.committer().name_bytes() != b"bors" {
         return Ok(None);
     }
@@ -352,8 +352,16 @@ fn build_author_map_(
             // rollup, which isn't fair.
             commit_authors.push(Author::new(commit.author()));
         }
-        if let Some(reviewers) = parse_bors_reviewer(&reviewers, &repo, &commit)? {
-            commit_authors.extend(reviewers);
+        match parse_bors_reviewer(&reviewers, &repo, &commit) {
+            Ok(Some(reviewers)) => commit_authors.extend(reviewers),
+            Ok(None) => {}
+            Err(ErrorContext(msg, e)) => {
+                if e.is::<reviewers::UnknownReviewer>() {
+                    eprintln!("Unknown reviewer: {}", ErrorContext(msg, e));
+                } else {
+                    return Err(ErrorContext(msg, e).into());
+                }
+            }
         }
         commit_authors.extend(commit_coauthors(&commit));
         for author in commit_authors {
