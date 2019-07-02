@@ -1,4 +1,4 @@
-use crate::mailmap::Author;
+use mailmap::Author;
 use std::collections::HashMap;
 use std::fmt;
 

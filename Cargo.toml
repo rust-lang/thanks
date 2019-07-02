@@ -13,6 +13,9 @@ lazy_static = "1"
 handlebars = "2.0.0-beta.2"
 walkdir = "2"
 regex = "1.1.6"
+mailmap = { path = "./mailmap" }
 
 [profile.release]
 debug = 2
+
+[workspace]

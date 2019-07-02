@@ -1,4 +1,5 @@
 use git2::{Commit, Oid, Repository};
+use mailmap::{Author, Mailmap};
 use regex::{Regex, RegexBuilder};
 use semver::Version;
 use std::collections::{BTreeMap, HashMap, HashSet};
@@ -9,16 +10,32 @@ use std::sync::Mutex;
 use std::{cmp, fmt, str};
 
 use config::Config;
-use mailmap::{Author, Mailmap};
 use reviewers::Reviewers;
 
 mod config;
 mod error;
-mod mailmap;
 mod reviewers;
 mod site;
 
 use error::ErrorContext;
+
+trait ToAuthor {
+    fn from_sig(sig: git2::Signature<'_>) -> Author;
+}
+
+impl ToAuthor for Author {
+    fn from_sig(sig: git2::Signature<'_>) -> Author {
+        let name = sig.name().unwrap_or_else(|| panic!("no name for {}", sig));
+        let email = sig
+            .email()
+            .unwrap_or_else(|| panic!("no email for {}", sig));
+
+        Author {
+            name: name.to_string(),
+            email: email.to_string(),
+        }
+    }
+}
 
 #[derive(Clone)]
 pub struct AuthorMap {
@@ -350,7 +367,7 @@ fn build_author_map_(
             //
             // Otherwise, a single rollup with N PRs attributes N commits to the author of the
             // rollup, which isn't fair.
-            commit_authors.push(Author::new(commit.author()));
+            commit_authors.push(Author::from_sig(commit.author()));
         }
         match parse_bors_reviewer(&reviewers, &repo, &commit) {
             Ok(Some(reviewers)) => commit_authors.extend(reviewers),
@@ -372,10 +389,25 @@ fn build_author_map_(
     Ok(author_map)
 }
 
+fn mailmap_from_repo(repo: &git2::Repository) -> Result<Mailmap, Box<dyn std::error::Error>> {
+    let file = String::from_utf8(
+        repo.revparse_single("master")?
+            .peel_to_commit()?
+            .tree()?
+            .get_name(".mailmap")
+            .unwrap()
+            .to_object(&repo)?
+            .peel_to_blob()?
+            .content()
+            .into(),
+    )?;
+    Mailmap::from_string(file)
+}
+
 fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::error::Error>> {
     let path = update_repo("https://github.com/rust-lang/rust.git")?;
     let repo = git2::Repository::open(&path)?;
-    let mailmap = Mailmap::from_repo(&repo)?;
+    let mailmap = mailmap_from_repo(&repo)?;
     let reviewers = Reviewers::new()?;
 
     let mut versions = get_versions(&repo)?;

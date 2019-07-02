@@ -2,6 +2,9 @@ use std::fmt;
 use std::pin::Pin;
 use std::ptr::NonNull;
 
+#[cfg(test)]
+mod test;
+
 pub struct Mailmap {
     buffer: Pin<Box<str>>,
     entries: Vec<RawMapEntry>,
@@ -69,39 +72,7 @@ impl fmt::Debug for Author {
     }
 }
 
-impl Author {
-    pub fn new(sig: git2::Signature<'_>) -> Self {
-        let name = sig.name().unwrap_or_else(|| panic!("no name for {}", sig));
-        let email = sig
-            .email()
-            .unwrap_or_else(|| panic!("no email for {}", sig));
-
-        Author {
-            name: name.to_string(),
-            email: email.to_string(),
-        }
-    }
-}
-
 impl Mailmap {
-    fn read_from_repo(repo: &git2::Repository) -> Result<String, Box<dyn std::error::Error>> {
-        Ok(String::from_utf8(
-            repo.revparse_single("master")?
-                .peel_to_commit()?
-                .tree()?
-                .get_name(".mailmap")
-                .unwrap()
-                .to_object(&repo)?
-                .peel_to_blob()?
-                .content()
-                .into(),
-        )?)
-    }
-
-    pub fn from_repo(repo: &git2::Repository) -> Result<Mailmap, Box<dyn std::error::Error>> {
-        Self::from_string(Self::read_from_repo(repo)?)
-    }
-
     pub fn from_string(file: String) -> Result<Mailmap, Box<dyn std::error::Error>> {
         let file = Pin::new(file.into_boxed_str());
         let mut entries = Vec::with_capacity(file.lines().count());
@@ -230,99 +201,5 @@ fn parse_line(mut line: &str, idx: usize) -> Option<MapEntry<'_>> {
         Some(entry)
     } else {
         None
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    macro_rules! test_parser {
-        ($parser:ident, $input:expr, $exp:expr $(,)*) => {{
-            let mut input = $input;
-            let ret = $parser(&mut input);
-            assert_eq!(input, $exp);
-            ret
-        }};
-    }
-
-    #[test]
-    fn comment_1() {
-        test_parser!(read_comment, "# foo", "");
-    }
-
-    #[test]
-    fn comment_2() {
-        test_parser!(read_comment, "bar # foo", "bar # foo");
-    }
-
-    #[test]
-    fn email_1() {
-        assert_eq!(
-            test_parser!(read_email, "<foo@example.com>", ""),
-            Some("foo@example.com")
-        );
-    }
-
-    #[test]
-    fn email_2() {
-        assert_eq!(
-            test_parser!(
-                read_email,
-                "<foo@example.com> <foo2@example.com>",
-                " <foo2@example.com>"
-            ),
-            Some("foo@example.com")
-        );
-    }
-
-    #[test]
-    fn email_3() {
-        assert_eq!(
-            test_parser!(
-                read_email,
-                "Bar <foo@example.com> <foo2@example.com>",
-                "Bar <foo@example.com> <foo2@example.com>",
-            ),
-            None
-        );
-    }
-
-    #[test]
-    fn name_1() {
-        assert_eq!(
-            test_parser!(
-                read_name,
-                "Canonical Name <foo@example.com>",
-                "<foo@example.com>"
-            ),
-            Some("Canonical Name"),
-        );
-    }
-
-    #[test]
-    fn line_1() {
-        assert_eq!(
-            parse_line("Joe Bob <email1> <email2>", 0),
-            Some(MapEntry {
-                canonical_name: Some("Joe Bob"),
-                canonical_email: Some("email1"),
-                current_name: None,
-                current_email: Some("email2"),
-            })
-        );
-    }
-
-    #[test]
-    fn line_2() {
-        assert_eq!(
-            parse_line("Joe Bob <email1>", 0),
-            Some(MapEntry {
-                canonical_name: Some("Joe Bob"),
-                canonical_email: Some("email1"),
-                current_name: None,
-                current_email: Some("email1"),
-            })
-        );
     }
 }
