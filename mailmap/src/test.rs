@@ -88,3 +88,38 @@ fn line_2() {
         })
     );
 }
+
+fn a(name: &str, email: &str) -> Author {
+    Author {
+        name: name.into(),
+        email: email.into(),
+    }
+}
+
+fn map(line: &str) -> Mailmap {
+    Mailmap::from_string(line.into()).unwrap()
+}
+
+#[test]
+fn map_1() {
+    let mm = map("PN <PE> CN <CE>");
+    assert_eq!(mm.canonicalize(&a("CN", "CE")), a("PN", "PE"));
+}
+
+#[test]
+fn map_2() {
+    let mm = map("PN <C/PE>");
+    assert_eq!(mm.canonicalize(&a("any", "C/PE")), a("PN", "C/PE"));
+}
+
+#[test]
+fn map_3() {
+    let mm = map("PN <PE> <CE>");
+    assert_eq!(mm.canonicalize(&a("any", "CE")), a("PN", "PE"));
+}
+
+#[test]
+fn map_4() {
+    let mm = map("<PE> <CE>");
+    assert_eq!(mm.canonicalize(&a("any", "CE")), a("any", "PE"));
+}

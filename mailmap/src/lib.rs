@@ -5,6 +5,18 @@ use std::ptr::NonNull;
 #[cfg(test)]
 mod test;
 
+/// Loads a mailmap from the string passed in.
+///
+/// The format is the same as used by `git`; specifically:
+///
+/// * `Canonical Name <canonical email> Current Name <current email>`
+///   * This changes authors matching both name and email to the canonical forms.
+/// * `Canonical Name <current email>`
+///   * This changes all entries with this email to new name, regardless of their current name.
+/// * `Canonical Name <canonical email> <current email>`
+///   * This changes all entries with the current email to the canonical name and email.
+/// * `<canonical email> <current email>`
+///   * This changes all entries with the current email to the canonical email.
 pub struct Mailmap {
     buffer: Pin<Box<str>>,
     entries: Vec<RawMapEntry>,
