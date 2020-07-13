@@ -199,9 +199,11 @@ header h1 {
   letter-spacing: 1px; }
 
 .highlight {
-  height: 30px;
+  height: 12px;
   position: relative;
-  top: -30px;
+  top: 0;
   left: -10px;
   width: 120%;
-  max-width: 90vw; }
+  max-width: 90vw;
+  line-height: 1.6;
+  border-radius: 2px; }
