@@ -22,26 +22,26 @@ impl Reviewers {
 
         let aatch = a("James Miller", "james@aatch.net");
         let alexcrichton = a("Alex Crichton", "alex@alexcrichton.com");
+        let arielb1 = a("Ariel Ben-Yehuda", "ariel.byd@gmail.com");
+        let brson = a("Brian Anderson", "andersrb@gmail.com");
+        let burntsushi = a("Andrew Gallant", "jamslam@gmail.com");
+        let centril = a("Mazdak Farrokhzad", "twingoow@gmail.com");
+        let frewsxcv = a("Corey Farwell", "coreyf@rwell.org");
         let gankro = a("Alexis Beingessner", "a.beingessner@gmail.com");
+        let guillaumegomez = a("Guillaume Gomez", "guillaume1.gomez@gmail.com");
         let huonw = a("Huon Wilson", "wilson.huon@gmail.com");
         let jakub = a("Jakub Kądziołka", "kuba@kadziolka.net");
+        let joshtriplett = a("Josh Triplett", "josh@joshtriplett.org");
+        let manishearth = a("Manish Goregaokar", "manishsmail@gmail.com");
         let michaelwoerister = a("Michael Woerister", "michaelwoerister@posteo.net");
         let nikomatsakis = a("Niko Matsakis", "niko@alum.mit.edu");
         let nrc = a("Nick Cameron", "ncameron@mozilla.com");
         let pcwalton = a("Patrick Walton", "pcwalton@mimiga.net");
-        let steveklabnik = a("Steve Klabnik", "steve@steveklabnik.com");
-        let arielb1 = a("Ariel Ben-Yehuda", "ariel.byd@gmail.com");
-        let manishearth = a("Manish Goregaokar", "manishsmail@gmail.com");
-        let burntsushi = a("Andrew Gallant", "jamslam@gmail.com");
-        let guillaumegomez = a("Guillaume Gomez", "guillaume1.gomez@gmail.com");
-        let frewsxcv = a("Corey Farwell", "coreyf@rwell.org");
-        let brson = a("Brian Anderson", "andersrb@gmail.com");
-        let simulacrum = a("Mark Rousskov", "mark.simulacrum@gmail.com");
         let quietmisdreavus = a("QuietMisdreavus", "grey@quietmisdreavus.net");
-        let joshtriplett = a("Josh Triplett", "josh@joshtriplett.org");
+        let simulacrum = a("Mark Rousskov", "mark.simulacrum@gmail.com");
+        let steveklabnik = a("Steve Klabnik", "steve@steveklabnik.com");
         let withoutboats = a("Without Boats", "boats@mozilla.com");
         let zoxc = a("John Kåre Alsaker", "john.kare.alsaker@gmail.com");
-        let centril = a("Mazdak Farrokhzad", "twingoow@gmail.com");
 
         map.insert("Aaron1011", a("Aaron Hill", "aa1ronham@gmail.com"));
         map.insert("Aaronepower", a("Erin Power", "xampprocky@gmail.com"));
