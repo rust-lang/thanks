@@ -175,6 +175,7 @@ impl Reviewers {
         map.insert("lqd", a("lqd", "remy.rakic+github@gmail.com"));
         map.insert("lukaramu", a("lukaramu", "lukaramu@users.noreply.github.com"));
         map.insert("luqmana", a("Luqman Aden", "laden@csclub.uwaterloo.ca"));
+        map.insert("m-ou-se", a("Mara Bos", "m-ou.se@m-ou.se"));
         map.insert("malbarbo", a("Marco A L Barbosa", "malbarbo@gmail.com"));
         map.insert("manishearth", manishearth.clone());
         map.insert("mark-i-m", a("Mark Mansi", "markm@cs.wisc.edu"));
