@@ -280,6 +280,11 @@ fn parse_bors_reviewer(
         return Ok(None);
     }
 
+    // Skip non-merge commits
+    if commit.parents().count() == 1 {
+        return Ok(None);
+    }
+
     let to_author = |list: &str| -> Result<Vec<Author>, ErrorContext> {
         list.trim_end_matches('.')
             .split(|c| c == ',' || c == '+')
