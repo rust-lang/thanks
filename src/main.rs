@@ -277,7 +277,9 @@ fn parse_bors_reviewer(
     commit: &Commit,
 ) -> Result<Option<Vec<Author>>, ErrorContext> {
     if commit.author().name_bytes() != b"bors" || commit.committer().name_bytes() != b"bors" {
-        return Ok(None);
+        if commit.committer().name_bytes() != b"GitHub" || !is_rollup_commit(commit) {
+            return Ok(None);
+        }
     }
 
     // Skip non-merge commits
