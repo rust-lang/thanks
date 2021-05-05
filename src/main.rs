@@ -294,6 +294,7 @@ fn parse_bors_reviewer(
             .map(|r| r.trim_end_matches('`'))
             .map(|r| r.trim())
             .filter(|r| !r.is_empty())
+            .filter(|r| *r != "<try>")
             .inspect(|r| {
                 if !r
                     .chars()
@@ -354,6 +355,18 @@ fn build_author_map_(
     to: &str,
 ) -> Result<AuthorMap, Box<dyn std::error::Error>> {
     let mut walker = repo.revwalk()?;
+
+    if repo.revparse_single(to).is_err() {
+        // If a commit is not found, try fetching it.
+        git(&[
+            "--git-dir",
+            repo.path().to_str().unwrap(),
+            "fetch",
+            "origin",
+            to,
+        ])?;
+    }
+
     if from == "" {
         let to = repo.revparse_single(to)?.peel_to_commit()?.id();
         walker.push(to)?;
