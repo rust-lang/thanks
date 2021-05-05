@@ -294,6 +294,7 @@ fn parse_bors_reviewer(
             .map(|r| r.trim_end_matches('`'))
             .map(|r| r.trim())
             .filter(|r| !r.is_empty())
+            .filter(|r| *r != "<try>")
             .inspect(|r| {
                 if !r
                     .chars()
