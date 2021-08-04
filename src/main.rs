@@ -499,7 +499,7 @@ fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::err
         name: String::from("Beta"),
         version: {
             let mut last = versions.last().unwrap().version.clone();
-            last.increment_minor();
+            last.minor += 1;
             last
         },
         raw_tag: String::from("beta"),
@@ -516,7 +516,7 @@ fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::err
         version: {
             // master is plus 1 minor versions off of beta, which we just pushed
             let mut last = versions.last().unwrap().version.clone();
-            last.increment_minor();
+            last.minor += 1;
             last
         },
         raw_tag: String::from("master"),

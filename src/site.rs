@@ -36,7 +36,7 @@ impl CommonData {
     }
 }
 
-fn hb() -> Result<Handlebars, Box<dyn std::error::Error>> {
+fn hb() -> Result<Handlebars<'static>, Box<dyn std::error::Error>> {
     let mut handlebars = Handlebars::new();
     handlebars.set_strict_mode(true);
     handlebars.register_templates_directory(".hbs", "templates")?;

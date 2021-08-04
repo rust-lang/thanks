@@ -5,12 +5,12 @@ authors = ["The Rust Project Developers"]
 edition = "2018"
 
 [dependencies]
-git2 = "0.9"
+git2 = "0.13"
 serde = { version = "1", features = ["derive"] }
-semver = "0.9"
+semver = "1"
 tempfile = "3"
 lazy_static = "1"
-handlebars = "2.0.0-beta.2"
+handlebars = { version = "4.1.1", features = ["dir_source"] }
 walkdir = "2"
 regex = "1.1.6"
 mailmap = { path = "./mailmap" }
