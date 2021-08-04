@@ -69,6 +69,23 @@ impl AuthorMap {
                 .extend(set);
         }
     }
+
+    #[must_use]
+    fn difference(&self, other: &AuthorMap) -> AuthorMap {
+        let mut new = AuthorMap::new();
+        new.map.reserve(self.map.len());
+        for (author, set) in self.map.iter() {
+            if let Some(other_set) = other.map.get(&author) {
+                let diff: HashSet<_> = set.difference(other_set).cloned().collect();
+                if !diff.is_empty() {
+                    new.map.insert(author.clone(), diff);
+                }
+            } else {
+                new.map.insert(author.clone(), set.clone());
+            }
+        }
+        new
+    }
 }
 
 fn git(args: &[&str]) -> Result<String, Box<dyn std::error::Error>> {
@@ -165,6 +182,12 @@ impl fmt::Display for VersionTag {
     }
 }
 
+impl std::hash::Hash for VersionTag {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.version.hash(state);
+    }
+}
+
 impl cmp::Eq for VersionTag {}
 impl cmp::PartialEq for VersionTag {
     fn eq(&self, other: &Self) -> bool {
@@ -233,11 +256,13 @@ fn commit_coauthors(commit: &Commit) -> Vec<Author> {
         }
 
         for line in msg.lines().rev() {
-            if let Some(caps) = RE.captures(line) {
-                coauthors.push(Author {
-                    name: caps["name"].to_string(),
-                    email: caps["email"].to_string(),
-                });
+            if line.starts_with("Co-authored-by") {
+                if let Some(caps) = RE.captures(line) {
+                    coauthors.push(Author {
+                        name: caps["name"].to_string(),
+                        email: caps["email"].to_string(),
+                    });
+                }
             }
         }
     }
@@ -378,6 +403,7 @@ fn build_author_map_(
     for oid in walker {
         let oid = oid?;
         let commit = repo.find_commit(oid)?;
+
         let mut commit_authors = Vec::new();
         if !is_rollup_commit(&commit) {
             // We ignore the author of rollup-merge commits, and account for
@@ -424,6 +450,44 @@ fn mailmap_from_repo(repo: &git2::Repository) -> Result<Mailmap, Box<dyn std::er
     Mailmap::from_string(file)
 }
 
+fn up_to_release(
+    repo: &Repository,
+    reviewers: &Reviewers,
+    mailmap: &Mailmap,
+    to: &VersionTag,
+) -> Result<AuthorMap, Box<dyn std::error::Error>> {
+    let to_commit = repo.find_commit(to.commit).map_err(|e| {
+        ErrorContext(
+            format!(
+                "find_commit: repo={}, commit={}",
+                repo.path().display(),
+                to.commit
+            ),
+            Box::new(e),
+        )
+    })?;
+    let modules = get_submodules(&repo, &to_commit)?;
+
+    let mut author_map = build_author_map(&repo, &reviewers, &mailmap, "", &to.raw_tag)
+        .map_err(|e| ErrorContext(format!("Up to {}", to), e))?;
+
+    for module in &modules {
+        if let Ok(path) = update_repo(&module.repository) {
+            let subrepo = Repository::open(&path)?;
+            let submap = build_author_map(
+                &subrepo,
+                &reviewers,
+                &mailmap,
+                "",
+                &module.commit.to_string(),
+            )?;
+            author_map.extend(submap);
+        }
+    }
+
+    Ok(author_map)
+}
+
 fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::error::Error>> {
     let path = update_repo("https://github.com/rust-lang/rust.git")?;
     let repo = git2::Repository::open(&path)?;
@@ -467,6 +531,8 @@ fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::err
 
     let mut version_map = BTreeMap::new();
 
+    let mut cache = HashMap::new();
+
     for (idx, version) in versions.iter().enumerate() {
         let previous = if let Some(v) = idx.checked_sub(1).map(|idx| &versions[idx]) {
             v
@@ -478,75 +544,19 @@ fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::err
 
         eprintln!("Processing {:?} to {:?}", previous, version);
 
-        let mut modules: HashMap<PathBuf, (Option<&Submodule>, Option<&Submodule>)> =
-            HashMap::new();
-        let previous_commit = repo.find_commit(previous.commit).map_err(|e| {
-            ErrorContext(
-                format!(
-                    "find_commit: repo={}, commit={}",
-                    repo.path().display(),
-                    previous.commit
-                ),
-                Box::new(e),
-            )
-        })?;
-        let previous_modules = get_submodules(&repo, &previous_commit)?;
-        for module in &previous_modules {
-            if let Ok(path) = update_repo(&module.repository) {
-                modules.insert(path, (Some(module), None));
-            }
-        }
+        cache.insert(
+            version,
+            up_to_release(&repo, &reviewers, &mailmap, &version)?,
+        );
+        let previous = match cache.remove(&previous) {
+            Some(v) => v,
+            None => up_to_release(&repo, &reviewers, &mailmap, &previous)?,
+        };
+        let current = cache.get(&version).unwrap();
 
-        let current_commit = repo.find_commit(version.commit)?;
-        let current_modules = get_submodules(&repo, &current_commit)?;
-        for module in &current_modules {
-            if let Ok(path) = update_repo(&module.repository) {
-                modules.entry(path).or_insert((None, None)).1 = Some(module);
-            }
-        }
-
-        let mut author_map = build_author_map(
-            &repo,
-            &reviewers,
-            &mailmap,
-            &previous.raw_tag,
-            &version.raw_tag,
-        )
-        .map_err(|e| ErrorContext(format!("From {} to {}", previous, version), e))?;
-
-        for (path, (pre, cur)) in &modules {
-            match (pre, cur) {
-                (Some(previous), Some(current)) => {
-                    let subrepo = Repository::open(&path)?;
-                    let submap = build_author_map(
-                        &subrepo,
-                        &reviewers,
-                        &mailmap,
-                        &previous.commit.to_string(),
-                        &current.commit.to_string(),
-                    )?;
-                    author_map.extend(submap);
-                }
-                (None, Some(current)) => {
-                    let subrepo = Repository::open(&path)?;
-                    let submap = build_author_map(
-                        &subrepo,
-                        &reviewers,
-                        &mailmap,
-                        "",
-                        &current.commit.to_string(),
-                    )?;
-                    author_map.extend(submap);
-                }
-                (None, None) => unreachable!(),
-                (Some(_), None) => {
-                    // nothing, if submodule was deleted then we presume no changes since then
-                    // affect us
-                }
-            }
-        }
-
-        version_map.insert(version.clone(), author_map);
+        // Remove commits reachable from the previous release.
+        let only_current = current.difference(&previous);
+        version_map.insert(version.clone(), only_current);
     }
 
     Ok(version_map)
