@@ -427,6 +427,7 @@ fn build_author_map_(
             }
         }
         commit_authors.extend(commit_coauthors(&commit));
+        commit_authors.push(Author::from_sig(commit.committer()));
         for author in commit_authors {
             let author = mailmap.canonicalize(&author);
             author_map.add(author, oid);
