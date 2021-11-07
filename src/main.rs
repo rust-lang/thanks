@@ -496,10 +496,17 @@ fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::err
     let reviewers = Reviewers::new()?;
 
     let mut versions = get_versions(&repo)?;
+    let last_full_stable = versions
+        .iter()
+        .rfind(|v| v.raw_tag.ends_with(".0"))
+        .unwrap()
+        .version
+        .clone();
+
     versions.push(VersionTag {
         name: String::from("Beta"),
         version: {
-            let mut last = versions.last().unwrap().version.clone();
+            let mut last = last_full_stable.clone();
             last.minor += 1;
             last
         },
@@ -516,8 +523,8 @@ fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::err
         name: String::from("Master"),
         version: {
             // master is plus 1 minor versions off of beta, which we just pushed
-            let mut last = versions.last().unwrap().version.clone();
-            last.minor += 1;
+            let mut last = last_full_stable.clone();
+            last.minor += 2;
             last
         },
         raw_tag: String::from("master"),
