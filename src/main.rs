@@ -454,6 +454,7 @@ fn up_to_release(
     repo: &Repository,
     reviewers: &Reviewers,
     mailmap: &Mailmap,
+    from: Option<&VersionTag>,
     to: &VersionTag,
 ) -> Result<AuthorMap, Box<dyn std::error::Error>> {
     let to_commit = repo.find_commit(to.commit).map_err(|e| {
@@ -468,8 +469,14 @@ fn up_to_release(
     })?;
     let modules = get_submodules(&repo, &to_commit)?;
 
-    let mut author_map = build_author_map(&repo, &reviewers, &mailmap, "", &to.raw_tag)
-        .map_err(|e| ErrorContext(format!("Up to {}", to), e))?;
+    let mut author_map = build_author_map(
+        &repo,
+        &reviewers,
+        &mailmap,
+        from.map(|from| from.raw_tag.as_str()).unwrap_or(""),
+        &to.raw_tag,
+    )
+    .map_err(|e| ErrorContext(format!("Up to {}", to), e))?;
 
     for module in &modules {
         if let Ok(path) = update_repo(&module.repository) {
@@ -553,11 +560,11 @@ fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::err
 
         cache.insert(
             version,
-            up_to_release(&repo, &reviewers, &mailmap, &version)?,
+            up_to_release(&repo, &reviewers, &mailmap, Some(previous), &version)?,
         );
         let previous = match cache.remove(&previous) {
             Some(v) => v,
-            None => up_to_release(&repo, &reviewers, &mailmap, &previous)?,
+            None => up_to_release(&repo, &reviewers, &mailmap, None, &previous)?,
         };
         let current = cache.get(&version).unwrap();
 
