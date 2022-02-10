@@ -36,7 +36,9 @@ impl Reviewers {
         let huonw = a("Huon Wilson", "wilson.huon@gmail.com");
         let jakub = a("Jakub Kądziołka", "kuba@kadziolka.net");
         let joshtriplett = a("Josh Triplett", "josh@joshtriplett.org");
+        let jyn514 = a("Joshua Nelson", "jyn514@gmail.com");
         let kodraus = a("Ashley Mannix", "ashleymannix@live.com.au");
+        let llogiq = a("Andre Bogus", "bogusandre@gmail.com");
         let manishearth = a("Manish Goregaokar", "manishsmail@gmail.com");
         let michaelwoerister = a("Michael Woerister", "michaelwoerister@posteo.net");
         let nikomatsakis = a("Niko Matsakis", "niko@alum.mit.edu");
@@ -93,6 +95,7 @@ impl Reviewers {
         map.insert("bugadani", a("Dániel Buga", "bugadani@gmail.com"));
         map.insert("burntsushi", burntsushi.clone());
         map.insert("BurntSushi", burntsushi.clone());
+        map.insert("BoxyUwU", a("Boxy", "supbscripter@gmail.com"));
         map.insert("c410-f3r", a("Caio", "c410.f3r@gmail.com"));
         map.insert("calebcartwright", a("Caleb Cartwright", "caleb.cartwright@outlook.com"));
         map.insert("camelid", a("Camelid", "camelidcamel@gmail.com"));
@@ -117,6 +120,7 @@ impl Reviewers {
         map.insert("davidtwco", a("David Wood", "david@davidtw.co"));
         map.insert("dingelish", a("Yu Ding", "dingelish@gmail.com"));
         map.insert("djc", a("Dirkjan Ochtman", "dirkjan@ochtman.nl"));
+        map.insert("dns2utf8", a("Stefan Schindler", "dns2utf8@estada.ch"));
         map.insert("dotdash", a("Björn Steinbrink", "bsteinbr@gmail.com"));
         map.insert("dtolnay", a("David Tolnay", "dtolnay@gmail.com"));
         map.insert("durka", a("Alex Durka", "web@alexburka.com"));
@@ -135,6 +139,7 @@ impl Reviewers {
         map.insert("est31", a("est31", "MTest31@outlook.com"));
         map.insert("estebank", a("Esteban Küber", "esteban@kuber.com.ar"));
         map.insert("euclio", a("Andy Russell", "arussell123@gmail.com"));
+        map.insert("fee1-dead", a("Deadbeef", "ent3rm4n@gmail.com"));
         map.insert("fitzgen", a("Nick Fitzgerald", "fitzgen@gmail.com"));
         map.insert("flaper87", a("Flavio Percoco", "flaper87@gmail.com"));
         map.insert("flip1995", a("flip1995", "hello@philkrones.com"));
@@ -166,6 +171,7 @@ impl Reviewers {
         map.insert("jbclements", a("John Clements", "clements@racket-lang.org"));
         map.insert("jdm", a("Josh Matthews", "josh@joshmatthews.net"));
         map.insert("jethrogb", a("Jethro Beekman", "jethro@fortanix.com"));
+        map.insert("jhpratt", a("Jacob Pratt", "jacob@jhpratt.dev"));
         map.insert("JohnTitor", a("Yuki Okushi", "huyuumi.dev@gmail.com"));
         map.insert("jonas-schievink", a("Jonas Schievink", "jonasschievink@gmail.com"));
         map.insert("jonathandturner", a("Jonathan Turner", "jturner@mozilla.com"));
@@ -175,7 +181,8 @@ impl Reviewers {
         map.insert("jseyfried", a("Jeffrey Seyfried", "jeffrey.seyfried@gmail.com"));
         map.insert("jsgf", a("Jeremy Fitzhardinge", "jsgf@fb.com"));
         map.insert("jsha", a("Jacob Hoffman-Andrews", "github@hoffman-andrews.com"));
-        map.insert("jyn514", a("Joshua Nelson", "jyn514@gmail.com"));
+        map.insert("jyn514", jyn514.clone());
+        map.insert("jyn541", jyn514.clone());
         map.insert("kballard", a("Lily Ballard", "lily@sb.org"));
         map.insert("keeperofdakeys", a("Josh Driver", "keeperofdakeys@gmail.com"));
         map.insert("kennytm", a("kennytm", "kennytm@gmail.com"));
@@ -191,7 +198,8 @@ impl Reviewers {
         map.insert("LeSeulArtichaut", a("LeSeulArtichaut", "leseulartichaut@gmail.com"));
         map.insert("LingMan", a("LingMan", "LingMan@users.noreply.github.com"));
         map.insert("ljedrz", a("ljedrz", "ljedrz@gmail.com"));
-        map.insert("llogiq", a("Andre Bogus", "bogusandre@gmail.com"));
+        map.insert("llogiq", llogiq.clone());
+        map.insert("llogic", llogiq.clone());
         map.insert("lnicola", a("Laurențiu Nicola", "lnicola@dend.ro"));
         map.insert("Lokathor", a("Lokathor", "zefria@gmail.com"));
         map.insert("lqd", a("lqd", "remy.rakic+github@gmail.com"));
@@ -209,6 +217,7 @@ impl Reviewers {
         map.insert("Mark-Simulacrum", simulacrum.clone());
         map.insert("Mark-Simulacru", simulacrum.clone());
         map.insert("mark-simulcrum", simulacrum.clone());
+        map.insert("MarkSimulacrum", simulacrum.clone());
         map.insert("marmeladema", a("marmeladema", "xademax@gmail.com"));
         map.insert("mati865", a("Mateusz Mikuła", "mati865@gmail.com"));
         map.insert("matklad", a("Aleksey Kladov", "aleksey.kladov@gmail.com"));
@@ -227,6 +236,7 @@ impl Reviewers {
         map.insert("mw", michaelwoerister.clone());
         map.insert("Nadrieril", a("Nadrieril", "nadrieril+git@gmail.com"));
         map.insert("nagisa", a("Simonas Kazlauskas", "git@kazlauskas.me"));
+        map.insert("nbdd0121", a("Gary Guo", "gary@garyguo.net"));
         map.insert("ncr", nrc.clone());
         map.insert("nellshamrell", a("Nell Shamrell-Harrington", "nellshamrell@gmail.com"));
         map.insert("Nemo157", a("Wim Looman", "git@nemo157.com"));
@@ -297,6 +307,7 @@ impl Reviewers {
         map.insert("wesleywiser", a("Wesley Wiser", "wwiser@gmail.com"));
         map.insert("withouboats", withoutboats.clone());
         map.insert("withoutboats", withoutboats.clone());
+        map.insert("Wodann", a("Wodann", "wodannson@gmail.com"));
         map.insert("workingjubilee", a("Jubilee Young", "workingjubilee@gmail.com"));
         map.insert("wycats", a("Yehuda Katz", "wycats@gmail.com"));
         map.insert("XAMPPRocky", a("Erin Power", "xampprocky@gmail.com"));
