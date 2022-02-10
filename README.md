@@ -2,8 +2,8 @@
 
 [![Build Status][status-img]][status]
 
-[status-img]: https://travis-ci.com/rust-lang/thanks.svg?branch=master
-[status]: https://travis-ci.com/rust-lang/thanks
+[status-img]: https://github.com/rust-lang/thanks/actions/workflows/ci.yml/badge.svg?branch=master
+[status]: https://github.com/rust-lang/thanks/actions/workflows/ci.yml
 
 This is a static site generator showing people who have contributed to Rust.
 
