@@ -111,6 +111,7 @@ impl Reviewers {
         map.insert("Cldfire", a("Jarek Samic", "cldfire3@gmail.com"));
         map.insert("cmr", a("Corey Richardson", "corey@octayn.net"));
         map.insert("collin5", a("Collins Abitekaniza", "abtcolns@gmail.com"));
+        map.insert("compiler-errors", a("Michael Goulet", "michael@errs.io"));
         map.insert("CraftSpider", a("Rune Tynan", "runetynan@gmail.com"));
         map.insert("cramert", cramertj.clone());
         map.insert("cramertj", cramertj.clone());
