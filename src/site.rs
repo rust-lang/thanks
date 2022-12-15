@@ -150,7 +150,7 @@ fn author_map_to_scores(map: &AuthorMap) -> Vec<Entry> {
             commits: commits,
         })
         .collect::<Vec<_>>();
-    scores.sort_by_key(|e| std::cmp::Reverse((e.commits, e.author.clone())));
+    scores.sort_by_key(|e| (std::cmp::Reverse(e.commits), e.author.clone()));
     let mut last_rank = 1;
     let mut ranked_at_current = 0;
     let mut last_commits = usize::max_value();
