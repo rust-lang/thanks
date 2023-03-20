@@ -61,7 +61,7 @@ impl Reviewers {
         map.insert("abonander", a("Austin Bonander", "austin.bonander@gmail.com"));
         map.insert("achrichto", alexcrichton.clone());
         map.insert("acrichto", alexcrichton.clone());
-        map.insert("aDotInTheVoid", a("Nixon Enraght-Moony", "nixon.emoony@gmail.com"));
+        map.insert("aDotInTheVoid", a("Alona Enraght-Moony", "code@alona.page"));
         map.insert("aidanhs", a("Aidan Hobson Sayers", "aidanhs@cantab.net"));
         map.insert("aleksator", a("Alex Tokarev", "aleksator@gmail.com"));
         map.insert("alexchrichton", alexcrichton.clone());
