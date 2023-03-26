@@ -63,6 +63,7 @@ impl Reviewers {
         map.insert("acrichto", alexcrichton.clone());
         map.insert("aDotInTheVoid", a("Alona Enraght-Moony", "code@alona.page"));
         map.insert("aidanhs", a("Aidan Hobson Sayers", "aidanhs@cantab.net"));
+        map.insert("albertlarsan68", a("Albert Larsan", "albert.larsan@gmail.com"));
         map.insert("aleksator", a("Alex Tokarev", "aleksator@gmail.com"));
         map.insert("alexchrichton", alexcrichton.clone());
         map.insert("alexcirchton", alexcrichton.clone());
