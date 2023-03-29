@@ -321,12 +321,11 @@ fn parse_bors_reviewer(
             .filter(|r| !r.is_empty())
             .filter(|r| *r != "<try>")
             .inspect(|r| {
-                if !r
-                    .chars()
-                    .all(|c| c.is_alphabetic() || c.is_digit(10) || c == '-' || c == '_')
-                {
-                    panic!(
-                        "to_author for {} contained non-alphabetic characters: {:?}",
+                if !r.chars().all(|c| {
+                    c.is_alphabetic() || c.is_digit(10) || c == '-' || c == '_' || c == '='
+                }) {
+                    eprintln!(
+                        "warning: to_author for {} contained non-alphabetic characters: {:?}",
                         commit.id(),
                         r
                     );
