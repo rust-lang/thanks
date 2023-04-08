@@ -149,14 +149,19 @@ impl Reviewers {
         insert("arielb", alias("arielb1"));
         insert("bson", alias("brson"));
         insert("cramert", alias("cramertj"));
+        insert("cjgillo", alias("cjgillot"));
         insert("ecstaticmorse", alias("ecstatic-morse"));
+        insert("ekuber", alias("estebank"));
         insert("frewsxcvx", alias("frewsxcv"));
         insert("frewsxcxv", alias("frewsxcv"));
         insert("gankro", alias("gankra"));
         insert("guilliamegomez", alias("guillaumegomez"));
         insert("guilliaumegomez", alias("guillaumegomez"));
+        insert("guillaumegomezp", alias("guillaumegomez"));
         insert("huon", alias("huonw"));
         insert("imperio", alias("guillaumegomez"));
+        insert("icnr", alias("lcnr"));
+        insert("jackh276", alias("jackh726"));
         insert("jakub-", alias("jakub"));
         insert("jonathandturner", alias("jntrnr"));
         insert("jyn541", alias("jyn514"));
@@ -172,6 +177,8 @@ impl Reviewers {
         insert("nmatsakis", alias("nikomatsakis"));
         insert("obi-obk", alias("oli-obk"));
         insert("oli", alias("oli-obk"));
+        insert("oli-bok", alias("oli-obk"));
+        insert("oli-obj", alias("oli-obk"));
         insert("petrochencov", alias("petrochenkov"));
         insert("pwalton", alias("pcwalton"));
         insert("quietmisdreqvus", alias("quietmisdreavus"));
@@ -179,6 +186,7 @@ impl Reviewers {
         insert("simulacrum", alias("mark-simulacrum"));
         insert("steveklanik", alias("steveklabnik"));
         insert("steveklbanik", alias("steveklabnik"));
+        insert("wesleyweiser", alias("wesleywiser"));
         insert("withouboats", alias("withoutboats"));
         insert("yaahallo", alias("yaahc"));
 
