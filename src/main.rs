@@ -596,7 +596,6 @@ fn main() {
 
 #[derive(Debug)]
 struct Submodule {
-    path: PathBuf,
     commit: Oid,
     // url
     repository: String,
@@ -631,7 +630,6 @@ fn get_submodules(
         };
         assert_eq!(entry.kind().unwrap(), git2::ObjectType::Commit);
         submodules.push(Submodule {
-            path: path.to_owned(),
             commit: entry.id(),
             repository: url.to_owned(),
         });
