@@ -11,80 +11,71 @@ pub struct Reviewers {
 impl Reviewers {
     #[rustfmt::skip]
     pub fn new() -> Result<Self, Box<dyn std::error::Error>> {
-        let mut map = HashMap::new();
+        let mut map: HashMap<String, Author> = HashMap::new();
         // FIXME: somehow dynamically generate this list. For now, it's small enough that
         // maintaining it here is not too much of a hardship.
 
-        fn a(name: &str, email: &str) -> Author {
-            Author {
+        enum AddKind {
+            New(Author),
+            Alias(&'static str),
+        }
+
+        fn a(name: &str, email: &str) -> AddKind {
+            AddKind::New(Author {
                 name: name.into(),
                 email: email.into(),
-            }
+            })
+        }
+
+        fn alias(name: &'static str) -> AddKind {
+            AddKind::Alias(name)
         }
 
         let team_people = get_team_people()?;
         for (username, person) in team_people.people {
             if let Some(email) = person.email {
-                map.insert(username.to_lowercase(), a(&person.name, &email));
+                map.insert(username.to_lowercase(), Author { name: person.name, email});
             }
         }
 
-
-        let alexcrichton = a("Alex Crichton", "alex@alexcrichton.com");
-        let amanieu = a("Amanieu d'Antras", "amanieu@gmail.com");
-        let arielb1 = a("Ariel Ben-Yehuda", "ariel.byd@gmail.com");
-        let brson = a("Brian Anderson", "andersrb@gmail.com");
-        let cramertj = a("Taylor Cramer", "cramertj@google.com");
-        let ecstaticmorse = a("Dylan MacKenzie", "ecstaticmorse@gmail.com");
-        let frewsxcv = a("Corey Farwell", "coreyf@rwell.org");
-        let guillaumegomez = a("Guillaume Gomez", "guillaume1.gomez@gmail.com");
-        let hanna_kruppe = a("Hanna Kruppe", "hanna.kruppe@gmail.com");
-        let huonw = a("Huon Wilson", "wilson.huon@gmail.com");
-        let jakub = a("Jakub Kądziołka", "kuba@kadziolka.net");
-        let jyn514 = a("Joshua Nelson", "jyn514@gmail.com");
-        let llogiq = a("Andre Bogus", "bogusandre@gmail.com");
-        let manishearth = a("Manish Goregaokar", "manishsmail@gmail.com");
-        let michaelwoerister = a("Michael Woerister", "michaelwoerister@posteo.net");
-        let nikomatsakis = a("Niko Matsakis", "niko@alum.mit.edu");
-        let nrc = a("Nick Cameron", "ncameron@mozilla.com");
-        let oli_obk = a("Oliver Scherer", "github35764891676564198441@oli-obk.de");
-        let pcwalton = a("Patrick Walton", "pcwalton@mimiga.net");
-        let petrochenkov = a("Vadim Petrochenkov", "vadim.petrochenkov@gmail.com");
-        let quietmisdreavus = a("QuietMisdreavus", "grey@quietmisdreavus.net");
-        let simulacrum = a("Mark Rousskov", "mark.simulacrum@gmail.com");
-        let steveklabnik = a("Steve Klabnik", "steve@steveklabnik.com");
-        let withoutboats = a("Without Boats", "boats@mozilla.com");
-        let yaahc = a("Jane Lusby", "jlusby42@gmail.com");
-
-        let mut insert = |name: &str, author| {
-            if map.insert(name.into(), author).is_some() {
-                println!("{name}");
+        let mut insert = |name: &str, author: AddKind| {
+            match author {
+                AddKind::New(author) => if map.insert(name.into(), author).is_some() {
+                    println!("{name}");
+                },
+                AddKind::Alias(aliased) => {
+                    if let Some(author) = map.get(aliased).cloned() {
+                        map.insert(name.into(), author);
+                    } else {
+                        eprintln!("Cannot alias non-existent author: {aliased}")
+                    }
+                }
             }
         };
 
         insert("aaronepower", a("Erin Power", "xampprocky@gmail.com"));
         insert("abonander", a("Austin Bonander", "austin.bonander@gmail.com"));
-        insert("achrichto", alexcrichton.clone());
-        insert("acrichto", alexcrichton.clone());
+        insert("achrichto", alias("alexcrichton"));
+        insert("acrichto", alias("alexcrichton"));
         insert("aleksator", a("Alex Tokarev", "aleksator@gmail.com"));
-        insert("alexchrichton", alexcrichton.clone());
-        insert("alexcirchton", alexcrichton.clone());
-        insert("alexcrhiton", alexcrichton.clone());
-        insert("alexcrichto", alexcrichton.clone());
-        insert("alexcricthon", alexcrichton.clone());
-        insert("alexcricton", alexcrichton.clone());
-        insert("alexcritchton", alexcrichton.clone());
+        insert("alexchrichton", alias("alexcrichton"));
+        insert("alexcirchton", alias("alexcrichton"));
+        insert("alexcrhiton", alias("alexcrichton"));
+        insert("alexcrichto", alias("alexcrichton"));
+        insert("alexcricthon", alias("alexcrichton"));
+        insert("alexcricton", alias("alexcrichton"));
+        insert("alexcritchton", alias("alexcrichton"));
         insert("alexreg", a("Alexander Regueiro", "alexreg@me.com"));
-        insert("amaneiu", amanieu.clone());
+        insert("amaneiu", alias("amanieu"));
         insert("anasazi", a("Eric Reed", "ecreed@cs.washington.edu"));
         insert("apasel422", a("Andrew Paseltiner", "apaseltiner@gmail.com"));
-        insert("arielb", arielb1.clone());
+        insert("arielb", alias("arielb1"));
         insert("arthurprs", a("arthurprs", "arthurprs@gmail.com"));
         insert("bblum", a("Ben Blum", "bblum@andrew.cmu.edu"));
         insert("bjz", a("Brendan Zabarauskas", "bjzaba@yahoo.com.au"));
         insert("bluss", a("Ulrik Sverdrup", "bluss@users.noreply.github.com"));
-        insert("brson", brson.clone());
-        insert("bson", brson.clone());
+        insert("brson", a("Brian Anderson", "andersrb@gmail.com"));
+        insert("bson", alias("brson"));
         insert("bugadani", a("Dániel Buga", "bugadani@gmail.com"));
         insert("c410-f3r", a("Caio", "c410.f3r@gmail.com"));
         insert("catamorphism", a("Tim Chevalier", "chevalier@alum.wellesley.edu"));
@@ -93,33 +84,33 @@ impl Reviewers {
         insert("cldfire", a("Jarek Samic", "cldfire3@gmail.com"));
         insert("cmr", a("Corey Richardson", "corey@octayn.net"));
         insert("collin5", a("Collins Abitekaniza", "abtcolns@gmail.com"));
-        insert("cramert", cramertj.clone());
+        insert("cramert", alias("cramertj"));
         insert("csmoe", a("csmoe", "csmoe@msn.com"));
         insert("dingelish", a("Yu Ding", "dingelish@gmail.com"));
         insert("djc", a("Dirkjan Ochtman", "dirkjan@ochtman.nl"));
         insert("dns2utf8", a("Stefan Schindler", "dns2utf8@estada.ch"));
         insert("durka", a("Alex Durka", "web@alexburka.com"));
-        insert("ecstaticmorse", ecstaticmorse.clone());
+        insert("ecstaticmorse", alias("ecstatic-morse"));
         insert("eerden", a("Ercan Erden", "ercerden@gmail.com"));
         insert("elichai", a("Elichai Turkel", "elichai.turkel@gmail.com"));
         insert("est31", a("est31", "MTest31@outlook.com"));
         insert("euclio", a("Andy Russell", "arussell123@gmail.com"));
         insert("flaper87", a("Flavio Percoco", "flaper87@gmail.com"));
-        insert("frewsxcvx", frewsxcv.clone());
-        insert("frewsxcxv", frewsxcv.clone());
+        insert("frewsxcvx", alias("frewsxcv"));
+        insert("frewsxcxv", alias("frewsxcv"));
         insert("gankro", a("Alexis Beingessner", "a.beingessner@gmail.com"));
         insert("gereeter", a("Jonathan S", "gereeter+code@gmail.com"));
         insert("gnzlbg", a("gnzlbg", "gonzalobg88@gmail.com"));
         insert("graydon", a("Graydon Hoare", "graydon@pobox.com"));
-        insert("guilliamegomez", guillaumegomez.clone());
-        insert("guilliaumegomez", guillaumegomez.clone());
-        insert("hanna-kruppe", hanna_kruppe.clone());
+        insert("guilliamegomez", alias("guillaumegomez"));
+        insert("guilliaumegomez", alias("guillaumegomez"));
+        insert("hanna-kruppe", a("Hanna Kruppe", "hanna.kruppe@gmail.com"));
         insert("hellow554", a("Marcel Hellwig", "github@cookiesoft.de"));
-        insert("huon", huonw.clone());
+        insert("huon", alias("huonw"));
         insert("ilyoan", a("ILYONG CHO", "ilyoan@gmail.com"));
-        insert("imperio", guillaumegomez.clone());
-        insert("jakub", jakub.clone());
-        insert("jakub-", jakub.clone());
+        insert("imperio", alias("guillaumegomez"));
+        insert("jakub", a("Jakub Kądziołka", "kuba@kadziolka.net"));
+        insert("jakub-", alias("jakub"));
         insert("jbclements", a("John Clements", "clements@racket-lang.org"));
         insert("jdm", a("Josh Matthews", "josh@joshmatthews.net"));
         insert("jethrogb", a("Jethro Beekman", "jethro@fortanix.com"));
@@ -127,21 +118,21 @@ impl Reviewers {
         insert("jroesch", a("Jared Roesch", "roeschinc@gmail.com"));
         insert("jsgf", a("Jeremy Fitzhardinge", "jsgf@fb.com"));
         insert("jyn", a("Joshua Nelson", "rust@jyn.dev"));
-        insert("jyn541", jyn514.clone());
+        insert("jyn541", alias("jyn514"));
         insert("kballard", a("Lily Ballard", "lily@sb.org"));
         insert("keeperofdakeys", a("Josh Driver", "keeperofdakeys@gmail.com"));
         insert("kmcallister", a("Keegan McAllister", "mcallister.keegan@gmail.com"));
         insert("kornelski", a("Kornel", "kornel@geekhood.net"));
         insert("lingman", a("LingMan", "LingMan@users.noreply.github.com"));
         insert("ljedrz", a("ljedrz", "ljedrz@gmail.com"));
-        insert("llogic", llogiq.clone());
+        insert("llogic", alias("llogiq"));
         insert("lukaramu", a("lukaramu", "lukaramu@users.noreply.github.com"));
         insert("lzutao", a("Lzu Tao", "taolzu@gmail.com"));
         insert("malbarbo", a("Marco A L Barbosa", "malbarbo@gmail.com"));
-        insert("manisheart", manishearth.clone());
-        insert("mark-simulacru", simulacrum.clone());
-        insert("mark-simulcrum", simulacrum.clone());
-        insert("marksimulacrum", simulacrum.clone());
+        insert("manisheart", alias("manishearth"));
+        insert("mark-simulacru", alias("mark-simulacrum"));
+        insert("mark-simulcrum", alias("mark-simulacrum"));
+        insert("marksimulacrum", alias("mark-simulacrum"));
         insert("marmeladema", a("marmeladema", "xademax@gmail.com"));
         insert("mati865", a("Mateusz Mikuła", "mati865@gmail.com"));
         insert("max-heller", a("max-heller", "max.a.heller@gmail.com"));
@@ -150,29 +141,29 @@ impl Reviewers {
         insert("mikeyhew", a("Michael Hewson", "michael@michaelhewson.ca"));
         insert("mjbshaw", a("Michael Bradshaw", "mjbshaw@google.com"));
         insert("msullivan", a("Michael J. Sullivan", "sully@msully.net"));
-        insert("mw", michaelwoerister.clone());
-        insert("ncr", nrc.clone());
-        insert("nick29581", nrc.clone());
-        insert("nmatsakis", nikomatsakis.clone());
-        insert("obi-obk", oli_obk.clone());
-        insert("oli", oli_obk.clone());
+        insert("mw", alias("michaelwoerister"));
+        insert("ncr", alias("nrc"));
+        insert("nick29581", alias("nrc"));
+        insert("nmatsakis", alias("nikomatsakis"));
+        insert("obi-obk", alias("oli-obk"));
+        insert("oli", alias("oli-obk"));
         insert("pczarn", a("Piotr Czarnecki", "pioczarn@gmail.com"));
         insert("petrhosek", a("Petr Hosek", "phosek@gmail.com"));
-        insert("petrochencov", petrochenkov.clone());
+        insert("petrochencov", alias("petrochenkov"));
         insert("pickfire", a("Ivan Tham", "pickfire@riseup.net"));
         insert("poliorcetics", a("Alexis Bourget", "alexis.bourget@gmail.com"));
-        insert("pwalton", pcwalton.clone());
-        insert("quietmisdreqvus", quietmisdreavus.clone());
+        insert("pwalton", alias("pcwalton"));
+        insert("quietmisdreqvus", alias("quietmisdreavus"));
         insert("raoulstrackx", a("Raoul Strackx", "raoul.strackx@fortanix.com"));
         insert("rcvalle", a("Ramon de C Valle", "als"));
         insert("retep998", a("Peter Atashian", "retep998@gmail.com"));
         insert("richkadel", a("Rich Kadel", "richkadel@google.com"));
-        insert("rkruppe", hanna_kruppe.clone());
+        insert("rkruppe", alias("hanna-kruppe"));
         insert("sanxiyn", a("Seo Sanghyeon", "sanxiyn@gmail.com"));
         insert("seanmonstar", a("Sean McArthur", "sean@seanmonstar.com"));
-        insert("simulacrum", simulacrum.clone());
-        insert("steveklanik", steveklabnik.clone());
-        insert("steveklbanik", steveklabnik.clone());
+        insert("simulacrum", alias("mark-simulacrum"));
+        insert("steveklanik", alias("steveklabnik"));
+        insert("steveklbanik", alias("steveklabnik"));
         insert("stjepang", a("Stjepan Glavina", "stjepang@gmail.com"));
         insert("susurrus", a("Bryant Mairs", "bryant@mai.rs"));
         insert("swatinem", a("Arpad Borsos", "swatinem@swatinem.de"));
@@ -181,9 +172,9 @@ impl Reviewers {
         insert("tromey", a("Tom Tromey", "tom@tromey.com"));
         insert("vadimcn", a("Vadim Chugunov", "vadimcn@gmail.com"));
         insert("willcrichton", a("Will Crichton", "wcrichto@cs.stanford.edu"));
-        insert("withouboats", withoutboats.clone());
+        insert("withouboats", alias("withoutboats"));
         insert("xfix", a("Konrad Borowski", "konrad@borowski.pw"));
-        insert("yaahallo", yaahc.clone());
+        insert("yaahallo", alias("yaahc"));
         insert("yichoi", a("Young-il Choi", "duddlf.choi@samsung.com"));
         insert("y-nak", a("Yoshitomo Nakanishi", "yurayura.rounin.3@gmail.com"));
         insert("yurydelendik", a("Yury Delendik", "ydelendik@mozilla.com"));
