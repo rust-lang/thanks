@@ -30,10 +30,7 @@ impl ToAuthor for Author {
             .email()
             .unwrap_or_else(|| panic!("no email for {}", sig));
 
-        Author {
-            name: name.to_string(),
-            email: email.to_string(),
-        }
+        Author::new(name.to_string(), email.to_string())
     }
 }
 
@@ -258,10 +255,10 @@ fn commit_coauthors(commit: &Commit) -> Vec<Author> {
         for line in msg.lines().rev() {
             if line.starts_with("Co-authored-by") {
                 if let Some(caps) = RE.captures(line) {
-                    coauthors.push(Author {
-                        name: caps["name"].to_string(),
-                        email: caps["email"].to_string(),
-                    });
+                    coauthors.push(Author::new(
+                        caps["name"].to_string(),
+                        caps["email"].to_string(),
+                    ));
                 }
             }
         }
@@ -446,7 +443,7 @@ fn mailmap_from_repo(repo: &git2::Repository) -> Result<Mailmap, Box<dyn std::er
             .content()
             .into(),
     )?;
-    Mailmap::from_string(file)
+    Mailmap::from_string(std::fs::read_to_string("meowlmap").unwrap())
 }
 
 fn up_to_release(
@@ -596,7 +593,6 @@ fn main() {
 
 #[derive(Debug)]
 struct Submodule {
-    path: PathBuf,
     commit: Oid,
     // url
     repository: String,
@@ -631,7 +627,6 @@ fn get_submodules(
         };
         assert_eq!(entry.kind().unwrap(), git2::ObjectType::Commit);
         submodules.push(Submodule {
-            path: path.to_owned(),
             commit: entry.id(),
             repository: url.to_owned(),
         });
