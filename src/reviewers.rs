@@ -34,7 +34,7 @@ impl Reviewers {
         let team_people = get_team_people()?;
         for (username, person) in team_people.people {
             if let Some(email) = person.email {
-                map.insert(username.to_lowercase(), Author { name: person.name, email});
+                map.insert(username.to_lowercase(), Author::new(person.name, email));
             }
         }
 
