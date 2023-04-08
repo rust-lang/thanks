@@ -57,7 +57,9 @@ impl Reviewers {
         let yaahc = a("Jane Lusby", "jlusby42@gmail.com");
 
         let mut insert = |name: &str, author| {
-            map.insert(name.into(), author);
+            if map.insert(name.into(), author).is_some() {
+                println!("{name}");
+            }
         };
 
         insert("aaron1011", a("Aaron Hill", "aa1ronham@gmail.com"));
