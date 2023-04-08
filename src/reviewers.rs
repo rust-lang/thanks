@@ -41,13 +41,13 @@ impl Reviewers {
         let mut insert = |name: &str, author: AddKind| {
             match author {
                 AddKind::New(author) => if map.insert(name.into(), author).is_some() {
-                    println!("{name}");
+                    eprintln!("Reviewer is already pulled in from rust-lang/team: {name}");
                 },
                 AddKind::Alias(aliased) => {
                     if let Some(author) = map.get(aliased).cloned() {
                         map.insert(name.into(), author);
                     } else {
-                        eprintln!("Cannot alias non-existent author: {aliased}")
+                        eprintln!("Trying to alias reviewer that doesn't exist: {aliased}")
                     }
                 }
             }
