@@ -82,7 +82,6 @@ impl Reviewers {
         insert("est31", a("est31", "MTest31@outlook.com"));
         insert("euclio", a("Andy Russell", "arussell123@gmail.com"));
         insert("flaper87", a("Flavio Percoco", "flaper87@gmail.com"));
-        insert("gankro", a("Alexis Beingessner", "a.beingessner@gmail.com"));
         insert("gereeter", a("Jonathan S", "gereeter+code@gmail.com"));
         insert("gnzlbg", a("gnzlbg", "gonzalobg88@gmail.com"));
         insert("graydon", a("Graydon Hoare", "graydon@pobox.com"));
@@ -93,10 +92,8 @@ impl Reviewers {
         insert("jbclements", a("John Clements", "clements@racket-lang.org"));
         insert("jdm", a("Josh Matthews", "josh@joshmatthews.net"));
         insert("jethrogb", a("Jethro Beekman", "jethro@fortanix.com"));
-        insert("jonathandturner", a("Jonathan Turner", "jturner@mozilla.com"));
         insert("jroesch", a("Jared Roesch", "roeschinc@gmail.com"));
         insert("jsgf", a("Jeremy Fitzhardinge", "jsgf@fb.com"));
-        insert("jyn", a("Joshua Nelson", "rust@jyn.dev"));
         insert("kballard", a("Lily Ballard", "lily@sb.org"));
         insert("keeperofdakeys", a("Josh Driver", "keeperofdakeys@gmail.com"));
         insert("kmcallister", a("Keegan McAllister", "mcallister.keegan@gmail.com"));
@@ -119,7 +116,7 @@ impl Reviewers {
         insert("pickfire", a("Ivan Tham", "pickfire@riseup.net"));
         insert("poliorcetics", a("Alexis Bourget", "alexis.bourget@gmail.com"));
         insert("raoulstrackx", a("Raoul Strackx", "raoul.strackx@fortanix.com"));
-        insert("rcvalle", a("Ramon de C Valle", "als"));
+        insert("rcvalle", a("Ramon de C Valle", "rcvalle@users.noreply.github.com"));
         insert("retep998", a("Peter Atashian", "retep998@gmail.com"));
         insert("richkadel", a("Rich Kadel", "richkadel@google.com"));
         insert("sanxiyn", a("Seo Sanghyeon", "sanxiyn@gmail.com"));
@@ -155,12 +152,15 @@ impl Reviewers {
         insert("ecstaticmorse", alias("ecstatic-morse"));
         insert("frewsxcvx", alias("frewsxcv"));
         insert("frewsxcxv", alias("frewsxcv"));
+        insert("gankro", alias("gankra"));
         insert("guilliamegomez", alias("guillaumegomez"));
         insert("guilliaumegomez", alias("guillaumegomez"));
         insert("huon", alias("huonw"));
         insert("imperio", alias("guillaumegomez"));
         insert("jakub-", alias("jakub"));
+        insert("jonathandturner", alias("jntrnr"));
         insert("jyn541", alias("jyn514"));
+        insert("jyn", alias("jyn514"));
         insert("llogic", alias("llogiq"));
         insert("manisheart", alias("manishearth"));
         insert("mark-simulacru", alias("mark-simulacrum"));
