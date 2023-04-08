@@ -443,7 +443,7 @@ fn mailmap_from_repo(repo: &git2::Repository) -> Result<Mailmap, Box<dyn std::er
             .content()
             .into(),
     )?;
-    Mailmap::from_string(file)
+    Mailmap::from_string(std::fs::read_to_string("meowlmap").unwrap())
 }
 
 fn up_to_release(
