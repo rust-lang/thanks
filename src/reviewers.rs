@@ -240,7 +240,7 @@ impl Reviewers {
         map.insert("nick29581", nrc.clone());
         map.insert("nikic", a("Nikita Popov", "nikita.ppv@gmail.com"));
         map.insert("nikomatsakis", nikomatsakis.clone());
-        map.insert("nilstrieb", a("nils", "nilstrieb@gmail.com"));
+        map.insert("nilstrieb", a("Nilstrieb", "48135649+Nilstrieb@users.noreply.github.com"));
         map.insert("nmatsakis", nikomatsakis.clone());
         map.insert("nnethercote", a("Nicholas Nethercote", "nnethercote@mozilla.com"));
         map.insert("notriddle", a("Michael Howell", "michael@notriddle.com"));
