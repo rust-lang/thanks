@@ -1,3 +1,4 @@
+use crate::removed::Removed;
 use crate::{AuthorMap, VersionTag};
 use handlebars::Handlebars;
 use std::collections::BTreeMap;
@@ -146,7 +147,11 @@ fn author_map_to_scores(map: &AuthorMap) -> Vec<Entry> {
         .iter()
         .map(|(author, commits)| Entry {
             rank: 0,
-            author: author.name.clone(),
+            author: if author.is_removed() {
+                "[removed]".to_string()
+            } else {
+                author.name.clone()
+            },
             commits: commits,
         })
         .collect::<Vec<_>>();

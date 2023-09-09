@@ -14,6 +14,7 @@ use reviewers::Reviewers;
 
 mod config;
 mod error;
+mod removed;
 mod reviewers;
 mod site;
 
