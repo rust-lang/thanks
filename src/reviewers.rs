@@ -80,6 +80,7 @@ impl Reviewers {
         map.insert("b-naber", a("b-naber", "b_naber@gmx.de"));
         map.insert("badboy", a("Jan-Erik Rediger", "janerik@fnordig.de"));
         map.insert("bblum", a("Ben Blum", "bblum@andrew.cmu.edu"));
+        map.insert("blyxyas", a("blyxyas", "blyxyas@gmail.com"));
         map.insert("bjorn3", a("bjorn3", "bjorn3@users.noreply.github.com"));
         map.insert("bjz", a("Brendan Zabarauskas", "bjzaba@yahoo.com.au"));
         map.insert("bkoropoff", a("Brian Koropoff", "bkoropoff@gmail.com"));
@@ -99,6 +100,7 @@ impl Reviewers {
         map.insert("catamorphism", a("Tim Chevalier", "chevalier@alum.wellesley.edu"));
         map.insert("cdirkx", a("Christiaan Dirkx", "christiaan@dirkx.email"));
         map.insert("centril", a("Mazdak Farrokhzad", "twingoow@gmail.com"));
+        map.insert("centri3", a("Catherine Flores", "catherine.3.flores@gmail.com"));
         map.insert("chris", a("Chris Morgan", "me@chrismorgan.info"));
         map.insert("chrisdenton", a("Chris Denton", "christophersdenton@gmail.com"));
         map.insert("cjgillot", a("Camille GILLOT", "gillot.camille@gmail.com"));
