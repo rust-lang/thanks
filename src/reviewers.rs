@@ -251,7 +251,7 @@ impl Reviewers {
         map.insert("oli-obk", oli_obk.clone());
         map.insert("oli", oli_obk.clone());
         map.insert("ollie27", a("Oliver Middleton", "olliemail27@gmail.com"));
-        map.insert("ozkanonur", a("Onur Özkan", "contact@onurozkan.dev"));
+        map.insert("onur-ozkan", a("Onur Özkan", "contact@onurozkan.dev"));
         map.insert("pcwalton", pcwalton.clone());
         map.insert("pczarn", a("Piotr Czarnecki", "pioczarn@gmail.com"));
         map.insert("peschkaj", a("Jeremiah Peschka", "jeremiah.peschka@gmail.com"));
