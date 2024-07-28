@@ -36,6 +36,7 @@ impl Reviewers {
         let manishearth = a("Manish Goregaokar", "manishsmail@gmail.com");
         let michaelwoerister = a("Michael Woerister", "michaelwoerister@posteo.net");
         let nikomatsakis = a("Niko Matsakis", "niko@alum.mit.edu");
+        let nora = a("Noratrieb", "48135649+Noratrieb@users.noreply.github.com");
         let nrc = a("Nick Cameron", "ncameron@mozilla.com");
         let oli_obk = a("Oliver Scherer", "github35764891676564198441@oli-obk.de");
         let pcwalton = a("Patrick Walton", "pcwalton@mimiga.net");
@@ -242,10 +243,11 @@ impl Reviewers {
         map.insert("nick29581", nrc.clone());
         map.insert("nikic", a("Nikita Popov", "nikita.ppv@gmail.com"));
         map.insert("nikomatsakis", nikomatsakis.clone());
-        map.insert("nilstrieb", a("Nilstrieb", "48135649+Nilstrieb@users.noreply.github.com"));
+        map.insert("nilstrieb", nora.clone());
         map.insert("nmatsakis", nikomatsakis.clone());
         map.insert("nnethercote", a("Nicholas Nethercote", "nnethercote@mozilla.com"));
         map.insert("notriddle", a("Michael Howell", "michael@notriddle.com"));
+        map.insert("noratrieb", nora.clone());
         map.insert("nrc", nrc.clone());
         map.insert("obi-obk", oli_obk.clone());
         map.insert("oli-obk", oli_obk.clone());
