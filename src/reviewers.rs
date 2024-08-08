@@ -297,6 +297,7 @@ impl Reviewers {
         map.insert("susurrus", a("Bryant Mairs", "bryant@mai.rs"));
         map.insert("swatinem", a("Arpad Borsos", "swatinem@swatinem.de"));
         map.insert("tako8ki", a("Takayuki Maeda", "takoyaki0316@gmail.com"));
+        map.insert("tgross35", a("Trevor Gross", "tmgross@umich.edu"));
         map.insert("the8472", a("The8472", "git@infinite-source.de"));
         map.insert("thestinger", a("Daniel Micay", "danielmicay@gmail.com"));
         map.insert("thomasdezeeuw", a("Thomas de Zeeu", "thomasdezeeuw@gmail.com"));
