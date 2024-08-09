@@ -308,6 +308,7 @@ impl Reviewers {
         map.insert("tmiasko", a("Tomasz Miąsko", "tomasz.miasko@gmail.com"));
         map.insert("topecongiro", a("topecongiro", "seuchida@gmail.com"));
         map.insert("tromey", a("Tom Tromey", "tom@tromey.com"));
+        map.insert("urgau", a("Urgau", "urgau@numericable.fr"));
         map.insert("vadimcn", a("Vadim Chugunov", "vadimcn@gmail.com"));
         map.insert("varkor", a("varkor", "github@varkor.com"));
         map.insert("veykril", a("Lukas Wirth", "lukastw97@gmail.com"));
