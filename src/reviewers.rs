@@ -15,8 +15,8 @@ impl Reviewers {
 
         fn a(name: &str, email: &str) -> Author {
             Author {
-                name: name.into(),
-                email: email.into(),
+                name: name.to_string().into(),
+                email: email.to_string().into(),
             }
         }
 

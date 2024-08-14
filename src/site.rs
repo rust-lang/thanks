@@ -146,7 +146,7 @@ fn author_map_to_scores(map: &AuthorMap) -> Vec<Entry> {
         .iter()
         .map(|(author, commits)| Entry {
             rank: 0,
-            author: author.name.clone(),
+            author: author.name.to_string(),
             commits: commits,
         })
         .collect::<Vec<_>>();
