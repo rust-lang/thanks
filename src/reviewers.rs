@@ -43,6 +43,7 @@ impl Reviewers {
         let petrochenkov = a("Vadim Petrochenkov", "vadim.petrochenkov@gmail.com");
         let quietmisdreavus = a("QuietMisdreavus", "grey@quietmisdreavus.net");
         let simulacrum = a("Mark Rousskov", "mark.simulacrum@gmail.com");
+        let sophiajt = a("Sophia June Turner", "jturner@mozilla.com");
         let steveklabnik = a("Steve Klabnik", "steve@steveklabnik.com");
         let withoutboats = a("Without Boats", "boats@mozilla.com");
         let yaahc = a("Jane Lusby", "jlusby42@gmail.com");
@@ -178,7 +179,7 @@ impl Reviewers {
         map.insert("jhpratt", a("Jacob Pratt", "jacob@jhpratt.dev"));
         map.insert("johntitor", a("Yuki Okushi", "huyuumi.dev@gmail.com"));
         map.insert("jonas-schievink", a("Jonas Schievink", "jonasschievink@gmail.com"));
-        map.insert("jonathandturner", a("Jonathan Turner", "jturner@mozilla.com"));
+        map.insert("jonathandturner", sophiajt.clone());
         map.insert("joshtriplett", a("Josh Triplett", "josh@joshtriplett.org"));
         map.insert("jroesch", a("Jared Roesch", "roeschinc@gmail.com"));
         map.insert("jseyfried", a("Jeffrey Seyfried", "jeffrey.seyfried@gmail.com"));
