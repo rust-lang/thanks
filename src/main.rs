@@ -650,6 +650,7 @@ fn get_submodules(
             "https://github.com/rust-lang/jemalloc.git",
             "https://github.com/rust-lang/compiler-rt.git",
             "https://github.com/rust-lang/hoedown.git",
+            "https://github.com/rust-lang/gcc.git",
         ];
         is_rust
             && !exclude.contains(&s.repository.as_str())
