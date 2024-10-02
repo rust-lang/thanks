@@ -28,7 +28,7 @@ jobs:
         run: cargo run --release
 
       - name: Deploy to production
-        uses: rust-lang/simpleinfra/github-actions/static-websites@master
+        uses: rust-lang/simpleinfra/github-actions/static-websites@chore-update-static-website-action-to-ubuntu-24
         with:
           deploy_dir: output
           github_token: "${{ secrets.github_token }}"
