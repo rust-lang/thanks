@@ -11,3 +11,4 @@ categories = ["parsing"]
 license = "MIT OR Apache-2.0"
 
 [dependencies]
+unicase = "2.6.0"

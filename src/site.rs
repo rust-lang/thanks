@@ -3,6 +3,7 @@ use handlebars::Handlebars;
 use std::collections::BTreeMap;
 use std::fs;
 use std::path::Path;
+use unicase::UniCase;
 
 pub fn render(
     by_version: BTreeMap<VersionTag, AuthorMap>,
@@ -146,7 +147,7 @@ fn author_map_to_scores(map: &AuthorMap) -> Vec<Entry> {
         .iter()
         .map(|(author, commits)| Entry {
             rank: 0,
-            author: author.name.clone(),
+            author: UniCase::into_inner(author.name.clone()),
             commits: commits,
         })
         .collect::<Vec<_>>();
