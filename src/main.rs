@@ -30,10 +30,7 @@ impl ToAuthor for Author {
             .email()
             .unwrap_or_else(|| panic!("no email for {}", sig));
 
-        Author {
-            name: name.to_string(),
-            email: email.to_string(),
-        }
+        Author::new(name.to_string(), email.to_string())
     }
 }
 
@@ -258,10 +255,10 @@ fn commit_coauthors(commit: &Commit) -> Vec<Author> {
         for line in msg.lines().rev() {
             if line.starts_with("Co-authored-by") {
                 if let Some(caps) = RE.captures(line) {
-                    coauthors.push(Author {
-                        name: caps["name"].to_string(),
-                        email: caps["email"].to_string(),
-                    });
+                    coauthors.push(Author::new(
+                        caps["name"].to_string(),
+                        caps["email"].to_string(),
+                    ));
                 }
             }
         }
@@ -589,14 +586,13 @@ fn main() {
             eprintln!("\tcaused by: {}", cause);
             cur = cause;
         }
-        std::mem::drop(cur);
+        std::mem::drop(err);
         std::process::exit(1);
     }
 }
 
 #[derive(Debug)]
 struct Submodule {
-    path: PathBuf,
     commit: Oid,
     // url
     repository: String,
@@ -631,7 +627,6 @@ fn get_submodules(
         };
         assert_eq!(entry.kind().unwrap(), git2::ObjectType::Commit);
         submodules.push(Submodule {
-            path: path.to_owned(),
             commit: entry.id(),
             repository: url.to_owned(),
         });

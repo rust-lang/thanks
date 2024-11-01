@@ -1,6 +1,9 @@
 use std::fmt;
+use std::hash::Hash;
 use std::pin::Pin;
 use std::ptr::NonNull;
+
+use unicase::UniCase;
 
 #[cfg(test)]
 mod test;
@@ -74,8 +77,17 @@ impl<'a> MapEntry<'a> {
 
 #[derive(Clone, PartialEq, PartialOrd, Ord, Eq, Hash)]
 pub struct Author {
-    pub name: String,
-    pub email: String,
+    pub name: UniCase<String>,
+    pub email: UniCase<String>,
+}
+
+impl Author {
+    pub fn new(name: String, email: String) -> Self {
+        Self {
+            name: UniCase::new(name),
+            email: UniCase::new(email),
+        }
+    }
 }
 
 impl fmt::Debug for Author {
@@ -105,18 +117,18 @@ impl Mailmap {
             let entry = unsafe { entry.to_entry(&self.buffer) };
             if let Some(email) = entry.current_email {
                 if let Some(name) = entry.current_name {
-                    if author.name == name && author.email == email {
-                        return Author {
-                            name: entry.canonical_name.unwrap_or(&author.name).to_owned(),
-                            email: entry.canonical_email.expect("canonical email").to_owned(),
-                        };
+                    if author.name == UniCase::new(name) && author.email == UniCase::new(email) {
+                        return Author::new(
+                            entry.canonical_name.unwrap_or(&author.name).to_owned(),
+                            entry.canonical_email.expect("canonical email").to_owned(),
+                        );
                     }
                 } else {
-                    if author.email == email {
-                        return Author {
-                            name: entry.canonical_name.unwrap_or(&author.name).to_owned(),
-                            email: entry.canonical_email.expect("canonical email").to_owned(),
-                        };
+                    if author.email == UniCase::new(email) {
+                        return Author::new(
+                            entry.canonical_name.unwrap_or(&author.name).to_owned(),
+                            entry.canonical_email.expect("canonical email").to_owned(),
+                        );
                     }
                 }
             }

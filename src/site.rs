@@ -3,6 +3,7 @@ use handlebars::Handlebars;
 use std::collections::BTreeMap;
 use std::fs;
 use std::path::Path;
+use unicase::UniCase;
 
 pub fn render(
     by_version: BTreeMap<VersionTag, AuthorMap>,
@@ -142,12 +143,22 @@ struct Entry {
 }
 
 fn author_map_to_scores(map: &AuthorMap) -> Vec<Entry> {
+    let debug_emails = std::env::var("DEBUG_EMAILS").is_ok_and(|value| value == "1");
+
     let mut scores = map
         .iter()
-        .map(|(author, commits)| Entry {
-            rank: 0,
-            author: author.name.clone(),
-            commits: commits,
+        .map(|(author, commits)| {
+            let name = UniCase::into_inner(author.name.clone());
+
+            Entry {
+                rank: 0,
+                author: if debug_emails {
+                    format!("{name} ({})", UniCase::into_inner(author.email.clone()))
+                } else {
+                    name
+                },
+                commits,
+            }
         })
         .collect::<Vec<_>>();
     scores.sort_by_key(|e| (std::cmp::Reverse(e.commits), e.author.clone()));
