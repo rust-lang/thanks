@@ -177,6 +177,7 @@ impl Reviewers {
         map.insert("jdm", a("Josh Matthews", "josh@joshmatthews.net"));
         map.insert("jethrogb", a("Jethro Beekman", "jethro@fortanix.com"));
         map.insert("jhpratt", a("Jacob Pratt", "jacob@jhpratt.dev"));
+        map.insert("jieyouxu", a("Jieyou Xu", "jieyouxu@outlook.com"));
         map.insert("johntitor", a("Yuki Okushi", "huyuumi.dev@gmail.com"));
         map.insert("jonas-schievink", a("Jonas Schievink", "jonasschievink@gmail.com"));
         map.insert("jonathandturner", sophiajt.clone());
