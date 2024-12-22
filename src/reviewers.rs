@@ -147,6 +147,7 @@ impl Reviewers {
         map.insert("flaper87", a("Flavio Percoco", "flaper87@gmail.com"));
         map.insert("flip1995", a("flip1995", "hello@philkrones.com"));
         map.insert("flodiebold", a("Florian Diebold", "flodiebold@gmail.com"));
+        map.insert("fmease", a("León Orell Valerian Liehr", "me@fmease.dev"));
         map.insert("frewsxcv", frewsxcv.clone());
         map.insert("frewsxcvx", frewsxcv.clone());
         map.insert("frewsxcxv", frewsxcv.clone());
