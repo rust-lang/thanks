@@ -31,8 +31,8 @@ impl ToAuthor for Author {
             .unwrap_or_else(|| panic!("no email for {}", sig));
 
         Author {
-            name: name.to_string(),
-            email: email.to_string(),
+            name: name.to_string().into(),
+            email: email.to_string().into(),
         }
     }
 }
@@ -259,8 +259,8 @@ fn commit_coauthors(commit: &Commit) -> Vec<Author> {
             if line.starts_with("Co-authored-by") {
                 if let Some(caps) = RE.captures(line) {
                     coauthors.push(Author {
-                        name: caps["name"].to_string(),
-                        email: caps["email"].to_string(),
+                        name: caps["name"].to_string().into(),
+                        email: caps["email"].to_string().into(),
                     });
                 }
             }
@@ -589,7 +589,7 @@ fn main() {
             eprintln!("\tcaused by: {}", cause);
             cur = cause;
         }
-        std::mem::drop(cur);
+        let _ = cur;
         std::process::exit(1);
     }
 }

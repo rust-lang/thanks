@@ -23,7 +23,7 @@ fn comment_2() {
 fn email_1() {
     assert_eq!(
         test_parser!(read_email, "<foo@example.com>", ""),
-        Some("foo@example.com")
+        Some("foo@example.com".into())
     );
 }
 
@@ -35,7 +35,7 @@ fn email_2() {
             "<foo@example.com> <foo2@example.com>",
             " <foo2@example.com>"
         ),
-        Some("foo@example.com")
+        Some("foo@example.com".into())
     );
 }
 
@@ -59,7 +59,7 @@ fn name_1() {
             "Canonical Name <foo@example.com>",
             "<foo@example.com>"
         ),
-        Some("Canonical Name"),
+        Some("Canonical Name".into()),
     );
 }
 
@@ -68,10 +68,10 @@ fn line_1() {
     assert_eq!(
         parse_line("Joe Bob <email1> <email2>", 0),
         Some(MapEntry {
-            canonical_name: Some("Joe Bob"),
-            canonical_email: Some("email1"),
+            canonical_name: Some("Joe Bob".into()),
+            canonical_email: Some("email1".into()),
             current_name: None,
-            current_email: Some("email2"),
+            current_email: Some("email2".into()),
         })
     );
 }
@@ -81,18 +81,18 @@ fn line_2() {
     assert_eq!(
         parse_line("Joe Bob <email1>", 0),
         Some(MapEntry {
-            canonical_name: Some("Joe Bob"),
-            canonical_email: Some("email1"),
+            canonical_name: Some("Joe Bob".into()),
+            canonical_email: Some("email1".into()),
             current_name: None,
-            current_email: Some("email1"),
+            current_email: Some("email1".into()),
         })
     );
 }
 
 fn a(name: &str, email: &str) -> Author {
     Author {
-        name: name.into(),
-        email: email.into(),
+        name: name.to_owned().into(),
+        email: email.to_owned().into(),
     }
 }
 
@@ -122,4 +122,13 @@ fn map_3() {
 fn map_4() {
     let mm = map("<PE> <CE>");
     assert_eq!(mm.canonicalize(&a("any", "CE")), a("any", "PE"));
+}
+
+#[test]
+fn case_insensitive() {
+    let mm = map("Proper Name <proper@email.xx> CoMmIt NaMe <CoMmIt@EmAiL.xX>");
+    assert_eq!(
+        mm.canonicalize(&a("Commit Name", "commit@email.xx")),
+        a("Proper Name", "proper@email.xx")
+    );
 }
