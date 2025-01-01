@@ -1,6 +1,6 @@
 use crate::{AuthorMap, VersionTag};
 use handlebars::Handlebars;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use std::fs;
 use std::path::Path;
 use unicase::UniCase;
@@ -135,17 +135,18 @@ fn about() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-#[derive(serde::Serialize)]
+#[derive(serde::Serialize, Ord, PartialOrd, Eq, PartialEq)]
 struct Entry {
     rank: u32,
     author: String,
+    email: String,
     commits: usize,
 }
 
 fn author_map_to_scores(map: &AuthorMap) -> Vec<Entry> {
     let debug_emails = std::env::var("DEBUG_EMAILS").is_ok_and(|value| value == "1");
 
-    let mut scores = map
+    let scores = map
         .iter()
         .map(|(author, commits)| {
             let name = UniCase::into_inner(author.name.clone());
@@ -157,11 +158,14 @@ fn author_map_to_scores(map: &AuthorMap) -> Vec<Entry> {
                 } else {
                     name
                 },
+                email: UniCase::into_inner(author.email.clone()),
                 commits,
             }
         })
         .collect::<Vec<_>>();
+    let mut scores = deduplicate_scores(scores);
     scores.sort_by_key(|e| (std::cmp::Reverse(e.commits), e.author.clone()));
+
     let mut last_rank = 1;
     let mut ranked_at_current = 0;
     let mut last_commits = usize::max_value();
@@ -176,6 +180,30 @@ fn author_map_to_scores(map: &AuthorMap) -> Vec<Entry> {
         entry.rank = last_rank;
     }
     scores
+}
+
+/// Deduplicate scores based on the assumption that an e-mail uniquely identifies a given
+/// person. If there are multiple entries with the same email, their commit counts will be
+/// merged into a single entry, with the canonical name being chosen based on the entry with
+/// the most commits.
+fn deduplicate_scores(entries: Vec<Entry>) -> Vec<Entry> {
+    let mut entry_map: HashMap<String, Vec<Entry>> = HashMap::with_capacity(entries.len());
+    for entry in entries {
+        entry_map.entry(entry.email.clone()).or_default().push(entry);
+    }
+
+    entry_map.into_values().map(|mut entry| {
+        // If there are multiple entries with the same maximum commit count, ensure that
+        // the ordering is stable, by sorting based on the whole entry.
+        entry.sort();
+        let canonical_entry = entry.iter().max_by_key(|entry| entry.commits).unwrap();
+        Entry {
+            rank: 0,
+            author: canonical_entry.author.clone(),
+            email: canonical_entry.email.clone(),
+            commits: entry.iter().map(|e| e.commits).sum(),
+        }
+    }).collect()
 }
 
 fn releases(
