@@ -28,7 +28,7 @@ jobs:
         run: cargo run --release
 
       - name: Upload artifact
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/master' && github.repository_owner == 'rust-lang'
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./output
