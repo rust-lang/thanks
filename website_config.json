@@ -1,0 +1,11 @@
+{
+    "headers": {
+        "Strict-Transport-Security": "max-age=63072000",
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "DENY",
+        "X-XSS-Protection": "1; mode=block",
+        "Referrer-Policy": "no-referrer, strict-origin-when-cross-origin",
+        "Content-Security-Policy": "default-src 'none'; style-src 'self'; img-src 'self'; font-src 'self'"
+    },
+    "github_pages_origin": "rust-lang.github.io/thanks"
+}
