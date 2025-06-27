@@ -638,6 +638,7 @@ fn get_submodules(
             "https://github.com/rust-lang/llvm.git",
             "https://github.com/rust-lang/llvm-project.git",
             "https://github.com/rust-lang/lld.git",
+            "https://github.com/rust-lang/enzyme.git",
             "https://github.com/rust-lang-nursery/clang.git",
             "https://github.com/rust-lang-nursery/lldb.git",
             "https://github.com/rust-lang/libuv.git",
