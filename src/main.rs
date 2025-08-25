@@ -648,9 +648,10 @@ fn get_submodules(
             "https://github.com/rust-lang/hoedown.git",
             "https://github.com/rust-lang/gcc.git",
         ];
+        let repo_name = s.repository.to_lowercase();
         is_rust
-            && !exclude.contains(&s.repository.as_str())
-            && !exclude.contains(&&*format!("{}.git", s.repository))
+            && !exclude.contains(&repo_name.as_str())
+            && !exclude.contains(&&*format!("{}.git", repo_name))
     });
     Ok(submodules)
 }
