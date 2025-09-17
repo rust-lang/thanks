@@ -104,7 +104,6 @@ impl Reviewers {
         insert("lzutao", a("Lzu Tao", "taolzu@gmail.com"));
         insert("malbarbo", a("Marco A L Barbosa", "malbarbo@gmail.com"));
         insert("marmeladema", a("marmeladema", "xademax@gmail.com"));
-        insert("mati865", a("Mateusz Mikuła", "mati865@gmail.com"));
         insert("max-heller", a("max-heller", "max.a.heller@gmail.com"));
         insert("metajack", a("Jack Moffitt", "jack@metajack.im"));
         insert("mikerite", a("Michael Wright", "mikerite@lavabit.com"));
@@ -163,17 +162,19 @@ impl Reviewers {
         insert("guilliamegomez", alias("guillaumegomez"));
         insert("guilliaumegomez", alias("guillaumegomez"));
         insert("guillaumegomezp", alias("guillaumegomez"));
-        insert("hi-rustin", alias("rustin170506"));
+        insert("hi-rustin", alias("0xpoe"));
         insert("huon", alias("huonw"));
         insert("imperio", alias("guillaumegomez"));
         insert("icnr", alias("lcnr"));
         insert("jackh276", alias("jackh726"));
         insert("jakub-", alias("jakub"));
         insert("jonathandturner", alias("sophiajt"));
-        insert("Jubilee", alias("workingjubilee"));
+        insert("jubilee", alias("workingjubilee"));
         insert("jyn541", alias("jyn514"));
         insert("jyn", alias("jyn514"));
         insert("llogic", alias("llogiq"));
+        insert("lncr", alias("lcnr"));
+        insert("lolbinary", alias("lolbinarycat"));
         insert("manisheart", alias("manishearth"));
         insert("mark-simulacru", alias("mark-simulacrum"));
         insert("mark-simulcrum", alias("mark-simulacrum"));
@@ -192,6 +193,7 @@ impl Reviewers {
         insert("pwalton", alias("pcwalton"));
         insert("quietmisdreqvus", alias("quietmisdreavus"));
         insert("rkruppe", alias("hanna-kruppe"));
+        insert("rustin170506", alias("0xpoe"));
         insert("simulacrum", alias("mark-simulacrum"));
         insert("steveklanik", alias("steveklabnik"));
         insert("steveklbanik", alias("steveklabnik"));
@@ -204,17 +206,21 @@ impl Reviewers {
 
     pub fn to_author(&self, reviewer: &str) -> Result<Option<Author>, UnknownReviewer> {
         let skip = &[
-            "me",
-            "just",
-            "new",
-            "rollup",
+            "3",
             "burningtree",
+            "docs",
+            "just",
+            "me",
+            "new",
+            "nobody",
+            "rollup",
+            "rustdoc",
+            "rustdoc-team",
+            "t-rustdoc",
+            "t-rustdoc-frontend",
+            "the-whole-team",
             "tinyfix",
             "update",
-            "3",
-            "the-whole-team",
-            "nobody",
-            "docs",
         ];
         let reviewer = reviewer.to_lowercase();
         if skip.contains(&reviewer.as_str()) {
