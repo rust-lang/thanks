@@ -515,7 +515,7 @@ fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::err
         in_progress: true,
     });
     versions.push(VersionTag {
-        name: String::from("Main"),
+        name: String::from("Nightly"),
         version: {
             // main is plus 1 minor versions off of beta, which we just pushed
             let mut last = last_full_stable.clone();
