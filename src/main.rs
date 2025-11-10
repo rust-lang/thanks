@@ -433,7 +433,7 @@ fn build_author_map_(
 
 fn mailmap_from_repo(repo: &git2::Repository) -> Result<Mailmap, Box<dyn std::error::Error>> {
     let file = String::from_utf8(
-        repo.revparse_single("master")?
+        repo.revparse_single("HEAD")?
             .peel_to_commit()?
             .tree()?
             .get_name(".mailmap")
@@ -515,16 +515,16 @@ fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::err
         in_progress: true,
     });
     versions.push(VersionTag {
-        name: String::from("Master"),
+        name: String::from("Nightly"),
         version: {
-            // master is plus 1 minor versions off of beta, which we just pushed
+            // main is plus 1 minor versions off of beta, which we just pushed
             let mut last = last_full_stable.clone();
             last.minor += 2;
             last
         },
-        raw_tag: String::from("master"),
+        raw_tag: String::from("main"),
         commit: repo
-            .revparse_single("master")
+            .revparse_single("HEAD")
             .unwrap()
             .peel_to_commit()
             .unwrap()
