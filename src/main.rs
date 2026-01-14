@@ -299,7 +299,7 @@ fn parse_bors_reviewer(
     commit: &Commit,
 ) -> Result<Option<Vec<Author>>, ErrorContext> {
     let is_old_bors = commit.author().name_bytes() == b"bors" && commit.committer().name_bytes() == b"bors";
-    // This username was used for merges for a ~week from January 7 to January 12 on the
+    // This username was used for merges for a ~week from January 7 to January 12 2026 on the
     // rust-lang/rust repository.
     let is_new_bors = commit.author().name_bytes() == b"rust-bors[bot]";
     let is_bors = is_old_bors || is_new_bors;
