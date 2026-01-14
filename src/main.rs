@@ -293,12 +293,22 @@ fn is_rollup_commit(commit: &Commit) -> bool {
     summary.starts_with("Rollup merge of #")
 }
 
+/// Git usernames used by bors
+static BORS_USERNAMES: &[&[u8]] = &[
+    b"bors",
+    b"rust-bors[bot]"
+];
+
 fn parse_bors_reviewer(
     reviewers: &Reviewers,
     repo: &Repository,
     commit: &Commit,
 ) -> Result<Option<Vec<Author>>, ErrorContext> {
-    if commit.author().name_bytes() != b"bors" || commit.committer().name_bytes() != b"bors" {
+    let is_bors_author = BORS_USERNAMES
+        .iter()
+        .any(|username| commit.author().name_bytes() == *username || commit.committer().name_bytes() == *username);
+
+    if !is_bors_author {
         if commit.committer().name_bytes() != b"GitHub" || !is_rollup_commit(commit) {
             return Ok(None);
         }
