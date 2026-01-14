@@ -293,22 +293,18 @@ fn is_rollup_commit(commit: &Commit) -> bool {
     summary.starts_with("Rollup merge of #")
 }
 
-/// Git usernames used by bors
-static BORS_USERNAMES: &[&[u8]] = &[
-    b"bors",
-    b"rust-bors[bot]"
-];
-
 fn parse_bors_reviewer(
     reviewers: &Reviewers,
     repo: &Repository,
     commit: &Commit,
 ) -> Result<Option<Vec<Author>>, ErrorContext> {
-    let is_bors_author = BORS_USERNAMES
-        .iter()
-        .any(|username| commit.author().name_bytes() == *username || commit.committer().name_bytes() == *username);
+    let is_old_bors = commit.author().name_bytes() == b"bors" && commit.committer().name_bytes() == b"bors";
+    // This username was used for merges for a ~week from January 7 to January 12 2026 on the
+    // rust-lang/rust repository.
+    let is_new_bors = commit.author().name_bytes() == b"rust-bors[bot]";
+    let is_bors = is_old_bors || is_new_bors;
 
-    if !is_bors_author {
+    if !is_bors {
         if commit.committer().name_bytes() != b"GitHub" || !is_rollup_commit(commit) {
             return Ok(None);
         }
