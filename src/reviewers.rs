@@ -245,7 +245,6 @@ impl fmt::Display for UnknownReviewer {
 }
 
 #[derive(Debug, Deserialize)]
-
 pub struct TeamPeople {
     pub people: HashMap<String, TeamPerson>,
 }
