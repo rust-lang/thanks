@@ -190,6 +190,7 @@ impl Reviewers {
         insert("oli-obj", alias("oli-obk"));
         insert("ozkanonur", alias("onur-ozkan"));
         insert("petrochencov", alias("petrochenkov"));
+        insert("pietroalbini", alias("emilyalbini"));
         insert("pwalton", alias("pcwalton"));
         insert("quietmisdreqvus", alias("quietmisdreavus"));
         insert("rkruppe", alias("hanna-kruppe"));
