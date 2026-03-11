@@ -19,7 +19,12 @@ mod site;
 
 use error::ErrorContext;
 
+/// Convert a commit signature to an `Author`.
+///
+/// Since `Author` is defined in the mailmap crate, this trait is needed to
+/// allow adding an extra method to the `Author` type.
 trait ToAuthor {
+    /// Convert a git commit signature to an `Author`.
     fn from_sig(sig: git2::Signature<'_>) -> Author;
 }
 
@@ -34,19 +39,24 @@ impl ToAuthor for Author {
     }
 }
 
+/// Map authors to their commits.
 #[derive(Clone)]
 pub struct AuthorMap {
-    // author -> [commits]
+    /// Mapping of each Author to the commits they authored or co-authored.
     map: HashMap<Author, HashSet<Oid>>,
 }
 
 impl AuthorMap {
+    /// Create an empty `AuthorMap`.
     fn new() -> Self {
         AuthorMap {
             map: HashMap::new(),
         }
     }
 
+    /// Add a commit authored or co-authored by the given `Author`.
+    ///
+    /// If the author is not already included in the map, they are added.
     fn add(&mut self, author: Author, commit: Oid) {
         self.map
             .entry(author)
@@ -54,10 +64,12 @@ impl AuthorMap {
             .insert(commit);
     }
 
+    /// Iterate over each author and the number of commits that they (co-)authored.
     fn iter(&self) -> impl Iterator<Item = (&Author, usize)> {
         self.map.iter().map(|(k, v)| (k, v.len()))
     }
 
+    /// Merge in the authorship data from another instance.
     fn extend(&mut self, other: Self) {
         for (author, set) in other.map {
             self.map
@@ -67,6 +79,8 @@ impl AuthorMap {
         }
     }
 
+    /// Create a new `AuthorMap` containing just the commits present in the current
+    /// map but not the other one.
     #[must_use]
     fn difference(&self, other: &AuthorMap) -> AuthorMap {
         let mut new = AuthorMap::new();
@@ -164,12 +178,20 @@ fn should_update() -> bool {
     std::env::args_os().nth(1).unwrap_or_default() == "--refresh"
 }
 
+/// Information about a git tag or other reference to treat as a tag.
 #[derive(Clone)]
 pub struct VersionTag {
+    /// Some custom name, e.g. "Rust 1.94.0" or "Beta".
     name: String,
+    /// The parsed Version for this tag.
     version: Version,
+    /// The raw name of the tag or commit.
     raw_tag: String,
+    /// The commit for this tag or reference.
     commit: Oid,
+    /// Whether this version is still being developed.
+    ///
+    /// This should only be true for the "Beta" and "Nightly" versions.
     in_progress: bool,
 }
 
@@ -437,6 +459,10 @@ fn build_author_map_(
     Ok(author_map)
 }
 
+/// Construct a `Mailmap` based on the latest commit in the given repository.
+///
+/// Returns an error if the latest commit cannot be retrieved or if it does not
+/// contain a `.mailmap` file to read.
 fn mailmap_from_repo(repo: &git2::Repository) -> Result<Mailmap, Box<dyn std::error::Error>> {
     let file = String::from_utf8(
         repo.revparse_single("HEAD")?
@@ -597,10 +623,12 @@ fn main() {
     }
 }
 
+/// A submodule that is used in a parent repository.
 #[derive(Debug)]
 struct Submodule {
+    /// The commit of the submodule.
     commit: Oid,
-    // url
+    /// The URL of the submodule.
     repository: String,
 }
 
@@ -662,6 +690,10 @@ fn get_submodules(
     Ok(submodules)
 }
 
+/// Extract the contents of a `.gitmodules` file as of a specific commit.
+///
+/// If the file does not exist as of the given commit, an empty string is
+/// returned in the result instead.
 fn modules_file(repo: &Repository, at: &Commit) -> Result<String, Box<dyn std::error::Error>> {
     if let Some(modules) = at.tree()?.get_name(".gitmodules") {
         Ok(String::from_utf8(
