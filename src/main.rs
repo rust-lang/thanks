@@ -464,13 +464,16 @@ fn build_author_map_(
 /// Returns an error if the latest commit cannot be retrieved or if it does not
 /// contain a `.mailmap` file to read.
 fn mailmap_from_repo(repo: &git2::Repository) -> Result<Mailmap, Box<dyn std::error::Error>> {
+    let tree = repo.revparse_single("HEAD")?
+        .peel_to_commit()?
+        .tree()?;
+    let file = tree.get_name(".mailmap");
+    let file = match file {
+        None => return Mailmap::from_string("".to_string()),
+        Some(f) => f
+    };
     let file = String::from_utf8(
-        repo.revparse_single("HEAD")?
-            .peel_to_commit()?
-            .tree()?
-            .get_name(".mailmap")
-            .unwrap()
-            .to_object(&repo)?
+        file.to_object(&repo)?
             .peel_to_blob()?
             .content()
             .into(),
