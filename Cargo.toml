@@ -15,7 +15,7 @@ walkdir = "2"
 regex = "1.5.5"
 mailmap = { path = "./mailmap" }
 ureq = { version = "2.6.2", features = ["json"] }
-unicase = "2.6.0"
+uncased = "0.9.10"
 
 [profile.release]
 debug = 2
