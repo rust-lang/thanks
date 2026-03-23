@@ -99,6 +99,11 @@ impl AuthorMap {
     }
 }
 
+/// Run a `git` command with the given arguments.
+///
+/// # Panics
+///
+/// Panics if the `git` command cannot be spawned
 fn git(args: &[&str]) -> Result<String, Box<dyn std::error::Error>> {
     let mut cmd = Command::new("git");
     cmd.args(args);
@@ -127,6 +132,13 @@ lazy_static::lazy_static! {
     static ref UPDATED: Mutex<HashSet<String>> = Mutex::new(HashSet::new());
 }
 
+/// Create or update the bare clone of the git repo at the given URL
+///
+/// If a clone of the repo already exists, it is only updated if
+/// [`should_update()`]  returns true.
+///
+/// On success, the returned Result contains a PathBuf with the path to the
+/// clone.
 fn update_repo(url: &str) -> Result<PathBuf, Box<dyn std::error::Error>> {
     let mut slug = url;
     let prefix = "https://github.com/";
@@ -174,6 +186,10 @@ fn update_repo(url: &str) -> Result<PathBuf, Box<dyn std::error::Error>> {
     Ok(path)
 }
 
+/// Determine if existing git clones should be updated.
+///
+/// Clones that already exist are only updated if the first command line
+/// argument specified was `--refresh`.
 fn should_update() -> bool {
     std::env::args_os().nth(1).unwrap_or_default() == "--refresh"
 }
@@ -263,6 +279,10 @@ fn get_versions(repo: &Repository) -> Result<Vec<VersionTag>, Box<dyn std::error
     Ok(versions)
 }
 
+/// Identify the co-authors, if any, of a commit
+///
+/// Co-authors are determined based on the commit message having lines starting
+/// `Co-authored-by: ` followed by a name and then an email enclosed in `<>`.
 fn commit_coauthors(commit: &Commit) -> Vec<Author> {
     let mut coauthors = vec![];
     if let Some(msg) = commit.message_raw() {
@@ -288,6 +308,10 @@ fn commit_coauthors(commit: &Commit) -> Vec<Author> {
     coauthors
 }
 
+/// Build up an [`AuthorMap`] of commits authored between `from` and `to`.
+///
+/// This function is a wrapper around [`build_author_map_`] to add additional
+/// context to any errors; see that function for further documentation.
 fn build_author_map(
     repo: &Repository,
     reviewers: &Reviewers,
@@ -309,12 +333,37 @@ fn build_author_map(
     }
 }
 
-// Note this is not the bors merge commit of a rollup
+/// Determine if a commit is a "rollup" merge commit
+///
+/// Rolloup commits are those whose commit messages start with "Rollup merge of #"
 fn is_rollup_commit(commit: &Commit) -> bool {
     let summary = commit.summary().unwrap_or("");
     summary.starts_with("Rollup merge of #")
 }
 
+/// Parse a commit to identify which reviewer(s) should be created as the author
+/// of a commit
+///
+/// For commits that were not authored by bors and are neither committed by
+/// GitHub or considered rollup commits (see [`is_rollup_commit`]), no reviewers
+/// are identified.
+///
+/// For non-merge commits, no reviewers are identified.
+///
+/// For commits where at least one line of the commit message contains ` r=`,
+/// the reviewers are those listed after that ` r=`. If no such line exists,
+/// for commits where at least one line of the commit message starts with
+/// `Reviewed-by: `, the reviewers are those listed on that line. For commits
+/// where neither type of line exists, the commit message must be
+/// exactly "automated merge\n".
+///
+/// # Panics
+///
+/// For commits that are merge commits and are either authored by bors or
+/// both committed by GitHub and considered rollup commits, we try to identify
+/// reviewers. If no line of the commit message contains ` r=` or starts with
+/// `Reviewed-by: `, the commit message must be exactly "automated merge\n",
+/// otherwise panics.
 fn parse_bors_reviewer(
     reviewers: &Reviewers,
     repo: &Repository,
@@ -356,6 +405,9 @@ fn parse_bors_reviewer(
                     );
                 }
             })
+            // Iterator is now of strings that are not empty, not `<try>`,
+            // do not container `,` or `+`, do not start with `@`, do not end
+            // with a '`', and do not start or end with whitespace
             .map(|r| {
                 reviewers.to_author(r).map_err(|e| {
                     ErrorContext(
@@ -364,7 +416,16 @@ fn parse_bors_reviewer(
                     )
                 })
             })
+            // Iterator is now of `Result<Option<Author>, ErrorContext>` items
             .flat_map(|r| r.transpose())
+            // Each r.transpose() call returned an Option<Result<Author, ErrorContext>>
+            // for the `map` part of `flat_map()`; the `flat` part used
+            // `Option::into_iter()` to ignore the `None` options and create an
+            // iterator of `Result<Author, ErrorContext>` items.
+            // Using the `FromIterator` impl for Result<V, E>, the `collect()`
+            // call below will result in either 1) the first `ErrorContext` in
+            // the iterator, or 2) all of the `Author`s in the iterator, if there
+            // were no errors
             .collect::<Result<Vec<_>, ErrorContext>>()
     };
 
@@ -396,6 +457,28 @@ fn parse_bors_reviewer(
     Ok(Some(reviewers))
 }
 
+/// Build up an [`AuthorMap`] of commits authored between `from` and `to`.
+///
+/// If `from` is empty, commits authored up to and including `to` are processed.
+/// If `from` is non-empty, commits starting *after* `from` are processed, up
+/// to and including the `to` commit.
+///
+/// For each commit processed, authorship is added to the `AuthorMap` result
+/// according to the following rules:
+/// * If the commit is **not** a rollup commit (see [`is_rollup_commit`]), the
+///   git author of the commit is credited as an author of the commit.
+/// * For every commit, any reviewers from by [`parse_bors_reviewer`] are
+///   credited as authors of the commit.
+/// * For every commit, any co-authors identified by [`commit_coauthors`] are
+///   credited as authors of the commit.
+///
+/// Authors in the resulting map are canonicalized using
+/// [`Mailmap::canonicalize`].
+///
+/// For any reviewer not recognized in [`parse_bors_reviewer`] (i.e. resulting
+/// in `Err<ErrorContext>` where the error is [`reviewers::UnknownReviewer`])
+/// a warning is printed to the standard error; any other error from
+/// [`parse_bors_reviewer`] or other methods results in returning an error.
 fn build_author_map_(
     repo: &Repository,
     reviewers: &Reviewers,
