@@ -308,7 +308,7 @@ fn commit_coauthors(commit: &Commit) -> Vec<Author> {
     coauthors
 }
 
-/// Build up an [`AuthorMap`] of commits authored between `from` and `to`.
+/// Build up an [`AuthorMap`] of commits authored up to and including `to`.
 ///
 /// This function is a wrapper around [`build_author_map_`] to add additional
 /// context to any errors; see that function for further documentation.
@@ -316,16 +316,14 @@ fn build_author_map(
     repo: &Repository,
     reviewers: &Reviewers,
     mailmap: &Mailmap,
-    from: &str,
     to: &str,
 ) -> Result<AuthorMap, Box<dyn std::error::Error>> {
-    match build_author_map_(repo, reviewers, mailmap, from, to) {
+    match build_author_map_(repo, reviewers, mailmap, to) {
         Ok(o) => Ok(o),
         Err(err) => Err(ErrorContext(
             format!(
-                "build_author_map(repo={}, from={:?}, to={:?})",
+                "build_author_map(repo={}, to={:?})",
                 repo.path().display(),
-                from,
                 to
             ),
             err,
@@ -457,11 +455,7 @@ fn parse_bors_reviewer(
     Ok(Some(reviewers))
 }
 
-/// Build up an [`AuthorMap`] of commits authored between `from` and `to`.
-///
-/// If `from` is empty, commits authored up to and including `to` are processed.
-/// If `from` is non-empty, commits starting *after* `from` are processed, up
-/// to and including the `to` commit.
+/// Build up an [`AuthorMap`] of commits authored up to and including `to`.
 ///
 /// For each commit processed, authorship is added to the `AuthorMap` result
 /// according to the following rules:
@@ -483,7 +477,6 @@ fn build_author_map_(
     repo: &Repository,
     reviewers: &Reviewers,
     mailmap: &Mailmap,
-    from: &str,
     to: &str,
 ) -> Result<AuthorMap, Box<dyn std::error::Error>> {
     let mut walker = repo.revwalk()?;
@@ -499,12 +492,8 @@ fn build_author_map_(
         ])?;
     }
 
-    if from == "" {
-        let to = repo.revparse_single(to)?.peel_to_commit()?.id();
-        walker.push(to)?;
-    } else {
-        walker.push_range(&format!("{}..{}", from, to))?;
-    }
+    let to = repo.revparse_single(to)?.peel_to_commit()?.id();
+    walker.push(to)?;
 
     let mut author_map = AuthorMap::new();
     for oid in walker {
@@ -579,7 +568,7 @@ fn up_to_release(
     })?;
     let modules = get_submodules(&repo, &to_commit)?;
 
-    let mut author_map = build_author_map(&repo, &reviewers, &mailmap, "", &to.raw_tag)
+    let mut author_map = build_author_map(&repo, &reviewers, &mailmap, &to.raw_tag)
         .map_err(|e| ErrorContext(format!("Up to {}", to), e))?;
 
     for module in &modules {
@@ -589,7 +578,6 @@ fn up_to_release(
                 &subrepo,
                 &reviewers,
                 &mailmap,
-                "",
                 &module.commit.to_string(),
             )?;
             author_map.extend(submap);
@@ -655,7 +643,7 @@ fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::err
         let previous = if let Some(v) = idx.checked_sub(1).map(|idx| &versions[idx]) {
             v
         } else {
-            let author_map = build_author_map(&repo, &reviewers, &mailmap, "", &version.raw_tag)?;
+            let author_map = build_author_map(&repo, &reviewers, &mailmap, &version.raw_tag)?;
             version_map.insert(version.clone(), author_map);
             continue;
         };
