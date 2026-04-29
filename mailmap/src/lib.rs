@@ -101,7 +101,7 @@ impl Mailmap {
         let file = Pin::new(file.into_boxed_str());
         let mut entries = Vec::with_capacity(file.lines().count());
         for (idx, line) in file.lines().enumerate() {
-            if let Some(entry) = parse_line(&line, idx + 1) {
+            if let Some(entry) = parse_line(line, idx + 1) {
                 entries.push(entry.to_raw_entry());
             }
         }

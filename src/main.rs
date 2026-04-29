@@ -86,7 +86,7 @@ impl AuthorMap {
         let mut new = AuthorMap::new();
         new.map.reserve(self.map.len());
         for (author, set) in self.map.iter() {
-            if let Some(other_set) = other.map.get(&author) {
+            if let Some(other_set) = other.map.get(author) {
                 let diff: HashSet<_> = set.difference(other_set).cloned().collect();
                 if !diff.is_empty() {
                     new.map.insert(author.clone(), diff);
@@ -175,13 +175,13 @@ fn update_repo(url: &str) -> Result<PathBuf, Box<dyn std::error::Error>> {
                 "--dissociate",
                 "--reference",
                 &tmp,
-                &url,
+                url,
                 &path_s,
             ])?;
             std::fs::remove_dir_all(&tmp)?;
         }
     } else {
-        git(&["clone", "--bare", &url, &path_s])?;
+        git(&["clone", "--bare", url, &path_s])?;
     }
     Ok(path)
 }
@@ -232,7 +232,7 @@ impl cmp::PartialEq for VersionTag {
 
 impl cmp::PartialOrd for VersionTag {
     fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
-        Some(self.cmp(&other))
+        Some(self.cmp(other))
     }
 }
 
@@ -258,7 +258,7 @@ fn get_versions(repo: &Repository) -> Result<Vec<VersionTag>, Box<dyn std::error
     let mut versions = tags
         .iter()
         .filter_map(|tag| {
-            Version::parse(&tag)
+            Version::parse(tag)
                 .or_else(|_| Version::parse(&format!("{}.0", tag)))
                 .ok()
                 .map(|v| VersionTag {
@@ -266,7 +266,7 @@ fn get_versions(repo: &Repository) -> Result<Vec<VersionTag>, Box<dyn std::error
                     version: v,
                     raw_tag: tag.clone(),
                     commit: repo
-                        .revparse_single(&tag)
+                        .revparse_single(tag)
                         .unwrap()
                         .peel_to_commit()
                         .unwrap()
@@ -439,7 +439,7 @@ fn parse_bors_reviewer(
         to_author(&line[start..end])?
     } else if let Some(line) = message.lines().find(|l| l.starts_with("Reviewed-by: ")) {
         let line = &line["Reviewed-by: ".len()..];
-        to_author(&line)?
+        to_author(line)?
     } else {
         // old bors didn't include r=
         if message != "automated merge\n" {
@@ -522,7 +522,7 @@ fn build_author_map_(
             // rollup, which isn't fair.
             commit_authors.push(Author::from_sig(commit.author()));
         }
-        match parse_bors_reviewer(&reviewers, &repo, &commit) {
+        match parse_bors_reviewer(reviewers, repo, &commit) {
             Ok(Some(reviewers)) => commit_authors.extend(reviewers),
             Ok(None) => {}
             Err(ErrorContext(msg, e)) => {
@@ -559,7 +559,7 @@ fn mailmap_from_repo(repo: &git2::Repository) -> Result<Mailmap, Box<dyn std::er
         Some(f) => f
     };
     let file = String::from_utf8(
-        file.to_object(&repo)?
+        file.to_object(repo)?
             .peel_to_blob()?
             .content()
             .into(),
@@ -583,9 +583,9 @@ fn up_to_release(
             Box::new(e),
         )
     })?;
-    let modules = get_submodules(&repo, &to_commit)?;
+    let modules = get_submodules(repo, &to_commit)?;
 
-    let mut author_map = build_author_map(&repo, &reviewers, &mailmap, "", &to.raw_tag)
+    let mut author_map = build_author_map(repo, reviewers, mailmap, "", &to.raw_tag)
         .map_err(|e| ErrorContext(format!("Up to {}", to), e))?;
 
     for module in &modules {
@@ -593,8 +593,8 @@ fn up_to_release(
             let subrepo = Repository::open(&path)?;
             let submap = build_author_map(
                 &subrepo,
-                &reviewers,
-                &mailmap,
+                reviewers,
+                mailmap,
                 "",
                 &module.commit.to_string(),
             )?;
@@ -670,11 +670,11 @@ fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::err
 
         cache.insert(
             version,
-            up_to_release(&repo, &reviewers, &mailmap, &version)?,
+            up_to_release(&repo, &reviewers, &mailmap, version)?,
         );
         let previous = match cache.remove(&previous) {
             Some(v) => v,
-            None => up_to_release(&repo, &reviewers, &mailmap, &previous)?,
+            None => up_to_release(&repo, &reviewers, &mailmap, previous)?,
         };
         let current = cache.get(&version).unwrap();
 
@@ -725,7 +725,7 @@ fn get_submodules(
     repo: &Repository,
     at: &Commit,
 ) -> Result<Vec<Submodule>, Box<dyn std::error::Error>> {
-    let submodule_cfg = modules_file(&repo, &at)?;
+    let submodule_cfg = modules_file(repo, at)?;
     let submodule_cfg = Config::parse(&submodule_cfg)?;
     let mut path_to_url = HashMap::new();
     let entries = submodule_cfg.entries(None)?;
@@ -742,7 +742,7 @@ fn get_submodules(
     let tree = at.tree()?;
     for (path, url) in &path_to_url {
         let path = Path::new(&path);
-        let entry = tree.get_path(&path);
+        let entry = tree.get_path(path);
         // the submodule may not actually exist
         let entry = match entry {
             Ok(e) => e,
@@ -786,7 +786,7 @@ fn get_submodules(
 fn modules_file(repo: &Repository, at: &Commit) -> Result<String, Box<dyn std::error::Error>> {
     if let Some(modules) = at.tree()?.get_name(".gitmodules") {
         Ok(String::from_utf8(
-            modules.to_object(&repo)?.peel_to_blob()?.content().into(),
+            modules.to_object(repo)?.peel_to_blob()?.content().into(),
         )?)
     } else {
         return Ok(String::new());

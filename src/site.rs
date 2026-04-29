@@ -220,7 +220,7 @@ fn releases(
         in_progress: bool,
     }
     let hb = hb()?;
-    let scores = author_map_to_scores(&all_time);
+    let scores = author_map_to_scores(all_time);
 
     let res = hb.render(
         "stats",
@@ -238,7 +238,7 @@ fn releases(
     fs::write("output/rust/all-time/index.html", res)?;
 
     for (version, map) in by_version {
-        let scores = author_map_to_scores(&map);
+        let scores = author_map_to_scores(map);
         let res = hb.render(
             "stats",
             &Release {
