@@ -248,6 +248,18 @@ impl fmt::Debug for VersionTag {
     }
 }
 
+/// Identify the versions that have been tagged in the given repo.
+///
+/// A [`VersionTag`] is created for each tagged commit in the given repository
+/// where either
+/// * the name of the tag can be parsed with [`Version::parse()`]
+/// * the name of the tag, followed by ".0", can be parsed with
+///   [`Version::parse()`]
+///
+/// The values of [`VersionTag::version`] are the results of the successful
+/// [`Version::parse()`] calls (i.e. they might include extra ".0"s not in the
+/// tag names). Each of the returned version tags has the
+/// [`in_progress`][VersionTag::in_progress] field as `false`.
 fn get_versions(repo: &Repository) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
     let tags = repo
         .tag_names(None)?
@@ -567,6 +579,16 @@ fn mailmap_from_repo(repo: &git2::Repository) -> Result<Mailmap, Box<dyn std::er
     Mailmap::from_string(file)
 }
 
+/// Try to build an [`AuthorMap`] for the repository up to the release specified.
+///
+/// This function builds an [`AuthorMap`] using the provided set of reviewers
+/// and author mapping for each commit from the start of the repository up
+/// through the commit associated with the release.
+///
+/// TODO: a more performant approach would be to pass in the previous release
+/// and provide that to [`build_author_map`] so that only commits since that
+/// release are processed, instead of subtracting commits from prior releases
+/// afterwards.
 fn up_to_release(
     repo: &Repository,
     reviewers: &Reviewers,
@@ -605,6 +627,17 @@ fn up_to_release(
     Ok(author_map)
 }
 
+/// Generate thanks information mapping the [`VersionTag`] for each version to
+/// the [`AuthorMap`] with the information about commits.
+///
+/// The successful result includes thanks information for
+/// * each version identified by [`get_versions()`]
+/// * the unreleased version "Beta" based on the current "beta" branch in the
+///   repository, which has a version number one greater than the last full
+///   stable release
+/// * the unreleased version "Nightly" based on the current "main" branch in the
+///   repository, which has a version number one greater than the version for
+///   "Beta"
 fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::error::Error>> {
     let path = update_repo("https://github.com/rust-lang/rust.git")?;
     let repo = git2::Repository::open(&path)?;
@@ -686,9 +719,22 @@ fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::err
     Ok(version_map)
 }
 
+/// Primary entrypoint to generate and render the thanks information.
+///
+/// Thanks information will be rendered for
+/// * each version identified by [`get_versions()`]
+/// * the unreleased version "Beta"
+/// * the unreleased version "Nightly"
+/// * "all time" contributions across any of those versions
 fn run() -> Result<(), Box<dyn std::error::Error>> {
     let by_version = generate_thanks()?;
 
+    // TODO: this currently just adds up the AuthorMap instances for each
+    // version - since those were created by subtracted older versions from
+    // newer ones, we should already have a full AuthorMap for all time already
+    // created in generate_thanks(). We should use that instead.
+    // Though, if up_to_release() is refactored to account for commits in the
+    // previous release then that will no longer be an option.
     let mut all_time = by_version.values().next().unwrap().clone();
     for map in by_version.values().skip(1) {
         all_time.extend(map.clone());
@@ -699,6 +745,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+/// Generate thanks information via [`run()`] but with error handling
 fn main() {
     if let Err(err) = run() {
         eprintln!("Error: {}", err);
@@ -721,6 +768,17 @@ struct Submodule {
     repository: String,
 }
 
+/// Identify the submodules present in a repository as-of the given commit.
+///
+/// The actual submodules are identified based on [`modules_file()`]. These
+/// are then filtered to only include submodules where the source URL includes
+/// "rust-lang" or "rust-lang-nursery", and also filtered to excluded a few
+/// specific repositories.
+///
+/// The returned [`Submodule`] objects include not only the repository the
+/// submodule was cloned from, but also the commit *of the submodule* present
+/// in the primary repository *as of the given commit*. This information is
+/// used to include thanks information for contributions to submodules.
 fn get_submodules(
     repo: &Repository,
     at: &Commit,
