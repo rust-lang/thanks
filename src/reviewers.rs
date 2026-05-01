@@ -21,10 +21,10 @@ impl Reviewers {
         }
 
         fn a(name: &str, email: &str) -> AddKind {
-            AddKind::New(Author {
-                name: name.into(),
-                email: email.into(),
-            })
+            AddKind::New(Author::new(
+                 name.into(),
+                 email.into(),
+            ))
         }
 
         fn alias(name: &'static str) -> AddKind {

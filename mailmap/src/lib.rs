@@ -3,7 +3,7 @@ use std::hash::Hash;
 use std::pin::Pin;
 use std::ptr::NonNull;
 
-use unicase::UniCase;
+use uncased::{Uncased, UncasedStr};
 
 #[cfg(test)]
 mod test;
@@ -39,10 +39,10 @@ impl fmt::Debug for Mailmap {
 
 #[derive(Copy, Clone)]
 struct RawMapEntry {
-    canonical_name: Option<NonNull<str>>,
-    canonical_email: Option<NonNull<str>>,
-    current_name: Option<NonNull<str>>,
-    current_email: Option<NonNull<str>>,
+    canonical_name: Option<NonNull<UncasedStr>>,
+    canonical_email: Option<NonNull<UncasedStr>>,
+    current_name: Option<NonNull<UncasedStr>>,
+    current_email: Option<NonNull<UncasedStr>>,
 }
 
 impl RawMapEntry {
@@ -58,10 +58,10 @@ impl RawMapEntry {
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 struct MapEntry<'a> {
-    canonical_name: Option<&'a str>,
-    canonical_email: Option<&'a str>,
-    current_name: Option<&'a str>,
-    current_email: Option<&'a str>,
+    canonical_name: Option<&'a UncasedStr>,
+    canonical_email: Option<&'a UncasedStr>,
+    current_name: Option<&'a UncasedStr>,
+    current_email: Option<&'a UncasedStr>,
 }
 
 impl<'a> MapEntry<'a> {
@@ -77,15 +77,15 @@ impl<'a> MapEntry<'a> {
 
 #[derive(Clone, PartialEq, PartialOrd, Ord, Eq, Hash)]
 pub struct Author {
-    pub name: UniCase<String>,
-    pub email: UniCase<String>,
+    pub name: Uncased<'static>,
+    pub email: Uncased<'static>,
 }
 
 impl Author {
     pub fn new(name: String, email: String) -> Self {
         Self {
-            name: UniCase::new(name),
-            email: UniCase::new(email),
+            name: name.into(),
+            email: email.into(),
         }
     }
 }
@@ -117,17 +117,17 @@ impl Mailmap {
             let entry = unsafe { entry.to_entry(&self.buffer) };
             if let Some(email) = entry.current_email {
                 if let Some(name) = entry.current_name {
-                    if author.name == UniCase::new(name) && author.email == UniCase::new(email) {
+                    if author.name == name && author.email == email {
                         return Author::new(
-                            entry.canonical_name.unwrap_or(&author.name).to_owned(),
-                            entry.canonical_email.expect("canonical email").to_owned(),
+                            entry.canonical_name.unwrap_or(&author.name).to_string(),
+                            entry.canonical_email.expect("canonical email").to_string(),
                         );
                     }
                 } else {
-                    if author.email == UniCase::new(email) {
+                    if author.email == email {
                         return Author::new(
-                            entry.canonical_name.unwrap_or(&author.name).to_owned(),
-                            entry.canonical_email.expect("canonical email").to_owned(),
+                            entry.canonical_name.unwrap_or(&author.name).to_string(),
+                            entry.canonical_email.expect("canonical email").to_string(),
                         );
                     }
                 }
@@ -138,7 +138,7 @@ impl Mailmap {
     }
 }
 
-fn read_email<'a>(line: &mut &'a str) -> Option<&'a str> {
+fn read_email<'a>(line: &mut &'a str) -> Option<&'a UncasedStr> {
     if !line.starts_with('<') {
         return None;
     }
@@ -148,21 +148,21 @@ fn read_email<'a>(line: &mut &'a str) -> Option<&'a str> {
         .unwrap_or_else(|| panic!("could not find email end in {:?}", line));
     let ret = &line[1..end];
     *line = &line[end + 1..];
-    Some(ret)
+    Some(ret.into())
 }
 
-fn read_name<'a>(line: &mut &'a str) -> Option<&'a str> {
+fn read_name<'a>(line: &mut &'a str) -> Option<&'a UncasedStr> {
     let end = if let Some(end) = line.find('<') {
         end
     } else {
         return None;
     };
-    let ret = &line[..end].trim();
+    let ret = line[..end].trim();
     *line = &line[end..];
     if ret.is_empty() {
         None
     } else {
-        Some(ret)
+        Some(ret.into())
     }
 }
 
