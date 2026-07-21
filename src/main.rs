@@ -16,8 +16,10 @@ mod config;
 mod error;
 mod reviewers;
 mod site;
+mod score;
 
 use error::ErrorContext;
+use crate::score::{author_map_to_scores, AuthorScore};
 
 /// Convert a commit signature to an `Author`.
 ///
@@ -90,6 +92,21 @@ impl AuthorMap {
             }
         }
         new
+    }
+}
+
+pub struct AuthorsWithScores {
+    pub authors: AuthorMap,
+    pub scores: Vec<AuthorScore>
+}
+
+impl AuthorsWithScores {
+    fn new(authors: AuthorMap) -> Self {
+        let scores = author_map_to_scores(&authors);
+        Self {
+            authors,
+            scores
+        }
     }
 }
 
@@ -669,13 +686,17 @@ fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::err
 
 fn run() -> Result<(), Box<dyn std::error::Error>> {
     let by_version = generate_thanks()?;
+    let by_version: BTreeMap<_, _> = by_version
+        .into_iter()
+        .map(|(k, v)| (k, AuthorsWithScores::new(v)))
+        .collect();
 
-    let mut all_time = by_version.values().next().unwrap().clone();
-    for map in by_version.values().skip(1) {
-        all_time.extend(map.clone());
+    let mut all_time = by_version.values().next().unwrap().authors.clone();
+    for authors in by_version.values().skip(1) {
+        all_time.extend(authors.authors.clone());
     }
 
-    site::render(by_version, all_time)?;
+    site::render(by_version, AuthorsWithScores::new(all_time))?;
 
     Ok(())
 }

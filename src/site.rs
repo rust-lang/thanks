@@ -1,16 +1,16 @@
-use crate::{AuthorMap, VersionTag};
+use crate::score::AuthorScore;
+use crate::{AuthorMap, AuthorsWithScores, VersionTag};
 use handlebars::Handlebars;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 use std::fs;
 use std::path::Path;
-use unicase::UniCase;
 
 pub fn render(
-    by_version: BTreeMap<VersionTag, AuthorMap>,
-    all_time_map: AuthorMap,
+    by_version: BTreeMap<VersionTag, AuthorsWithScores>,
+    all_time_map: AuthorsWithScores,
 ) -> Result<(), Box<dyn std::error::Error>> {
     copy_public()?;
-    index(&all_time_map, &by_version)?;
+    index(&all_time_map.authors, &by_version)?;
     about()?;
     releases(&by_version, &all_time_map)?;
 
@@ -72,7 +72,7 @@ fn copy_public() -> Result<(), Box<dyn std::error::Error>> {
 
 fn index(
     all_time: &AuthorMap,
-    by_version: &BTreeMap<VersionTag, AuthorMap>,
+    by_version: &BTreeMap<VersionTag, AuthorsWithScores>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     #[derive(serde::Serialize)]
     struct Release {
@@ -99,8 +99,8 @@ fn index(
         releases.push(Release {
             name: version.name.clone(),
             url: format!("/rust/{}/", version.version),
-            people: stats.iter().count(),
-            commits: stats.iter().map(|(_, count)| count).sum(),
+            people: stats.authors.iter().count(),
+            commits: stats.authors.iter().map(|(_, count)| count).sum(),
         });
     }
 
@@ -135,99 +135,22 @@ fn about() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-#[derive(serde::Serialize, Ord, PartialOrd, Eq, PartialEq)]
-struct Entry {
-    rank: u32,
-    author: String,
-    email: String,
-    commits: usize,
-}
-
-fn author_map_to_scores(map: &AuthorMap) -> Vec<Entry> {
-    let debug_emails = std::env::var("DEBUG_EMAILS").is_ok_and(|value| value == "1");
-
-    let scores = map
-        .iter()
-        .map(|(author, commits)| {
-            let name = UniCase::into_inner(author.name.clone());
-
-            Entry {
-                rank: 0,
-                author: if debug_emails {
-                    format!("{name} ({})", UniCase::into_inner(author.email.clone()))
-                } else {
-                    name
-                },
-                email: UniCase::into_inner(author.email.clone()),
-                commits,
-            }
-        })
-        .collect::<Vec<_>>();
-    let mut scores = deduplicate_scores(scores);
-    scores.sort_by_key(|e| (std::cmp::Reverse(e.commits), e.author.clone()));
-
-    let mut last_rank = 1;
-    let mut ranked_at_current = 0;
-    let mut last_commits = usize::MAX;
-    for entry in &mut scores {
-        if entry.commits < last_commits {
-            last_commits = entry.commits;
-            last_rank += ranked_at_current;
-            ranked_at_current = 1;
-        } else {
-            ranked_at_current += 1;
-        }
-        entry.rank = last_rank;
-    }
-    scores
-}
-
-/// Deduplicate scores based on the assumption that an e-mail uniquely identifies a given
-/// person. If there are multiple entries with the same email, their commit counts will be
-/// merged into a single entry, with the canonical name being chosen based on the entry with
-/// the most commits.
-fn deduplicate_scores(entries: Vec<Entry>) -> Vec<Entry> {
-    let mut entry_map: HashMap<String, Vec<Entry>> = HashMap::with_capacity(entries.len());
-    for entry in entries {
-        entry_map
-            .entry(entry.email.clone())
-            .or_default()
-            .push(entry);
-    }
-
-    entry_map
-        .into_values()
-        .map(|mut entry| {
-            // If there are multiple entries with the same maximum commit count, ensure that
-            // the ordering is stable, by sorting based on the whole entry.
-            entry.sort();
-            let canonical_entry = entry.iter().max_by_key(|entry| entry.commits).unwrap();
-            Entry {
-                rank: 0,
-                author: canonical_entry.author.clone(),
-                email: canonical_entry.email.clone(),
-                commits: entry.iter().map(|e| e.commits).sum(),
-            }
-        })
-        .collect()
-}
-
 fn releases(
-    by_version: &BTreeMap<VersionTag, AuthorMap>,
-    all_time: &AuthorMap,
+    by_version: &BTreeMap<VersionTag, AuthorsWithScores>,
+    all_time: &AuthorsWithScores,
 ) -> Result<(), Box<dyn std::error::Error>> {
     #[derive(serde::Serialize)]
-    struct Release {
+    struct Release<'a> {
         common: CommonData,
         release_title: String,
         release: String,
         count: usize,
-        scores: Vec<Entry>,
+        scores: &'a [AuthorScore],
         in_progress: bool,
     }
     let hb = hb()?;
-    let scores = author_map_to_scores(all_time);
 
+    let scores = &all_time.scores;
     let res = hb.render(
         "stats",
         &Release {
@@ -244,7 +167,7 @@ fn releases(
     fs::write("output/rust/all-time/index.html", res)?;
 
     for (version, map) in by_version {
-        let scores = author_map_to_scores(map);
+        let scores = &map.scores;
         let res = hb.render(
             "stats",
             &Release {
