@@ -3,12 +3,12 @@ use mailmap::{Author, Mailmap};
 use regex::{Regex, RegexBuilder};
 use semver::Version;
 use std::collections::{BTreeMap, HashMap, HashSet};
-use std::io::Read;
+use std::io::{BufWriter, Read};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::Mutex;
 use std::{cmp, fmt, str};
-
+use std::str::FromStr;
 use config::Config;
 use reviewers::Reviewers;
 
@@ -684,7 +684,24 @@ fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::err
     Ok(version_map)
 }
 
-fn run() -> Result<(), Box<dyn std::error::Error>> {
+enum OutputMode {
+    Html,
+    Csv
+}
+
+impl FromStr for OutputMode {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "html" => Ok(Self::Html),
+            "csv" => Ok(Self::Csv),
+            _ => Err(format!("Invalid output mode {s}. Possible values: `html` or `csv`."))
+        }
+    }
+}
+
+fn run(mode: OutputMode) -> Result<(), Box<dyn std::error::Error>> {
     let by_version = generate_thanks()?;
     let by_version: BTreeMap<_, _> = by_version
         .into_iter()
@@ -696,13 +713,36 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         all_time.extend(authors.authors.clone());
     }
 
-    site::render(by_version, AuthorsWithScores::new(all_time))?;
+    match mode {
+        OutputMode::Html => {
+            site::render(by_version, AuthorsWithScores::new(all_time))?;
+        }
+        OutputMode::Csv => {
+            use std::io::Write;
+
+            let directory = PathBuf::from("output/csv");
+            std::fs::create_dir_all(&directory)?;
+            for (version, authors) in by_version {
+                let mut file = BufWriter::new(std::fs::File::create(directory.join(format!("{version}.csv")))?);
+                for score in authors.scores {
+                    let AuthorScore { rank, author, email, commits } = score;
+                    writeln!(file, "{rank},{author},{email},{commits}")?;
+                }
+            }
+        }
+    }
 
     Ok(())
 }
 
 fn main() {
-    if let Err(err) = run() {
+    let mode = std::env::args().skip(1).next();
+    let mode = match mode {
+        None => OutputMode::Html,
+        Some(mode) => mode.parse().unwrap()
+    };
+
+    if let Err(err) = run(mode) {
         eprintln!("Error: {}", err);
         let mut cur = &*err;
         while let Some(cause) = cur.source() {
