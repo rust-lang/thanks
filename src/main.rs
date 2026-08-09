@@ -369,7 +369,8 @@ fn parse_bors_reviewer(
     repo: &Repository,
     commit: &Commit,
 ) -> Result<Option<Vec<Author>>, ErrorContext> {
-    let is_old_bors = commit.author().name_bytes() == b"bors" && commit.committer().name_bytes() == b"bors";
+    let is_old_bors =
+        commit.author().name_bytes() == b"bors" && commit.committer().name_bytes() == b"bors";
     // This username was used for merges for a ~week from January 7 to January 12 2026 on the
     // rust-lang/rust repository.
     let is_new_bors = commit.author().name_bytes() == b"rust-bors[bot]";
@@ -547,23 +548,16 @@ fn build_author_map_(
 /// Returns an error if the latest commit cannot be retrieved or if it does not
 /// contain a `.mailmap` file to read.
 fn mailmap_from_repo(repo: &git2::Repository) -> Result<Mailmap, Box<dyn std::error::Error>> {
-    let tree = repo.revparse_single("HEAD")?
-        .peel_to_commit()?
-        .tree()?;
+    let tree = repo.revparse_single("HEAD")?.peel_to_commit()?.tree()?;
     let file = tree.get_name(".mailmap");
     let file = match file {
         None => {
             eprintln!("No mailmap found");
             return Mailmap::from_string("".to_string());
-        },
-        Some(f) => f
+        }
+        Some(f) => f,
     };
-    let file = String::from_utf8(
-        file.to_object(&repo)?
-            .peel_to_blob()?
-            .content()
-            .into(),
-    )?;
+    let file = String::from_utf8(file.to_object(&repo)?.peel_to_blob()?.content().into())?;
     Mailmap::from_string(file)
 }
 
