@@ -558,20 +558,23 @@ fn up_to_release(
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Product {
     Rust,
+    Rustup,
 }
 
 impl Product {
-    const ALL: [Self; 1] = [Self::Rust];
+    const ALL: [Self; 2] = [Self::Rust, Self::Rustup];
 
     fn name(&self) -> &str {
         match self {
             Self::Rust => "Rust",
+            Self::Rustup => "Rustup",
         }
     }
 
     fn repo(&self) -> &str {
         match self {
             Self::Rust => "https://github.com/rust-lang/rust.git",
+            Self::Rustup => "https://github.com/rust-lang/rustup.git",
         }
     }
 
@@ -619,6 +622,22 @@ impl Product {
                     in_progress: true,
                 },
             ],
+            Self::Rustup => vec![VersionTag {
+                name: String::from("Rustup Nightly"),
+                version: {
+                    let mut last = last_full_stable.clone();
+                    last.minor += 1;
+                    last
+                },
+                raw_tag: String::from("main"),
+                commit: repo
+                    .revparse_single("HEAD")
+                    .unwrap()
+                    .peel_to_commit()
+                    .unwrap()
+                    .id(),
+                in_progress: true,
+            }],
         }
     }
 
