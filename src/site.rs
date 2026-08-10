@@ -1,4 +1,4 @@
-use crate::{AuthorMap, VersionTag};
+use crate::{AuthorMap, Product, VersionTag};
 use handlebars::Handlebars;
 use std::collections::{BTreeMap, HashMap};
 use std::fs;
@@ -6,15 +6,20 @@ use std::path::Path;
 use unicase::UniCase;
 
 pub fn render(
-    by_version: BTreeMap<VersionTag, AuthorMap>,
-    all_time_map: AuthorMap,
+    products: &[Product],
+    by_version: &[BTreeMap<VersionTag, AuthorMap>],
+    all_time_map: &AuthorMap,
 ) -> Result<(), Box<dyn std::error::Error>> {
     copy_public()?;
-    index(&all_time_map, &by_version)?;
     about()?;
-    releases(&by_version, &all_time_map)?;
 
-    Ok(())
+    let mut index_releases = vec![];
+    for (product, by_version) in products.iter().zip(by_version) {
+        index_releases.extend(product.index_releases(all_time_map, by_version)?);
+        product.releases(by_version, all_time_map)?;
+    }
+
+    index(index_releases)
 }
 
 #[derive(serde::Serialize)]
@@ -70,40 +75,22 @@ fn copy_public() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn index(
-    all_time: &AuthorMap,
-    by_version: &BTreeMap<VersionTag, AuthorMap>,
-) -> Result<(), Box<dyn std::error::Error>> {
+#[derive(serde::Serialize)]
+pub struct Release {
+    name: String,
+    url: String,
+    people: usize,
+    commits: usize,
+}
+
+pub fn index(releases: Vec<Release>) -> Result<(), Box<dyn std::error::Error>> {
     #[derive(serde::Serialize)]
-    struct Release {
-        name: String,
-        url: String,
-        people: usize,
-        commits: usize,
-    }
-    #[derive(serde::Serialize)]
-    struct Index {
+    pub struct Index {
         common: CommonData,
         releases: Vec<Release>,
     }
+
     let hb = hb()?;
-
-    let mut releases = Vec::new();
-    releases.push(Release {
-        name: "All time".into(),
-        url: "/rust/all-time/".into(),
-        people: all_time.iter().count(),
-        commits: all_time.iter().map(|(_, count)| count).sum(),
-    });
-    for (version, stats) in by_version.iter().rev() {
-        releases.push(Release {
-            name: version.name.clone(),
-            url: format!("/rust/{}/", version.version),
-            people: stats.iter().count(),
-            commits: stats.iter().map(|(_, count)| count).sum(),
-        });
-    }
-
     let res = hb.render(
         "index",
         &Index {
@@ -114,6 +101,36 @@ fn index(
 
     fs::write("output/index.html", res)?;
     Ok(())
+}
+
+impl Product {
+    fn index_releases(
+        &self,
+        all_time: &AuthorMap,
+        by_version: &BTreeMap<VersionTag, AuthorMap>,
+    ) -> Result<Vec<Release>, Box<dyn std::error::Error>> {
+        let mut releases = Vec::new();
+        if self == &Self::Rust {
+            releases.push(Release {
+                name: "All time".into(),
+                url: "/rust/all-time/".into(),
+                people: all_time.iter().count(),
+                commits: all_time.iter().map(|(_, count)| count).sum(),
+            });
+        }
+
+        let product = self.name();
+        let product_lower = product.to_lowercase();
+        for (version, stats) in by_version.iter().rev() {
+            releases.push(Release {
+                name: version.name.clone(),
+                url: format!("/{product_lower}/{}/", version.version),
+                people: stats.iter().count(),
+                commits: stats.iter().map(|(_, count)| count).sum(),
+            });
+        }
+        Ok(releases)
+    }
 }
 
 fn about() -> Result<(), Box<dyn std::error::Error>> {
@@ -212,53 +229,60 @@ fn deduplicate_scores(entries: Vec<Entry>) -> Vec<Entry> {
         .collect()
 }
 
-fn releases(
-    by_version: &BTreeMap<VersionTag, AuthorMap>,
-    all_time: &AuthorMap,
-) -> Result<(), Box<dyn std::error::Error>> {
-    #[derive(serde::Serialize)]
-    struct Release {
-        common: CommonData,
-        release_title: String,
-        release: String,
-        count: usize,
-        scores: Vec<Entry>,
-        in_progress: bool,
+impl Product {
+    fn releases(
+        &self,
+        by_version: &BTreeMap<VersionTag, AuthorMap>,
+        all_time: &AuthorMap,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        #[derive(serde::Serialize)]
+        struct Release {
+            common: CommonData,
+            release_title: String,
+            release: String,
+            count: usize,
+            scores: Vec<Entry>,
+            in_progress: bool,
+        }
+        let hb = hb()?;
+        let scores = author_map_to_scores(all_time);
+
+        let product = self.name();
+        if self == &Self::Rust {
+            let res = hb.render(
+                "stats",
+                &Release {
+                    common: CommonData::new("All-time Rust Contributors".into()),
+                    release_title: String::from("All-time"),
+                    release: String::from("all of Rust"),
+                    count: scores.len(),
+                    scores,
+                    in_progress: true,
+                },
+            )?;
+
+            create_dir("output/rust/all-time")?;
+            fs::write("output/rust/all-time/index.html", res)?;
+        }
+
+        let product_lower = product.to_lowercase();
+        for (version, map) in by_version {
+            let scores = author_map_to_scores(map);
+            let res = hb.render(
+                "stats",
+                &Release {
+                    common: CommonData::new(format!("{product} {version} Contributors")),
+                    release_title: version.name.clone(),
+                    release: version.to_string(),
+                    count: scores.len(),
+                    scores,
+                    in_progress: version.in_progress,
+                },
+            )?;
+
+            create_dir(format!("output/{product_lower}/{version}"))?;
+            fs::write(format!("output/{product_lower}/{version}/index.html"), res)?;
+        }
+        Ok(())
     }
-    let hb = hb()?;
-    let scores = author_map_to_scores(all_time);
-
-    let res = hb.render(
-        "stats",
-        &Release {
-            common: CommonData::new("All-time Rust Contributors".into()),
-            release_title: String::from("All-time"),
-            release: String::from("all of Rust"),
-            count: scores.len(),
-            scores,
-            in_progress: true,
-        },
-    )?;
-
-    create_dir("output/rust/all-time")?;
-    fs::write("output/rust/all-time/index.html", res)?;
-
-    for (version, map) in by_version {
-        let scores = author_map_to_scores(map);
-        let res = hb.render(
-            "stats",
-            &Release {
-                common: CommonData::new(format!("Rust {} Contributors", version)),
-                release_title: version.name.clone(),
-                release: version.to_string(),
-                count: scores.len(),
-                scores,
-                in_progress: version.in_progress,
-            },
-        )?;
-
-        create_dir(format!("output/rust/{}", version))?;
-        fs::write(format!("output/rust/{}/index.html", version), res)?;
-    }
-    Ok(())
 }

@@ -242,37 +242,6 @@ impl fmt::Debug for VersionTag {
     }
 }
 
-fn get_versions(repo: &Repository) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
-    let tags = repo
-        .tag_names(None)?
-        .into_iter()
-        .flatten()
-        .map(|v| v.to_owned())
-        .collect::<Vec<_>>();
-    let mut versions = tags
-        .iter()
-        .filter_map(|tag| {
-            Version::parse(tag)
-                .or_else(|_| Version::parse(&format!("{}.0", tag)))
-                .ok()
-                .map(|v| VersionTag {
-                    name: format!("Rust {}", v),
-                    version: v,
-                    raw_tag: tag.clone(),
-                    commit: repo
-                        .revparse_single(tag)
-                        .unwrap()
-                        .peel_to_commit()
-                        .unwrap()
-                        .id(),
-                    in_progress: false,
-                })
-        })
-        .collect::<Vec<_>>();
-    versions.sort();
-    Ok(versions)
-}
-
 /// Identify the co-authors, if any, of a commit
 ///
 /// Co-authors are determined based on the commit message having lines starting
@@ -586,98 +555,191 @@ fn up_to_release(
     Ok(author_map)
 }
 
-fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::error::Error>> {
-    let path = update_repo("https://github.com/rust-lang/rust.git")?;
-    let repo = git2::Repository::open(&path)?;
-    let mailmap = mailmap_from_repo(&repo)?;
-    let reviewers = Reviewers::new()?;
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Product {
+    Rust,
+    Rustup,
+}
 
-    let mut versions = get_versions(&repo)?;
-    let last_full_stable = versions
-        .iter()
-        .rfind(|v| v.raw_tag.ends_with(".0"))
-        .unwrap()
-        .version
-        .clone();
+impl Product {
+    const ALL: [Self; 2] = [Self::Rust, Self::Rustup];
 
-    versions.push(VersionTag {
-        name: String::from("Beta"),
-        version: {
-            let mut last = last_full_stable.clone();
-            last.minor += 1;
-            last
-        },
-        raw_tag: String::from("beta"),
-        commit: repo
-            .revparse_single("beta")
-            .unwrap()
-            .peel_to_commit()
-            .unwrap()
-            .id(),
-        in_progress: true,
-    });
-    versions.push(VersionTag {
-        name: String::from("Nightly"),
-        version: {
-            // main is plus 1 minor versions off of beta, which we just pushed
-            let mut last = last_full_stable.clone();
-            last.minor += 2;
-            last
-        },
-        raw_tag: String::from("main"),
-        commit: repo
-            .revparse_single("HEAD")
-            .unwrap()
-            .peel_to_commit()
-            .unwrap()
-            .id(),
-        in_progress: true,
-    });
-
-    let mut version_map = BTreeMap::new();
-
-    let mut cache = HashMap::new();
-
-    for (idx, version) in versions.iter().enumerate() {
-        let previous = if let Some(v) = idx.checked_sub(1).map(|idx| &versions[idx]) {
-            v
-        } else {
-            let author_map = build_author_map(&repo, &reviewers, &mailmap, "", &version.raw_tag)?;
-            version_map.insert(version.clone(), author_map);
-            continue;
-        };
-
-        eprintln!("Processing {:?} to {:?}", previous, version);
-
-        cache.insert(
-            version,
-            up_to_release(&repo, &reviewers, &mailmap, version)?,
-        );
-        let previous = match cache.remove(&previous) {
-            Some(v) => v,
-            None => up_to_release(&repo, &reviewers, &mailmap, previous)?,
-        };
-        let current = cache.get(&version).unwrap();
-
-        // Remove commits reachable from the previous release.
-        let only_current = current.difference(&previous);
-        version_map.insert(version.clone(), only_current);
+    fn name(&self) -> &str {
+        match self {
+            Self::Rust => "Rust",
+            Self::Rustup => "Rustup",
+        }
     }
 
-    Ok(version_map)
+    fn repo(&self) -> &str {
+        match self {
+            Self::Rust => "https://github.com/rust-lang/rust.git",
+            Self::Rustup => "https://github.com/rust-lang/rustup.git",
+        }
+    }
+
+    fn dummy_versions(&self, repo: &Repository, versions: &[VersionTag]) -> Vec<VersionTag> {
+        let last_full_stable = versions
+            .iter()
+            .rfind(|v| v.raw_tag.ends_with(".0"))
+            .unwrap()
+            .version
+            .clone();
+
+        match self {
+            Self::Rust => vec![
+                VersionTag {
+                    name: String::from("Beta"),
+                    version: {
+                        let mut last = last_full_stable.clone();
+                        last.minor += 1;
+                        last
+                    },
+                    raw_tag: String::from("beta"),
+                    commit: repo
+                        .revparse_single("beta")
+                        .unwrap()
+                        .peel_to_commit()
+                        .unwrap()
+                        .id(),
+                    in_progress: true,
+                },
+                VersionTag {
+                    name: String::from("Nightly"),
+                    version: {
+                        // main is plus 1 minor versions off of beta, which we just pushed
+                        let mut last = last_full_stable.clone();
+                        last.minor += 2;
+                        last
+                    },
+                    raw_tag: String::from("main"),
+                    commit: repo
+                        .revparse_single("HEAD")
+                        .unwrap()
+                        .peel_to_commit()
+                        .unwrap()
+                        .id(),
+                    in_progress: true,
+                },
+            ],
+            Self::Rustup => vec![VersionTag {
+                name: String::from("Rustup Nightly"),
+                version: {
+                    let mut last = last_full_stable.clone();
+                    last.minor += 1;
+                    last
+                },
+                raw_tag: String::from("main"),
+                commit: repo
+                    .revparse_single("HEAD")
+                    .unwrap()
+                    .peel_to_commit()
+                    .unwrap()
+                    .id(),
+                in_progress: true,
+            }],
+        }
+    }
+
+    fn get_versions(
+        &self,
+        repo: &Repository,
+    ) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
+        let tags = repo
+            .tag_names(None)?
+            .into_iter()
+            .flatten()
+            .map(|v| v.to_owned())
+            .collect::<Vec<_>>();
+        let mut versions = tags
+            .iter()
+            .filter_map(|tag| {
+                Version::parse(tag)
+                    .or_else(|_| Version::parse(&format!("{}.0", tag)))
+                    .ok()
+                    .map(|v| VersionTag {
+                        name: format!("{name} {v}", name = self.name()),
+                        version: v,
+                        raw_tag: tag.clone(),
+                        commit: repo
+                            .revparse_single(tag)
+                            .unwrap()
+                            .peel_to_commit()
+                            .unwrap()
+                            .id(),
+                        in_progress: false,
+                    })
+            })
+            .collect::<Vec<_>>();
+        versions.sort();
+        Ok(versions)
+    }
+
+    fn generate_thanks(
+        &self,
+    ) -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::error::Error>> {
+        let path = update_repo(self.repo())?;
+        let repo = git2::Repository::open(&path)?;
+        let mailmap = mailmap_from_repo(&repo)?;
+        let reviewers = Reviewers::new()?;
+
+        let mut versions = self.get_versions(&repo)?;
+        versions.extend(self.dummy_versions(&repo, &versions));
+
+        let mut version_map = BTreeMap::new();
+
+        let mut cache = HashMap::new();
+
+        for (idx, version) in versions.iter().enumerate() {
+            let previous = if let Some(v) = idx.checked_sub(1).map(|idx| &versions[idx]) {
+                v
+            } else {
+                let author_map =
+                    build_author_map(&repo, &reviewers, &mailmap, "", &version.raw_tag)?;
+                version_map.insert(version.clone(), author_map);
+                continue;
+            };
+
+            eprintln!("Processing {} {:?} to {:?}", self.name(), previous, version);
+
+            cache.insert(
+                version,
+                up_to_release(&repo, &reviewers, &mailmap, version)?,
+            );
+            let previous = match cache.remove(&previous) {
+                Some(v) => v,
+                None => up_to_release(&repo, &reviewers, &mailmap, previous)?,
+            };
+            let current = cache.get(&version).unwrap();
+
+            // Remove commits reachable from the previous release.
+            let only_current = current.difference(&previous);
+            version_map.insert(version.clone(), only_current);
+        }
+
+        Ok(version_map)
+    }
 }
 
 fn run() -> Result<(), Box<dyn std::error::Error>> {
-    let by_version = generate_thanks()?;
+    let products = Product::ALL;
 
-    let mut all_time = by_version.values().next().unwrap().clone();
-    for map in by_version.values().skip(1) {
-        all_time.extend(map.clone());
+    let mut by_version = Vec::with_capacity(products.len());
+    for product in &products {
+        let thanks = product.generate_thanks()?;
+        by_version.push(thanks);
     }
 
-    site::render(by_version, all_time)?;
+    let all_time =
+        by_version
+            .iter()
+            .flat_map(|m| m.values())
+            .fold(AuthorMap::new(), |mut acc, map| {
+                acc.extend(map.clone());
+                acc
+            });
 
-    Ok(())
+    site::render(&products, &by_version, &all_time)
 }
 
 fn main() {
