@@ -67,6 +67,7 @@ impl Reviewers {
         insert("brson", a("Brian Anderson", "andersrb@gmail.com"));
         insert("bugadani", a("Dániel Buga", "bugadani@gmail.com"));
         insert("c410-f3r", a("Caio", "c410.f3r@gmail.com"));
+        insert("camelid", a("Noah Lev", "camelidcamel@gmail.com"));
         insert("catamorphism", a("Tim Chevalier", "chevalier@alum.wellesley.edu"));
         insert("cdirkx", a("Christiaan Dirkx", "christiaan@dirkx.email"));
         insert("chris", a("Chris Morgan", "me@chrismorgan.info"));
