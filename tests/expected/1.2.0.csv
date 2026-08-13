@@ -1,0 +1,180 @@
+1,bors,bors@rust-lang.org,317
+2,Alex Crichton,alex@alexcrichton.com,215
+3,Steve Klabnik,steve@steveklabnik.com,82
+4,Eduard-Mihai Burtescu,edy.burt@gmail.com,49
+5,Brian Anderson,banderson@mozilla.com,47
+6,Niko Matsakis,rust@nikomatsakis.com,40
+7,Ariel Ben-Yehuda,arielb1@mail.tau.ac.il,36
+8,Tshepang Mbambo,hopsi@tuta.io,33
+9,Nick Cameron,nrc@ncameron.org,30
+10,Ulrik Sverdrup,bluss@users.noreply.github.com,29
+11,Manish Goregaokar,manishsmail@gmail.com,28
+11,Nick Hamann,nick@wabbo.org,28
+13,Guillaume Gomez,contact@guillaume-gomez.fr,21
+14,Steven Fackler,sfackler@gmail.com,20
+15,Alexis Beingessner,a.beingessner@gmail.com,17
+16,Simon Sapin,simon@exyr.org,15
+17,Björn Steinbrink,bsteinbr@gmail.com,14
+17,Huon Wilson,dbau.pp@gmail.com,14
+19,Aaron Turon,aturon@mozilla.com,11
+19,Felix Klock,pnkfelix@pnkfx.org,11
+21,Paul Faria,paul_faria@ultimatesoftware.com,10
+21,Richo Healey,richo@psych0tik.net,10
+23,Pascal Hertleif,killercup@gmail.com,9
+24,Geoffrey Thomas,geofft@ldpreload.com,8
+24,Mathieu David,mathieudavid@mathieudavid.org,8
+24,Ms2ger,ms2ger@gmail.com,8
+27,Luqman Aden,me@luqman.ca,7
+27,Matt Brubeck,mbrubeck@limpet.net,7
+27,Vadim Petrochenkov,vadim.petrochenkov@gmail.com,7
+30,Carol (Nichols || Goulding),carol.nichols@gmail.com,6
+30,Corey Farwell,coreyf@rwell.org,6
+30,Johannes Oertel,johannes.oertel@uni-due.de,6
+30,Lee Jeffery,leejeffery@gmail.com,6
+30,Mikhail Zabaluev,mikhail.zabaluev@gmail.com,6
+30,Seo Sanghyeon,sanxiyn@gmail.com,6
+36,Aidan Hobson Sayers,aidanhs@cantab.net,5
+36,Eli Friedman,eli.friedman@gmail.com,5
+36,James Miller,bladeon@gmail.com,5
+36,Markus Westerlind,marwes91@gmail.com,5
+36,Steven Allen,steven@stebalien.com,5
+36,Xuefeng Wu,benewu@gmail.com,5
+42,Akshay Chiwhane,achiwhane@gmail.com,4
+42,Chris Hellmuth,chellmuth@gmail.com,4
+42,Dave Huseby,dhuseby@mozilla.com,4
+42,Jake Goulding,jake.goulding@integer32.com,4
+42,Michael Sproul,micsproul@gmail.com,4
+42,P1start,rewi-github@whanau.org,4
+42,Peter Atashian,retep998@gmail.com,4
+42,Sean Patrick Santos,SeanPatrickSantos@gmail.com,4
+42,Simonas Kazlauskas,git@kazlauskas.me,4
+42,Tamir Duberstein,tamird@gmail.com,4
+42,peferron,pe.ferron@gmail.com,4
+53,Christian Stadelmann,dev@genodeftest.de,3
+53,David Campbell,dcampbell24@gmail.com,3
+53,Hsiang-Cheng Yang,rick68@users.noreply.github.com,3
+53,Jim Blandy,jimb@red-bean.com,3
+53,Matthew Astley,mca@sanger.ac.uk,3
+53,Oliver Scherer,oli-obk@users.noreply.github.com,3
+53,Will Andrews,will@firepipe.net,3
+60,Andrew Straw,strawman@astraw.com,2
+60,Chuck Bassett,iamchuckb@gmail.com,2
+60,Huon Wilson,dbau.pp+github@gmail.com,2
+60,Ivan Ukhov,ivan.ukhov@gmail.com,2
+60,Joshua Landau,joshua@landau.ws,2
+60,Lorenz,lorenzb@student.ethz.ch,2
+60,Marcell Pardavi,marcell.pardavi@gmail.com,2
+60,Martin Pool,mbp@sourcefrog.net,2
+60,Maximilian Haack,mxhaack@gmail.com,2
+60,Nick Howell,howellnick@gmail.com,2
+60,Nika Layzell,nika@thelayzells.com,2
+60,Nils Liberg,nils@nilsliberg.se,2
+60,Patrick Walton,pcwalton@mimiga.net,2
+60,Peer Aramillo Irizar,peer.aramillo.irizar@gmail.com,2
+60,Peter Elmers,peter.elmers@yahoo.com,2
+60,Ralph Giles,giles@thaumas.net,2
+60,Steve Gury,steve.gury@gmail.com,2
+60,Sébastien Marie,semarie@users.noreply.github.com,2
+60,Thomas Karpiniec,tk@1.21jiggawatts.net,2
+60,ember arlynx,ember@lunar.town,2
+60,mdinger,mdinger.bugzilla@gmail.com,2
+60,ray glover,ray@rayglover.net,2
+82,Abhishek Chanda,abhishek.becs@gmail.com,1
+82,Adolfo Ochagavía,aochagavia92@gmail.com,1
+82,Alex Burka,durka42+github@gmail.com,1
+82,Alex Stokes,r.alex.stokes@gmail.com,1
+82,Alexander Artemenko,svetlyak.40wt@gmail.com,1
+82,Andrea Canciani,ranma42@gmail.com,1
+82,Andrew Foote,afoote97@gmail.com,1
+82,Andrew Kensler,andrew@eastfarthing.com,1
+82,Austin Hellyer,hello@austinhellyer.me,1
+82,Barosl Lee,vcs@barosl.com,1
+82,Ben Striegel,ben.striegel@gmail.com,1
+82,Brian Campbell,lambda@continuation.org,1
+82,Brian Leibig,brian@brianleibig.com,1
+82,Brian Quinlan,brian@sweetapp.com,1
+82,Cornel Punga,cornel.punga@gmail.com,1
+82,Cruz Julian Bishop,cruzjbishop@gmail.com,1
+82,David Stygstra,david.stygstra@gmail.com,1
+82,David Voit,david.voit@gmail.com,1
+82,E. Dunham,edunham@mozilla.com,1
+82,Eduard Bopp,eduard.bopp@aepsil0n.de,1
+82,Emilio Cobos Álvarez,ecoal95@gmail.com,1
+82,Eric Ye,me@ericye16.com,1
+82,Erik Michaels-Ober,sferik@gmail.com,1
+82,Falco Hirschenberger,falco.hirschenberger@gmail.com,1
+82,FuGangqiang,fu_gangqiang@163.com,1
+82,Gleb Kozyrev,gleb@gkoz.com,1
+82,Gulshan Singh,gsingh2011@gmail.com,1
+82,Heejong Ahn,heejongahn@gmail.com,1
+82,Huachao Huang,huachao.huang@gmail.com,1
+82,Iven Hsu,ivenvd@gmail.com,1
+82,Jake Hickey,empty@cqdr.es,1
+82,Jared Roesch,roeschinc@gmail.com,1
+82,Jeremy Schlatter,jeremy.schlatter@gmail.com,1
+82,Jexell,Jexell@users.noreply.github.com,1
+82,Johann Tuffe,tafia973@gmail.com,1
+82,Johannes Hoff,johshoff@gmail.com,1
+82,John Hodge,acessdev@gmail.com,1
+82,John Talling,inrustwetrust@users.noreply.github.com,1
+82,Jonathan Reem,jonathan.reem@gmail.com,1
+82,Katze,binary@benary.org,1
+82,Kevin Butler,haqkrs@gmail.com,1
+82,Kubilay Kocak,koobs@users.noreply.github.com,1
+82,Leo Correa,lcorr005@gmail.com,1
+82,Liigo Zhuang,com.liigo@gmail.com,1
+82,Lily Ballard,lily@ballards.net,1
+82,Luca Bruno,lucab@debian.org,1
+82,Marcel Müller,neikos@neikos.email,1
+82,Marcus Klaas de Vries,mail@marcusklaas.nl,1
+82,Marin Atanasov Nikolov,dnaeon@gmail.com,1
+82,Marvin Löbel,loebel.marvin@gmail.com,1
+82,Matej Lach,matej.lach@gmail.com,1
+82,Max Jacobson,max@hardscrabble.net,1
+82,Michael Macias,zaeleus@gmail.com,1
+82,Michael Rosenberg,42micro@gmail.com,1
+82,Michael Woerister,michaelwoerister@posteo,1
+82,Mihnea Dobrescu-Balaur,mihnea@linux.com,1
+82,Mohammed Attia,skeuomorf@gmail.com,1
+82,Murarth,murarth@gmail.com,1
+82,Mário Feroldi,thelost-t@live.com,1
+82,Nathan Long,nathanmlong@gmail.com,1
+82,Nathaniel Theis,nttheis@gmail.com,1
+82,Nick Desaulniers,ndesaulniers@mozilla.com,1
+82,Nick Fitzgerald,fitzgen@gmail.com,1
+82,OlegTsyba,idethrone1@gmail.com,1
+82,Parker Moore,parkrmoore@gmail.com,1
+82,Paul Oliver,puzza007@gmail.com,1
+82,Philip Munksgaard,pmunksgaard@gmail.com,1
+82,Rein Henrichs,reinh@reinh.com,1
+82,Ricardo Martins,ricardo@scarybox.net,1
+82,Ricky Taylor,rickytaylor26@gmail.com,1
+82,Russell Johnston,rpjohnst@gmail.com,1
+82,Russell McClellan,russell.mcclellan@gmail.com,1
+82,Ryan Pendleton,me@ryanp.me,1
+82,Rémi Audebert,halfr@lse.epita.fr,1
+82,Sae-bom Kim,sae-bom.kim@samsung.com,1
+82,Sean Collins,sean@cllns.com,1
+82,Sean Gillespie,sean.william.g@gmail.com,1
+82,Steven Walter,stevenrwalter@gmail.com,1
+82,Tim Ringenbach,tim.ringenbach@gmail.com,1
+82,Wesley Wiser,wwiser@gmail.com,1
+82,Wilfred Hughes,me@wilfred.me.uk,1
+82,Will Engler,engler.will@gmail.com,1
+82,Yongqian Li,yongqli@kerrmetric.com,1
+82,York Xiang,bombless@126.com,1
+82,Z1,MazinZ1@users.noreply.github.com,1
+82,ben fleis,ben.fleis@gmail.com,1
+82,clatour,chandler.latour@gmail.com,1
+82,diwic,diwic@users.noreply.github.com,1
+82,dmgawel,dgkonik@gmail.com,1
+82,econoplas,econoplas@gmail.com,1
+82,frankamp,frankamp@gmail.com,1
+82,funkill,funkill2@gmail.com,1
+82,joliv,joliv@users.noreply.github.com,1
+82,klutzy,klutzytheklutzy@gmail.com,1
+82,olombard,lombard-olivier@bbox.fr,1
+82,saml,saml@users.noreply.github.com,1
+82,simplex,theemptystring@gmail.com,1
+82,sumito3478,sumito3478@gmail.com,1
+82,webmobster,webmobster@users.noreply.github.com,1

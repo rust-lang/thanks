@@ -1,0 +1,112 @@
+1,Alex Crichton,alex@alexcrichton.com,139
+2,bors,bors@rust-lang.org,93
+3,Felix S. Klock II,pnkfelix@pnkfx.org,50
+4,Steve Klabnik,steve@steveklabnik.com,48
+5,Brian Anderson,banderson@mozilla.com,45
+6,Niko Matsakis,rust@nikomatsakis.com,28
+7,Aaron Turon,aturon@mozilla.com,19
+7,Corey Farwell,coreyf@rwell.org,19
+9,Simonas Kazlauskas,git@kazlauskas.me,16
+10,Manish Goregaokar,manishsmail@gmail.com,14
+11,Nick Cameron,nrc@ncameron.org,13
+11,Richo Healey,richo@psych0tik.net,13
+13,Ryan Prichard,ryan.prichard@gmail.com,9
+14,Nick Hamann,nick@wabbo.org,8
+15,Seo Sanghyeon,sanxiyn@gmail.com,7
+16,Luke Gallagher,luke@hypergeometric.net,6
+16,Marvin Löbel,loebel.marvin@gmail.com,6
+16,Sean McArthur,sean.monstar@gmail.com,6
+16,Vadim Petrochenkov,vadim.petrochenkov@gmail.com,6
+20,Barosl Lee,vcs@barosl.com,5
+20,Christopher Chambers,chris.chambers@peanutcode.com,5
+20,Ruud van Asseldonk,dev@veniogames.com,5
+20,bcoopers,coopersmithbrian@gmail.com,5
+24,Andrew Paseltiner,apaseltiner@gmail.com,4
+24,Dave Huseby,dhuseby@mozilla.com,4
+24,Huon Wilson,dbau.pp@gmail.com,4
+24,Lily Ballard,lily@ballards.net,4
+24,Matt Brubeck,mbrubeck@limpet.net,4
+24,Tamir Duberstein,tamird@gmail.com,4
+24,Theo Belaire,theo.belaire@gmail.com,4
+24,Tshepang Mbambo,hopsi@tuta.io,4
+32,Brett Cannon,brett@python.org,3
+32,Guillaume Gomez,contact@guillaume-gomez.fr,3
+32,Michael Sproul,micsproul@gmail.com,3
+32,Sean Bowe,ewillbefull@gmail.com,3
+32,Tobias Bucher,tobiasbucher5991@gmail.com,3
+32,York Xiang,bombless@126.com,3
+38,Abhishek Chanda,abhishek.becs@gmail.com,2
+38,Alex Quach,alex@clinkle.com,2
+38,Chris Wong,lambda.fairy@gmail.com,2
+38,Dan Callahan,dan.callahan@gmail.com,2
+38,Dzmitry Malyshau,kvarkus@gmail.com,2
+38,Florian Hahn,flo@fhahn.com,2
+38,Fuqiao Xue,xfq.free@gmail.com,2
+38,Gleb Kozyrev,gleb@gkoz.com,2
+38,Huon Wilson,dbau.pp+github@gmail.com,2
+38,Igor Strebezhev,xamgore@ya.ru,2
+38,James Miller,bladeon@gmail.com,2
+38,James Perry,james.austin.perry@gmail.com,2
+38,John Gallagher,jgallagher@bignerdranch.com,2
+38,Michael Macias,zaeleus@gmail.com,2
+38,Oak,White-Oak@users.noreply.github.com,2
+38,Phil Dawes,phil@phildawes.net,2
+38,Steven Fackler,sfackler@gmail.com,2
+38,Sébastien Marie,semarie@users.noreply.github.com,2
+38,Tim Cuthbertson,tim@gfxmonk.net,2
+38,Ulrik Sverdrup,bluss@users.noreply.github.com,2
+38,kwantam,kwantam@gmail.com,2
+38,tynopex,tynopex@users.noreply.github.com,2
+38,Łukasz Niemier,lukasz@niemier.pl,2
+61,Adolfo Ochagavía,aochagavia92@gmail.com,1
+61,Alexis Beingessner,a.beingessner@gmail.com,1
+61,Andrea Canciani,ranma42@gmail.com,1
+61,Andreas Martens,andreasm@fastmail.fm,1
+61,Andrew Seidl,dev@aas.io,1
+61,Aram Visser,aramvisser@gmail.com,1
+61,Ariel Ben-Yehuda,arielb1@mail.tau.ac.il,1
+61,Augusto Hack,hack.augusto@gmail.com,1
+61,Ben Ashford,ben@bcash.org,1
+61,Björn Steinbrink,bsteinbr@gmail.com,1
+61,Carlos Galarza,carloslfu@gmail.com,1
+61,Chris Morgan,me@chrismorgan.info,1
+61,Dominick Allen,dominick.allen1989@gmail.com,1
+61,Earl St Sauver,estsauver@gmail.com,1
+61,Eduard-Mihai Burtescu,edy.burt@gmail.com,1
+61,Erick Tryzelaar,erick.tryzelaar@gmail.com,1
+61,Florian Hartwig,florian.j.hartwig@gmail.com,1
+61,Hajime Morrita,omo@dodgson.org,1
+61,Hanna Kruppe,hanna.kruppe@gmail.com,1
+61,Hugo Duncan,hugo@hugoduncan.org,1
+61,John Talling,inrustwetrust@users.noreply.github.com,1
+61,Jonathan S,gereeter@gmail.com,1
+61,Josh Triplett,josh@joshtriplett.org,1
+61,Keegan McAllister,mcallister.keegan@gmail.com,1
+61,Kevin Butler,haqkrs@gmail.com,1
+61,Liam Monahan,liam@monahan.io,1
+61,Manuel Hoffmann,manuel@polythematik.de,1
+61,Mark Mossberg,mark.mossberg@gmail.com,1
+61,Michael Alexander,beefsack@gmail.com,1
+61,Michael Woerister,michaelwoerister@posteo,1
+61,Mickaël Salaün,mic@digikod.net,1
+61,Ms2ger,ms2ger@gmail.com,1
+61,Ožbolt Menegatti,ozbolt.menegatti@gmail.com,1
+61,Pascal Hertleif,killercup@gmail.com,1
+61,Paul Quint,DrKwint@gmail.com,1
+61,Piotr Szotkowski,chastell@chastell.net,1
+61,Ralph Giles,giles@thaumas.net,1
+61,Remi Rampin,remirampin@gmail.com,1
+61,Robert Foss,dev@robertfoss.se,1
+61,Scott Olson,scott@solson.me,1
+61,Simon Ruggier,Simon80@gmail.com,1
+61,Simon Sapin,simon@exyr.org,1
+61,Tero Hänninen,lgvz@users.noreply.github.com,1
+61,Thiago Carvalho,thiago.carvalho@westwing.de,1
+61,Tibor Benke,ihrwein@gmail.com,1
+61,Will,will@glozer.net,1
+61,Will Hipschman,whipsch@gmail.com,1
+61,fenduru,fenduru@users.noreply.github.com,1
+61,github-monoculture,eocene@gmx.com,1
+61,kgv,mail@kgv.name,1
+61,mdinger,mdinger.bugzilla@gmail.com,1
+61,rundrop1,rundrop1@zoho.com,1
