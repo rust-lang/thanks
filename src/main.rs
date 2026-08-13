@@ -1,25 +1,25 @@
+use config::Config;
 use git2::{Commit, Oid, Repository};
 use mailmap::{Author, Mailmap};
 use regex::{Regex, RegexBuilder};
+use reviewers::Reviewers;
 use semver::Version;
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::io::{BufWriter, Read};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
+use std::str::FromStr;
 use std::sync::Mutex;
 use std::{cmp, fmt, str};
-use std::str::FromStr;
-use config::Config;
-use reviewers::Reviewers;
 
 mod config;
 mod error;
 mod reviewers;
-mod site;
 mod score;
+mod site;
 
-use error::ErrorContext;
 use crate::score::{author_map_to_scores, AuthorScore};
+use error::ErrorContext;
 
 /// Convert a commit signature to an `Author`.
 ///
@@ -97,16 +97,13 @@ impl AuthorMap {
 
 pub struct AuthorsWithScores {
     pub authors: AuthorMap,
-    pub scores: Vec<AuthorScore>
+    pub scores: Vec<AuthorScore>,
 }
 
 impl AuthorsWithScores {
     fn new(authors: AuthorMap) -> Self {
         let scores = author_map_to_scores(&authors);
-        Self {
-            authors,
-            scores
-        }
+        Self { authors, scores }
     }
 }
 
@@ -696,7 +693,7 @@ fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::err
 
 enum OutputMode {
     Html,
-    Csv
+    Csv,
 }
 
 impl FromStr for OutputMode {
@@ -706,7 +703,9 @@ impl FromStr for OutputMode {
         match s {
             "html" => Ok(Self::Html),
             "csv" => Ok(Self::Csv),
-            _ => Err(format!("Invalid output mode {s}. Possible values: `html` or `csv`."))
+            _ => Err(format!(
+                "Invalid output mode {s}. Possible values: `html` or `csv`."
+            )),
         }
     }
 }
@@ -733,9 +732,16 @@ fn run(mode: OutputMode) -> Result<(), Box<dyn std::error::Error>> {
             let directory = PathBuf::from("output/csv");
             std::fs::create_dir_all(&directory)?;
             for (version, authors) in by_version {
-                let mut file = BufWriter::new(std::fs::File::create(directory.join(format!("{version}.csv")))?);
+                let mut file = BufWriter::new(std::fs::File::create(
+                    directory.join(format!("{version}.csv")),
+                )?);
                 for score in authors.scores {
-                    let AuthorScore { rank, author, email, commits } = score;
+                    let AuthorScore {
+                        rank,
+                        author,
+                        email,
+                        commits,
+                    } = score;
                     writeln!(file, "{rank},{author},{email},{commits}")?;
                 }
             }
@@ -746,10 +752,10 @@ fn run(mode: OutputMode) -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn main() {
-    let mode = std::env::args().skip(1).next();
+    let mode = std::env::args().nth(1);
     let mode = match mode {
         None => OutputMode::Html,
-        Some(mode) => mode.parse().unwrap()
+        Some(mode) => mode.parse().unwrap(),
     };
 
     if let Err(err) = run(mode) {

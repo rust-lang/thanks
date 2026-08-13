@@ -6,16 +6,35 @@ on:
   schedule:
     - cron: "0 0 * * *" # Every day at 00:00 UTC
 
-permissions:
- contents: write
-
 jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the source code
+        uses: actions/checkout@v7
+
+      - name: Install Rust
+        run: |
+          rustup update stable
+          rustup component add rustfmt clippy
+          rustup override set stable
+
+      - name: Build
+        run: cargo build --all-targets --locked
+
+      - name: Clippy
+        run: cargo clippy -- -Dwarnings
+
+      - name: Format
+        run: cargo fmt --check
+
   build:
     name: Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the source code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install Rust
         run: |
