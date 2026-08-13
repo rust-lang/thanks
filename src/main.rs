@@ -742,7 +742,7 @@ fn run(mode: OutputMode) -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn main() {
-    let mode = std::env::args().skip(1).next();
+    let mode = std::env::args().nth(1);
     let mode = match mode {
         None => OutputMode::Html,
         Some(mode) => mode.parse().unwrap(),
