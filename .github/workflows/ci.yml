@@ -1,8 +1,8 @@
 name: CI
 on:
-  push: {}
-  pull_request: {}
-  workflow_dispatch: {}
+  push: { }
+  pull_request: { }
+  workflow_dispatch: { }
   schedule:
     - cron: "0 0 * * *" # Every day at 00:00 UTC
 
@@ -68,3 +68,26 @@ jobs:
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
         id: deployment
+
+  conclusion:
+    name: Conclusion
+    needs:
+      - test
+      - build
+      - deploy
+    # We need to ensure this job does *not* get skipped if its dependencies fail,
+    # because a skipped job is considered a success by GitHub. So we have to
+    # overwrite `if:`. We use `!cancelled()` to ensure the job does still not get run
+    # when the workflow is canceled manually.
+    #
+    # ALL THE PREVIOUS JOBS NEED TO BE ADDED TO THE `needs` SECTION OF THIS JOB!
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      # Manually check the status of all dependencies. `if: failure()` does not work.
+      - name: Conclusion
+        run: |
+          # Print the dependent jobs to see them in the CI log
+          jq -C <<< '${{ toJson(needs) }}'
+          # Check if all jobs that we depend on (in the needs array) were successful (or have been skipped).
+          jq --exit-status 'all(.result == "success" or .result == "skipped")' <<< '${{ toJson(needs) }}'
