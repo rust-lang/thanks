@@ -2,7 +2,7 @@
 
 [![Build Status][status-img]][status]
 
-[status-img]: https://github.com/rust-lang/thanks/actions/workflows/ci.yml/badge.svg?branch=master
+[status-img]: https://github.com/rust-lang/thanks/actions/workflows/ci.yml/badge.svg?branch=main
 [status]: https://github.com/rust-lang/thanks/actions/workflows/ci.yml
 
 This is a static site generator showing people who have contributed to Rust.
