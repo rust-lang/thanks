@@ -31,7 +31,15 @@ pub fn author_map_to_scores(map: &AuthorMap) -> Vec<AuthorScore> {
         })
         .collect::<Vec<_>>();
     let mut scores = deduplicate_scores(scores);
-    scores.sort_by_key(|e| (std::cmp::Reverse(e.commits), e.author.clone()));
+    // We also sort by the e-mail, in the off-chance that someone has the same name and the same
+    // number of contributions. Might not be so unlikely for low contribution counts.
+    scores.sort_by_key(|e| {
+        (
+            std::cmp::Reverse(e.commits),
+            e.author.clone(),
+            e.email.clone(),
+        )
+    });
 
     let mut last_rank = 1;
     let mut ranked_at_current = 0;
