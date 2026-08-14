@@ -834,6 +834,9 @@ fn get_submodules(
             && !exclude.contains(&repo_name.as_str())
             && !exclude.contains(&&*format!("{}.git", repo_name))
     });
+
+    // Sort the submodules to ensure deterministic commit iteration order
+    submodules.sort_by(|a, b| a.repository.cmp(&b.repository));
     Ok(submodules)
 }
 
