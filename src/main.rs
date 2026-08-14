@@ -589,12 +589,11 @@ fn up_to_release(
         .map_err(|e| ErrorContext(format!("Up to {}", to), e))?;
 
     for module in &modules {
-        if let Ok(path) = update_repo(&module.repository) {
-            let subrepo = Repository::open(&path)?;
-            let submap =
-                build_author_map(&subrepo, reviewers, mailmap, "", &module.commit.to_string())?;
-            author_map.extend(submap);
-        }
+        let path = update_repo(&module.repository)?;
+        let subrepo = Repository::open(&path)?;
+        let submap =
+            build_author_map(&subrepo, reviewers, mailmap, "", &module.commit.to_string())?;
+        author_map.extend(submap);
     }
 
     Ok(author_map)
