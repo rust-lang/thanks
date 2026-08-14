@@ -721,20 +721,19 @@ fn run(mode: OutputMode) -> Result<(), Box<dyn std::error::Error>> {
     for authors in by_version.values().skip(1) {
         all_time.extend(authors.authors.clone());
     }
+    let all_time = AuthorsWithScores::new(all_time);
 
     match mode {
         OutputMode::Html => {
-            site::render(by_version, AuthorsWithScores::new(all_time))?;
+            site::render(by_version, all_time)?;
         }
         OutputMode::Csv => {
             use std::io::Write;
 
-            let directory = PathBuf::from("output/csv");
-            std::fs::create_dir_all(&directory)?;
-            for (version, authors) in by_version {
-                let mut file = BufWriter::new(std::fs::File::create(
-                    directory.join(format!("{version}.csv")),
-                )?);
+            let write = |path: &Path,
+                         authors: AuthorsWithScores|
+             -> Result<(), Box<dyn std::error::Error>> {
+                let mut file = BufWriter::new(std::fs::File::create(path)?);
                 for score in authors.scores {
                     let AuthorScore {
                         rank,
@@ -744,7 +743,15 @@ fn run(mode: OutputMode) -> Result<(), Box<dyn std::error::Error>> {
                     } = score;
                     writeln!(file, "{rank},{author},{email},{commits}")?;
                 }
+                Ok(())
+            };
+
+            let directory = PathBuf::from("output/csv");
+            std::fs::create_dir_all(&directory)?;
+            for (version, authors) in by_version {
+                write(&directory.join(format!("{version}.csv")), authors)?;
             }
+            write(&directory.join("all-time.csv"), all_time)?;
         }
     }
 
