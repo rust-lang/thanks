@@ -18,7 +18,7 @@ mod reviewers;
 mod score;
 mod site;
 
-use crate::score::{author_map_to_scores, AuthorScore};
+use crate::score::{AuthorScore, author_map_to_scores};
 use error::ErrorContext;
 
 /// Convert a commit signature to an `Author`.
@@ -303,13 +303,13 @@ fn commit_coauthors(commit: &Commit) -> Vec<Author> {
         }
 
         for line in msg.lines().rev() {
-            if line.starts_with("Co-authored-by") {
-                if let Some(caps) = RE.captures(line) {
-                    coauthors.push(Author::new(
-                        caps["name"].to_string(),
-                        caps["email"].to_string(),
-                    ));
-                }
+            if line.starts_with("Co-authored-by")
+                && let Some(caps) = RE.captures(line)
+            {
+                coauthors.push(Author::new(
+                    caps["name"].to_string(),
+                    caps["email"].to_string(),
+                ));
             }
         }
     }

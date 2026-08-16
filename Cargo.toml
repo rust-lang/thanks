@@ -2,7 +2,7 @@
 name = "thanks"
 version = "0.1.0"
 authors = ["The Rust Project Developers"]
-edition = "2018"
+edition = "2024"
 
 [dependencies]
 git2 = "0.13"
