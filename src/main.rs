@@ -199,7 +199,7 @@ fn update_repo(url: &str) -> Result<PathBuf, Box<dyn std::error::Error>> {
 /// Clones that already exist are only updated if the first command line
 /// argument specified was `--refresh`.
 fn should_update() -> bool {
-    std::env::args_os().nth(1).unwrap_or_default() == "--refresh"
+    std::env::var("REFRESH").is_ok()
 }
 
 /// Information about a git tag or other reference to treat as a tag.
