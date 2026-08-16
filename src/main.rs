@@ -616,7 +616,7 @@ fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::err
                 let subrepo = Repository::open(path)?;
                 author_map.extend(build_author_map(&subrepo, &reviewers, &mailmap, &commits)?);
             }
-            Result::<(VersionTag, AuthorMap), Box<dyn std::error::Error>>::Ok((version, author_map))
+            Ok::<_, Box<dyn std::error::Error>>((version, author_map))
         })
         .collect::<Result<_, _>>()?;
     eprintln!(
@@ -641,6 +641,10 @@ fn gather_all_commits(
     let mut last_version_oid: Option<Oid> = None;
 
     let mut by_version: HashMap<VersionTag, VersionCommits> = HashMap::new();
+
+    // Re-opening the same repository multiple times causes us to unpack its object database
+    // repeatedly. If we cache the repositories, this doesn't have to happen.
+    let mut subrepo_cache: HashMap<String, Repository> = HashMap::new();
 
     // Iterate all version from the oldest to the newest
     for version in &versions {
@@ -675,7 +679,16 @@ fn gather_all_commits(
         let modules = get_submodules(repo, &commit)?;
         for submodule in modules {
             let path = update_repo(&submodule.repository)?;
-            let subrepo = Repository::open(&path)?;
+
+            let subrepo = subrepo_cache.get(&submodule.repository);
+            let subrepo = match subrepo {
+                Some(subrepo) => subrepo,
+                None => {
+                    // We do not use the entry API here because `open` returns a result
+                    subrepo_cache.insert(submodule.repository.clone(), Repository::open(&path)?);
+                    subrepo_cache.get(&submodule.repository).unwrap()
+                }
+            };
 
             // Iterate commits of the submodule
             let mut subwalk = subrepo.revwalk()?;
@@ -733,8 +746,9 @@ fn gather_all_commits(
     }
     let submodules = get_submodules(repo, &repo.find_commit(head)?)?;
     for submodule in submodules {
-        let repo = update_repo(&submodule.repository)?;
-        let repo = Repository::open(repo)?;
+        let repo = subrepo_cache
+            .get(&submodule.repository)
+            .expect("Submodule repository not found");
         let mut walk = repo.revwalk()?;
         walk.push(submodule.commit)?;
         for commit in walk {
