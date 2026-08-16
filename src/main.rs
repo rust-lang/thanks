@@ -10,6 +10,7 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::str::FromStr;
 use std::sync::Mutex;
+use std::time::Instant;
 use std::{cmp, fmt, str};
 
 mod config;
@@ -73,25 +74,6 @@ impl AuthorMap {
         for (author, set) in other.map {
             self.map.entry(author).or_default().extend(set);
         }
-    }
-
-    /// Create a new `AuthorMap` containing just the commits present in the current
-    /// map but not the other one.
-    #[must_use]
-    fn difference(&self, other: &AuthorMap) -> AuthorMap {
-        let mut new = AuthorMap::new();
-        new.map.reserve(self.map.len());
-        for (author, set) in self.map.iter() {
-            if let Some(other_set) = other.map.get(author) {
-                let diff: HashSet<_> = set.difference(other_set).cloned().collect();
-                if !diff.is_empty() {
-                    new.map.insert(author.clone(), diff);
-                }
-            } else {
-                new.map.insert(author.clone(), set.clone());
-            }
-        }
-        new
     }
 }
 
@@ -256,6 +238,22 @@ impl fmt::Debug for VersionTag {
     }
 }
 
+struct VersionCommits {
+    main: Vec<Oid>,
+    submodules: Vec<(Submodule, Vec<Oid>)>,
+}
+
+impl VersionCommits {
+    fn total_commits(&self) -> u64 {
+        self.main.len() as u64
+            + self
+                .submodules
+                .iter()
+                .map(|(_, commits)| commits.len() as u64)
+                .sum::<u64>()
+    }
+}
+
 fn get_versions(repo: &Repository) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
     let tags = repo
         .tag_names(None)?
@@ -324,18 +322,12 @@ fn build_author_map(
     repo: &Repository,
     reviewers: &Reviewers,
     mailmap: &Mailmap,
-    from: &str,
-    to: &str,
+    commits: &[Oid],
 ) -> Result<AuthorMap, Box<dyn std::error::Error>> {
-    match build_author_map_(repo, reviewers, mailmap, from, to) {
+    match build_author_map_(repo, reviewers, mailmap, commits) {
         Ok(o) => Ok(o),
         Err(err) => Err(ErrorContext(
-            format!(
-                "build_author_map(repo={}, from={:?}, to={:?})",
-                repo.path().display(),
-                from,
-                to
-            ),
+            format!("build_author_map(repo={})", repo.path().display(),),
             err,
         ))?,
     }
@@ -490,33 +482,11 @@ fn build_author_map_(
     repo: &Repository,
     reviewers: &Reviewers,
     mailmap: &Mailmap,
-    from: &str,
-    to: &str,
+    commits: &[Oid],
 ) -> Result<AuthorMap, Box<dyn std::error::Error>> {
-    let mut walker = repo.revwalk()?;
-
-    if repo.revparse_single(to).is_err() {
-        // If a commit is not found, try fetching it.
-        git(&[
-            "--git-dir",
-            repo.path().to_str().unwrap(),
-            "fetch",
-            "origin",
-            to,
-        ])?;
-    }
-
-    if from.is_empty() {
-        let to = repo.revparse_single(to)?.peel_to_commit()?.id();
-        walker.push(to)?;
-    } else {
-        walker.push_range(&format!("{}..{}", from, to))?;
-    }
-
     let mut author_map = AuthorMap::new();
-    for oid in walker {
-        let oid = oid?;
-        let commit = repo.find_commit(oid)?;
+    for oid in commits {
+        let commit = repo.find_commit(*oid)?;
 
         let mut commit_authors = Vec::new();
         if !is_rollup_commit(&commit) {
@@ -543,7 +513,7 @@ fn build_author_map_(
         commit_authors.extend(commit_coauthors(&commit));
         for author in commit_authors {
             let author = mailmap.canonicalize(&author);
-            author_map.add(author, oid);
+            author_map.add(author, *oid);
         }
     }
     Ok(author_map)
@@ -565,38 +535,6 @@ fn mailmap_from_repo(repo: &git2::Repository) -> Result<Mailmap, Box<dyn std::er
     };
     let file = String::from_utf8(file.to_object(repo)?.peel_to_blob()?.content().into())?;
     Mailmap::from_string(file)
-}
-
-fn up_to_release(
-    repo: &Repository,
-    reviewers: &Reviewers,
-    mailmap: &Mailmap,
-    to: &VersionTag,
-) -> Result<AuthorMap, Box<dyn std::error::Error>> {
-    let to_commit = repo.find_commit(to.commit).map_err(|e| {
-        ErrorContext(
-            format!(
-                "find_commit: repo={}, commit={}",
-                repo.path().display(),
-                to.commit
-            ),
-            Box::new(e),
-        )
-    })?;
-    let modules = get_submodules(repo, &to_commit)?;
-
-    let mut author_map = build_author_map(repo, reviewers, mailmap, "", &to.raw_tag)
-        .map_err(|e| ErrorContext(format!("Up to {}", to), e))?;
-
-    for module in &modules {
-        let path = update_repo(&module.repository)?;
-        let subrepo = Repository::open(&path)?;
-        let submap =
-            build_author_map(&subrepo, reviewers, mailmap, "", &module.commit.to_string())?;
-        author_map.extend(submap);
-    }
-
-    Ok(author_map)
 }
 
 fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::error::Error>> {
@@ -657,37 +595,159 @@ fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::err
         in_progress: true,
     });
 
-    let mut version_map = BTreeMap::new();
+    let start = Instant::now();
 
-    let mut cache = HashMap::new();
+    let by_version = gather_all_commits(&repo, versions)?;
 
-    for (idx, version) in versions.iter().enumerate() {
-        let previous = if let Some(v) = idx.checked_sub(1).map(|idx| &versions[idx]) {
-            v
-        } else {
-            let author_map = build_author_map(&repo, &reviewers, &mailmap, "", &version.raw_tag)?;
-            version_map.insert(version.clone(), author_map);
-            continue;
-        };
+    let version_count = by_version.len();
+    let commit_count = by_version.values().map(|v| v.total_commits()).sum::<u64>();
+    eprintln!(
+        "Gathered {version_count} versions with {commit_count} total commits in {:.2}s",
+        start.elapsed().as_secs_f64()
+    );
 
-        eprintln!("Processing {:?} to {:?}", previous, version);
-
-        cache.insert(
-            version,
-            up_to_release(&repo, &reviewers, &mailmap, version)?,
-        );
-        let previous = match cache.remove(&previous) {
-            Some(v) => v,
-            None => up_to_release(&repo, &reviewers, &mailmap, previous)?,
-        };
-        let current = cache.get(&version).unwrap();
-
-        // Remove commits reachable from the previous release.
-        let only_current = current.difference(&previous);
-        version_map.insert(version.clone(), only_current);
-    }
+    let start = Instant::now();
+    let version_map = by_version
+        .into_iter()
+        .map(|(version, data)| {
+            let mut author_map = build_author_map(&repo, &reviewers, &mailmap, &data.main)?;
+            for (submodule, commits) in data.submodules {
+                let path = update_repo(&submodule.repository)?;
+                let subrepo = Repository::open(path)?;
+                author_map.extend(build_author_map(&subrepo, &reviewers, &mailmap, &commits)?);
+            }
+            Result::<(VersionTag, AuthorMap), Box<dyn std::error::Error>>::Ok((version, author_map))
+        })
+        .collect::<Result<_, _>>()?;
+    eprintln!(
+        "Analyzed contributions in {:.2}s",
+        start.elapsed().as_secs_f64()
+    );
 
     Ok(version_map)
+}
+
+/// Gather all commits for the given versions from the given repository, including all its
+/// submodules.
+/// The commits are grouped by the individual versions.
+fn gather_all_commits(
+    repo: &Repository,
+    versions: Vec<VersionTag>,
+) -> Result<HashMap<VersionTag, VersionCommits>, Box<dyn std::error::Error>> {
+    // Set of all commits that we visited
+    let mut seen_commits = HashSet::new();
+
+    let mut submodule_last_oid = HashMap::new();
+    let mut last_version_oid: Option<Oid> = None;
+
+    let mut by_version: HashMap<VersionTag, VersionCommits> = HashMap::new();
+
+    // Iterate all version from the oldest to the newest
+    for version in &versions {
+        let mut walk = repo.revwalk()?;
+
+        // If we have a previous version, iterate from its commit to this commit
+        // Note that stable version tag commits are usually "forked" off the commit mainline
+        // Revwalk should take that into account
+        if let Some(last) = last_version_oid {
+            // Note: the left side of this range is exclusive, but that is what we want, because we
+            // already visited the `last` commit in the previous version
+            walk.push_range(&format!("{last}..{}", version.commit))?;
+        } else {
+            // If there is no previous version, iterate from this version to the start of the
+            // commit history.
+            walk.push(version.commit)?;
+        }
+
+        last_version_oid = Some(version.commit);
+
+        // All commits of this version from the main repo. This is kept in a Vec for deterministic
+        // order.
+        let mut version_commits = vec![];
+        for commit in walk {
+            let commit = commit?;
+            version_commits.push(commit);
+        }
+        let mut submodule_commits = vec![];
+
+        // Now find all submodules present in the repo at this commit
+        let commit = repo.find_commit(version.commit)?;
+        let modules = get_submodules(repo, &commit)?;
+        for submodule in modules {
+            let path = update_repo(&submodule.repository)?;
+            let subrepo = Repository::open(&path)?;
+
+            // Iterate commits of the submodule
+            let mut subwalk = subrepo.revwalk()?;
+
+            // If we know a previous commit of the same submodule from a previous main version,
+            // then use that to stop the walk
+            let last_commit = submodule_last_oid.get(&submodule.repository);
+            if let Some(submodule_last) = last_commit {
+                // If the submodule didn't change across versions, ignore the submodule for this
+                // version.
+                if submodule_last == &submodule.commit {
+                    continue;
+                }
+                subwalk.push_range(&format!("{}..{}", submodule_last, submodule.commit))?;
+            } else {
+                subwalk.push(submodule.commit)?;
+            }
+            submodule_last_oid.insert(submodule.repository.clone(), submodule.commit);
+
+            let mut commits = vec![];
+            for commit in subwalk {
+                let commit = commit?;
+                commits.push(commit);
+            }
+            submodule_commits.push((submodule, commits));
+        }
+
+        // If we encounter multiple commits across different versions for some reason,
+        // we always attribute them to the earliest version that encountered the commit.
+        // Since we iterate versions from oldest to newest, the retain below ensures that.
+        version_commits.retain(|c| seen_commits.insert(*c));
+        for (_, commits) in &mut submodule_commits {
+            commits.retain(|c| seen_commits.insert(*c));
+        }
+
+        by_version.insert(
+            version.clone(),
+            VersionCommits {
+                main: version_commits,
+                submodules: submodule_commits,
+            },
+        );
+    }
+
+    // Sanity check: walk all commits and ensure that we saw them previously
+    let head = versions.last().unwrap().commit;
+    let mut walk = repo.revwalk()?;
+    walk.push(head)?;
+    for commit in walk {
+        let commit = commit?;
+        assert!(
+            seen_commits.contains(&commit),
+            "Commit {commit} was not visited"
+        );
+    }
+    let submodules = get_submodules(repo, &repo.find_commit(head)?)?;
+    for submodule in submodules {
+        let repo = update_repo(&submodule.repository)?;
+        let repo = Repository::open(repo)?;
+        let mut walk = repo.revwalk()?;
+        walk.push(submodule.commit)?;
+        for commit in walk {
+            let commit = commit?;
+            assert!(
+                seen_commits.contains(&commit),
+                "Submodule {} commit {commit} was not visited",
+                submodule.repository
+            );
+        }
+    }
+
+    Ok(by_version)
 }
 
 enum OutputMode {
