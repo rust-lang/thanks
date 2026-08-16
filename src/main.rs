@@ -1,6 +1,7 @@
 use config::Config;
 use git2::{Commit, Oid, Repository};
 use mailmap::{Author, Mailmap};
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use regex::{Regex, RegexBuilder};
 use reviewers::Reviewers;
 use semver::Version;
@@ -641,6 +642,13 @@ fn gather_all_commits(
     let mut last_version_oid: Option<Oid> = None;
 
     let mut by_version: HashMap<VersionTag, VersionCommits> = HashMap::new();
+
+    let submodules = get_submodules(repo, &repo.find_commit(versions.last().unwrap().commit)?)?;
+    submodules.par_iter().for_each(|submodule| {
+        update_repo(&submodule.repository).unwrap_or_else(|e| {
+            panic!("Cannot checkout submodule {}: {e:?}", submodule.repository)
+        });
+    });
 
     // Iterate all version from the oldest to the newest
     for version in &versions {
