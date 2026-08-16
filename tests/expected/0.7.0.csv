@@ -1,0 +1,101 @@
+1,bors,bors@rust-lang.org,750
+2,Brian Anderson,banderson@mozilla.com,376
+3,Daniel Micay,danielmicay@gmail.com,311
+4,Tim Chevalier,chevalier@alum.wellesley.edu,222
+5,Patrick Walton,pcwalton@mimiga.net,194
+6,Huon Wilson,dbau.pp+github@gmail.com,175
+7,Niko Matsakis,rust@nikomatsakis.com,140
+8,Graydon Hoare,graydon@pobox.com,129
+9,Alex Crichton,alex@alexcrichton.com,113
+10,John Clements,clements@racket-lang.org,96
+11,James Miller,bladeon@gmail.com,94
+12,ember arlynx,ember@lunar.town,82
+13,Brendan Zabarauskas,bjzaba@yahoo.com.au,79
+14,Erick Tryzelaar,erick.tryzelaar@gmail.com,48
+14,Seo Sanghyeon,sanxiyn@gmail.com,48
+16,Ben Striegel,ben.striegel@gmail.com,47
+17,Ben Blum,bblum@andrew.cmu.edu,46
+18,Young-il Choi,duddlf.choi@samsung.com,44
+19,Philipp Brüschweiler,blei42@gmail.com,40
+20,Luqman Aden,me@luqman.ca,38
+21,Björn Steinbrink,bsteinbr@gmail.com,31
+22,Felix S. Klock II,pnkfelix@pnkfx.org,27
+22,NAKASHIMA, Makoto,makoto.nksm+github@gmail.com,27
+24,Michael Woerister,michaelwoerister@posteo,24
+24,Steve Klabnik,steve@steveklabnik.com,24
+26,Marvin Löbel,loebel.marvin@gmail.com,23
+26,Michael Sullivan,sully@msully.net,23
+28,Matthijs Hofstra,thiezz@gmail.com,20
+29,Gareth Daniel Smith,garethdanielsmith@gmail.com,19
+30,Lily Ballard,lily@ballards.net,18
+31,Jed Davis,jld@panix.com,14
+31,Ramkumar Ramachandra,r@artagnon.com,14
+33,Dan Luu,danluu@gmail.com,12
+33,Ilyong Cho,ilyoan@gmail.com,12
+33,Tom Lee,github@tomlee.co,12
+36,Vadim Chugunov,vadimcn@gmail.com,11
+37,Jyun-Yan You,jyyou.tw@gmail.com,10
+37,Lennart Kudling,github@kudling.de,10
+37,Olivier Saut,osaut@airpost.net,10
+37,Youngmin Yoo,youngmin.yoo@samsung.com,10
+37,Zack Corr,zack@z0w0.me,10
+42,Samuel Chase,samebchase@gmail.com,9
+43,Sangeun Kim,sammy.kim@samsung.com,8
+43,Steven Stewart-Gallus,sstewartgallus00@langara.bc.ca,8
+45,Brian Leibig,brian@brianleibig.com,7
+45,Huon Wilson,dbau.pp@gmail.com,7
+45,Youngsoo Son,ysson83@gmail.com,7
+45,blake2-ppc,ulrik.sverdrup@gmail.com,7
+49,Leah Hanson,astrieanna@gmail.com,6
+49,Ron Dahlgren,ronald.dahlgren@gmail.com,6
+51,Gábor Horváth,xazax.hun@gmail.com,5
+51,Jihyun Yu,j.yu@navercorp.com,5
+51,Josh Matthews,josh@joshmatthews.net,5
+54,Alexei Sholik,alcosholik@gmail.com,4
+54,Diggory Hardy,diggory.hardy@gmail.com,4
+54,Fedor Indutny,fedor.indutny@gmail.com,4
+54,Jack Moffitt,jack@metajack.im,4
+54,Jed Estep,aje@jhu.edu,4
+54,Palmer Cox,p@lmercox.com,4
+54,Ralph Bodenner,rkbodenner+github@gmail.com,4
+54,klutzy,klutzytheklutzy@gmail.com,4
+62,Daniel Farina,daniel@fdr.io,3
+62,Daniel Ralston,Wubbulous@gmail.com,3
+62,James Sanderson,zofrex@gmail.com,3
+62,Jeong YunWon,jeong@youknowone.org,3
+62,Jesse Luehrs,doy@tozt.net,3
+62,Jordi Boggiano,j.boggiano@seld.be,3
+62,Junyoung Cho,june0.cho@samsung.com,3
+62,Lindsey Kuper,lindsey@composition.al,3
+70,Benjamin Herr,ben@0x539.de,2
+70,Bill Myers,bill_myers@outlook.com,2
+70,Bryan Dunsmore,dunsmoreb@gmail.com,2
+70,Luca Bruno,lucab@debian.org,2
+70,Nick Desaulniers,ndesaulniers@mozilla.com,2
+70,SiegeLord,slabode@aim.com,2
+70,Tommy M. McGuire,mcguire@crsr.net,2
+70,Uwe Dauernheim,uwe@dauernheim.net,2
+78,Anthony Juckel,ajuckel@gmail.com,1
+78,Bill Wendling,wendling@apple.com,1
+78,Birunthan Mohanathas,birunthan@mohanathas.com,1
+78,Brett Cannon,brett@python.org,1
+78,Caitlin Potter,snowball@defpixel.com,1
+78,Herman J. Radtke III,herman@hermanradtke.com,1
+78,Honza Strnad,hanny.strnad@gmail.com,1
+78,James Tranovich,james@openhorizonlabs.com,1
+78,Jeaye,jeaye@arrownext.com,1
+78,Jens Nockert,jens@nockert.se,1
+78,Joris Rehm,joris.rehm@wakusei.fr,1
+78,Marti Raudsepp,marti@juffo.org,1
+78,Pavel Panchekha,me@pavpanchekha.com,1
+78,Rob Hoelz,rob@hoelz.ro,1
+78,Sander Mathijs van Veen,smvv@kompiler.org,1
+78,Saurabh Anand,saurabhanandiit@gmail.com,1
+78,Sean Moon,ssamoon@ucla.edu,1
+78,Steven De Coeyer,steven@banteng.be,1
+78,Steven Fackler,sfackler@gmail.com,1
+78,Ted Horst,ted.horst@earthlink.net,1
+78,Thomas Daede,daede003@umn.edu,1
+78,Tuncer Ayaz,tuncer.ayaz@gmail.com,1
+78,Vivek Galatage,vivekgalatage@gmail.com,1
+78,reus,reusee@ymail.com,1
