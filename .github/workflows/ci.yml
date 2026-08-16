@@ -55,7 +55,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the source code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install Rust
         run: |
@@ -102,6 +102,7 @@ jobs:
       - test
       - build
       - deploy
+      - regression
     # We need to ensure this job does *not* get skipped if its dependencies fail,
     # because a skipped job is considered a success by GitHub. So we have to
     # overwrite `if:`. We use `!cancelled()` to ensure the job does still not get run

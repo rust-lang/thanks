@@ -1,7 +1,9 @@
 // Test that we have the expected output for each version from 0.1.0 through
-// 1.95.0
-// Use `TESTS_UPDATE_EXPECTED` to update the expected output files when the
-// format of things changes
+// 1.95.0 (and the all-time totals from those versions).
+// The expected output is compared against the CSV output generated before the
+// test was run; use `cargo run --release -- csv` to create that output.
+// Set `TESTS_UPDATE_EXPECTED=1` before running the test to update the expected
+// output files automatcally.
 // Since the output can change as the rust-lang/rust .mailmap file is adjusted,
 // these tests are run against the .mailmap as of commit
 // 0490dd938541ad996c5ad1ec6e274012afe3e1d4, see .github/workflows/ci.yml
@@ -34,7 +36,7 @@ fn assert_file_content_matches(expected: &Path, actual: &Path, version: &OsStr) 
                 diff::Result::Right(r) => println!("+{}", r),
             }
         }
-        assert!(false, "CSV for {:?} should match", version);
+        panic!("CSV for {version:?} does not match");
     }
 }
 
