@@ -128,7 +128,6 @@ impl Reviewers {
         insert("tlively", a("Thomas Lively", "tlively@google.com"));
         insert("tromey", a("Tom Tromey", "tom@tromey.com"));
         insert("vadimcn", a("Vadim Chugunov", "vadimcn@gmail.com"));
-        insert("willcrichton", a("Will Crichton", "wcrichto@cs.stanford.edu"));
         insert("xfix", a("Konrad Borowski", "konrad@borowski.pw"));
         insert("yichoi", a("Young-il Choi", "duddlf.choi@samsung.com"));
         insert("y-nak", a("Yoshitomo Nakanishi", "yurayura.rounin.3@gmail.com"));
