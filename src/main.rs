@@ -627,7 +627,7 @@ fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::err
     Ok(version_map)
 }
 
-/// Gather all commits for the given versions from the given repository, including all its
+/// Gather all commits for the given versions from the given repository, including all of its
 /// submodules.
 /// The commits are grouped by the individual versions.
 fn gather_all_commits(
@@ -665,8 +665,8 @@ fn gather_all_commits(
 
         last_version_oid = Some(version.commit);
 
-        // All commits of this version from the main repo. This is kept in a Vec for deterministic
-        // order.
+        // All commits of this version (that are not contained in other versions) from the main
+        // repo. This is kept in a Vec for deterministic order.
         let mut version_commits = vec![];
         for commit in walk {
             let commit = commit?;
@@ -684,7 +684,7 @@ fn gather_all_commits(
             let subrepo = match subrepo {
                 Some(subrepo) => subrepo,
                 None => {
-                    // We do not use the entry API here because `open` returns a result
+                    // We do not use the entry API here because `open` returns a Result
                     subrepo_cache.insert(submodule.repository.clone(), Repository::open(&path)?);
                     subrepo_cache.get(&submodule.repository).unwrap()
                 }
@@ -702,7 +702,7 @@ fn gather_all_commits(
                 if submodule_last == &submodule.commit {
                     continue;
                 }
-                subwalk.push_range(&format!("{}..{}", submodule_last, submodule.commit))?;
+                subwalk.push_range(&format!("{submodule_last}..{}", submodule.commit))?;
             } else {
                 subwalk.push(submodule.commit)?;
             }
@@ -733,7 +733,7 @@ fn gather_all_commits(
         );
     }
 
-    // Sanity check: walk all commits and ensure that we saw them previously
+    // Validation: walk all commits and ensure that we saw them previously
     let head = versions.last().unwrap().commit;
     let mut walk = repo.revwalk()?;
     walk.push(head)?;
