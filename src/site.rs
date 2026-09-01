@@ -39,7 +39,7 @@ pub fn render_projects(
     about(root_dir)?;
 
     for data in projects {
-        let project_out_dir = root_dir.join(data.project.url());
+        let project_out_dir = root_dir.join(data.project.url_path());
         create_dir(&project_out_dir)?;
 
         let index_dir = if data.project.is_homepage() {
@@ -124,14 +124,14 @@ fn index(data: &ProjectData, output_dir: &Path) -> Result<(), Box<dyn std::error
     let mut releases = Vec::new();
     releases.push(Release {
         name: "All time".into(),
-        url: format!("/{}/all-time/", data.project.url()),
+        url: format!("/{}/all-time/", data.project.url_path()),
         people: data.all_time.authors.iter().count(),
         commits: data.all_time.authors.iter().map(|(_, count)| count).sum(),
     });
     for (version, stats) in data.by_version.iter().rev() {
         releases.push(Release {
             name: version.name.clone(),
-            url: format!("/{}/{}/", data.project.url(), version.version),
+            url: format!("/{}/{}/", data.project.url_path(), version.version),
             people: stats.authors.iter().count(),
             commits: stats.authors.iter().map(|(_, count)| count).sum(),
         });
