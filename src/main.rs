@@ -131,7 +131,7 @@ fn run(
 
             let csv_dir = PathBuf::from("output/csv");
             for data in data {
-                let directory = csv_dir.join(data.project.name().to_lowercase());
+                let directory = csv_dir.join(data.display_config.name().to_lowercase());
                 std::fs::create_dir_all(&directory)?;
                 for (version, authors) in data.by_version {
                     write(&directory.join(format!("{version}.csv")), authors)?;

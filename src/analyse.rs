@@ -12,8 +12,42 @@ use std::path::PathBuf;
 use std::sync::{Arc, LazyLock, Mutex};
 use std::time::Instant;
 
+pub struct ProjectDisplayConfig {
+    /// Name of the project, displayed on the website.
+    name: &'static str,
+    /// Path under which the project will be available on the web.
+    /// If the `url` is e.g. `rust`, it will be available under `/rust/`.
+    url_path: &'static str,
+    /// Should this project be displayed as the main homepage project?
+    is_homepage: bool,
+    /// Returns true if the project does not track versions explicitly.
+    /// It will be rendered as a single page with all-time contributions.
+    is_versionless: bool,
+}
+
+impl ProjectDisplayConfig {
+    /// Name of the project, displayed on the website.
+    pub fn name(&self) -> &'static str {
+        self.name
+    }
+    /// Path under which the project will be available on the web.
+    /// If the `url` is e.g. `rust`, it will be available under `/rust/`.
+    pub fn url_path(&self) -> &'static str {
+        self.url_path
+    }
+    /// Should this project be displayed as the main homepage project?
+    pub fn is_homepage(&self) -> bool {
+        self.is_homepage
+    }
+    /// Returns true if the project does not track versions explicitly.
+    /// It will be rendered as a single page with all-time contributions.
+    pub fn is_versionless(&self) -> bool {
+        self.is_versionless
+    }
+}
+
 pub struct ProjectData {
-    pub project: Box<dyn Project>,
+    pub display_config: ProjectDisplayConfig,
     pub by_version: BTreeMap<VersionTag, AuthorsWithScores>,
     pub all_time: AuthorsWithScores,
 }
@@ -34,7 +68,12 @@ pub fn compute_data(
     }
     let all_time = AuthorsWithScores::new(all_time);
     Ok(ProjectData {
-        project,
+        display_config: ProjectDisplayConfig {
+            name: project.name(),
+            url_path: project.url_path(),
+            is_homepage: project.is_homepage(),
+            is_versionless: project.is_versionless(),
+        },
         by_version,
         all_time,
     })

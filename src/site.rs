@@ -24,15 +24,15 @@ pub fn render_projects(
 
     let mut combined_all_time = AuthorMap::new();
     for data in projects {
-        let project_out_dir = root_dir.join(data.project.url_path());
+        let project_out_dir = root_dir.join(data.display_config.url_path());
         create_dir(&project_out_dir)?;
 
-        if data.project.is_homepage() {
-            assert!(!data.project.is_versionless());
+        if data.display_config.is_homepage() {
+            assert!(!data.display_config.is_versionless());
             render_project_index_page(&hb, data, root_dir)?;
         }
 
-        if data.project.is_versionless() {
+        if data.display_config.is_versionless() {
             render_all_time_page(&hb, data, &project_out_dir)?;
         } else {
             render_project_index_page(&hb, data, &project_out_dir)?;
@@ -69,14 +69,14 @@ pub fn render_projects(
 fn validate_homepage(projects: &[ProjectData]) {
     let mut homepage_project = None;
     for data in projects {
-        if data.project.is_homepage() {
+        if data.display_config.is_homepage() {
             if let Some(other) = homepage_project {
                 panic!(
                     "Multiple projects that are marked as a homepage project: {} and {other}",
-                    data.project.name()
+                    data.display_config.name()
                 );
             }
-            homepage_project = Some(data.project.name().to_string());
+            homepage_project = Some(data.display_config.name().to_string());
         }
     }
     if homepage_project.is_none() {
@@ -160,14 +160,14 @@ fn render_project_index_page(
     let mut releases = Vec::new();
     releases.push(Release {
         name: "All time".into(),
-        url: format!("/{}/all-time/", data.project.url_path()),
+        url: format!("/{}/all-time/", data.display_config.url_path()),
         people: data.all_time.authors.iter().count(),
         commits: data.all_time.authors.iter().map(|(_, count)| count).sum(),
     });
     for (version, stats) in data.by_version.iter().rev() {
         releases.push(Release {
             name: version.name.clone(),
-            url: format!("/{}/{}/", data.project.url_path(), version.version),
+            url: format!("/{}/{}/", data.display_config.url_path(), version.version),
             people: stats.authors.iter().count(),
             commits: stats.authors.iter().map(|(_, count)| count).sum(),
         });
@@ -176,9 +176,9 @@ fn render_project_index_page(
     let res = hb.render(
         "index",
         &Index {
-            common: CommonData::new(format!("{} Contributors", data.project.name()))
+            common: CommonData::new(format!("{} Contributors", data.display_config.name()))
                 .without_thanks_in_logo(),
-            name: data.project.name(),
+            name: data.display_config.name(),
             releases,
         },
     )?;
@@ -234,8 +234,8 @@ fn render_projects_page(
     let projects: Vec<ProjectInfo> = projects
         .iter()
         .map(|data| ProjectInfo {
-            name: data.project.name().to_string(),
-            link: data.project.url_path().to_string(),
+            name: data.display_config.name().to_string(),
+            link: data.display_config.url_path().to_string(),
             people: data.all_time.authors.iter().count(),
             commits: data.all_time.authors.iter().map(|(_, count)| count).sum(),
         })
@@ -275,13 +275,16 @@ fn render_all_time_page(
     let res = hb.render(
         "stats",
         &Release {
-            common: CommonData::new(format!("All-time {} Contributors", data.project.name())),
+            common: CommonData::new(format!(
+                "All-time {} Contributors",
+                data.display_config.name()
+            )),
             release_title: String::from("All-time"),
-            release: data.project.name().to_string(),
+            release: data.display_config.name().to_string(),
             count: scores.len(),
             scores,
             in_progress: true,
-            is_homepage_project: data.project.is_homepage(),
+            is_homepage_project: data.display_config.is_homepage(),
         },
     )?;
 
@@ -300,13 +303,16 @@ fn render_release_pages(
         let res = hb.render(
             "stats",
             &Release {
-                common: CommonData::new(format!("{} {version} Contributors", data.project.name())),
+                common: CommonData::new(format!(
+                    "{} {version} Contributors",
+                    data.display_config.name()
+                )),
                 release_title: version.name.clone(),
                 release: version.to_string(),
                 count: scores.len(),
                 scores,
                 in_progress: version.in_progress,
-                is_homepage_project: data.project.is_homepage(),
+                is_homepage_project: data.display_config.is_homepage(),
             },
         )?;
 
