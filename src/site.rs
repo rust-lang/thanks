@@ -16,25 +16,24 @@ pub fn render_projects(
 
     validate_homepage(projects);
 
-    let hb = hb()?;
-
     create_dir(root_dir)?;
-
     copy_public_assets(root_dir)?;
-    about(&hb, root_dir)?;
+
+    let hb = hb()?;
+    render_about_page(&hb, root_dir)?;
 
     let mut combined_all_time = AuthorMap::new();
     for data in projects {
         let project_out_dir = root_dir.join(data.project.url_path());
         create_dir(&project_out_dir)?;
 
-        let index_dir = if data.project.is_homepage() {
-            root_dir
+        if data.project.is_homepage() {
+            render_project_index_page(&hb, data, &project_out_dir)?;
+            render_project_index_page(&hb, data, root_dir)?;
         } else {
-            &project_out_dir
-        };
-        index(&hb, data, index_dir)?;
-        releases(&hb, data, &project_out_dir)?;
+            render_project_index_page(&hb, data, &project_out_dir)?;
+        }
+        render_release_pages(&hb, data, &project_out_dir)?;
 
         combined_all_time.extend(data.all_time.authors.clone());
     }
@@ -55,6 +54,8 @@ pub fn render_projects(
     )?;
 
     fs::write(root_dir.join("all-time.html"), res)?;
+
+    render_projects_page(&hb, projects, &combined_all_time, root_dir)?;
 
     Ok(())
 }
@@ -132,7 +133,7 @@ fn copy_public_assets(output_dir: &Path) -> Result<(), Box<dyn std::error::Error
     Ok(())
 }
 
-fn index(
+fn render_project_index_page(
     hb: &Handlebars<'_>,
     data: &ProjectData,
     output_dir: &Path,
@@ -147,6 +148,7 @@ fn index(
     #[derive(serde::Serialize)]
     struct Index {
         common: CommonData,
+        name: &'static str,
         releases: Vec<Release>,
     }
 
@@ -171,6 +173,7 @@ fn index(
         &Index {
             common: CommonData::new(format!("{} Contributors", data.project.name()))
                 .without_thanks_in_logo(),
+            name: data.project.name(),
             releases,
         },
     )?;
@@ -179,7 +182,10 @@ fn index(
     Ok(())
 }
 
-fn about(hb: &Handlebars<'_>, output_dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
+fn render_about_page(
+    hb: &Handlebars<'_>,
+    output_dir: &Path,
+) -> Result<(), Box<dyn std::error::Error>> {
     #[derive(serde::Serialize)]
     struct About {
         common: CommonData,
@@ -198,6 +204,52 @@ fn about(hb: &Handlebars<'_>, output_dir: &Path) -> Result<(), Box<dyn std::erro
     Ok(())
 }
 
+fn render_projects_page(
+    hb: &Handlebars<'_>,
+    projects: &[ProjectData],
+    all_time: &AuthorsWithScores,
+    output_dir: &Path,
+) -> Result<(), Box<dyn std::error::Error>> {
+    #[derive(serde::Serialize)]
+    struct ProjectInfo {
+        name: String,
+        link: String,
+        people: usize,
+        commits: usize,
+    }
+
+    #[derive(serde::Serialize)]
+    struct Projects {
+        common: CommonData,
+        projects: Vec<ProjectInfo>,
+        all_time_people: usize,
+        all_time_commits: usize,
+    }
+
+    let projects: Vec<ProjectInfo> = projects
+        .iter()
+        .map(|data| ProjectInfo {
+            name: data.project.name().to_string(),
+            link: data.project.url_path().to_string(),
+            people: data.all_time.authors.iter().count(),
+            commits: data.all_time.authors.iter().map(|(_, count)| count).sum(),
+        })
+        .collect();
+
+    let res = hb.render(
+        "projects",
+        &Projects {
+            common: CommonData::new("Rust toolchain projects".into()),
+            projects,
+            all_time_people: all_time.authors.iter().count(),
+            all_time_commits: all_time.authors.iter().map(|(_, count)| count).sum(),
+        },
+    )?;
+
+    fs::write(output_dir.join("projects.html"), res)?;
+    Ok(())
+}
+
 #[derive(serde::Serialize)]
 struct Release<'a> {
     common: CommonData,
@@ -209,7 +261,7 @@ struct Release<'a> {
     is_homepage_project: bool,
 }
 
-fn releases(
+fn render_release_pages(
     hb: &Handlebars<'_>,
     data: &ProjectData,
     output_dir: &Path,
@@ -220,7 +272,7 @@ fn releases(
         &Release {
             common: CommonData::new(format!("All-time {} Contributors", data.project.name())),
             release_title: String::from("All-time"),
-            release: format!("all of {}", data.project.name()),
+            release: data.project.name().to_string(),
             count: scores.len(),
             scores,
             in_progress: true,

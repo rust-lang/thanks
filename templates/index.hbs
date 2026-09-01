@@ -1,31 +1,31 @@
 {{#*inline "content"}}
-<header class="mv3 mb4-ns">
+  <header class="mv3 mb4-ns">
     <div class="w-100 mw-none ph3 mw8-m mw9-l center">
-        <h1>Thanks</h1>
+      <h1>{{ name }} contributions</h1>
     </div>
-</header>
-<section class="purple">
+  </header>
+  <section class="purple">
     <div class="w-100 mw-none ph3 mw8-m mw9-l center f3">
-        <p>
-            Rust is a community project and is very thankful for the many community
-            contributions it receives. <a href="/about/">See this page for more
-            information</a>.
-        </p>
+      <p>
+        {{ name }} is a community project and is very thankful for the many community
+        contributions it receives. <a href="/about/">See this page for more
+        information</a>.
+      </p>
 
-        <div class="flex flex-wrap justify-center tc">
-            {{#each releases}}
-            <a href="{{url}}" class="db w-100 w-33-m w-25-l mb4 ph2 rust-version">
-                <h2 class="f1 f2-ns mb2">{{name}}</h2>
-                <div>
-                    <b>{{people}}</b> people
-                </div>
-                <div>
-                    <b>{{commits}}</b> contributions
-                </div>
-            </a>
-            {{/each}}
-        </div>
+      <div class="flex flex-wrap justify-center tc">
+        {{#each releases}}
+          <a href="{{url}}" class="db w-100 w-33-m w-25-l mb4 ph2 rust-version">
+            <h2 class="f1 f2-ns mb2">{{name}}</h2>
+            <div>
+              <b>{{people}}</b> people
+            </div>
+            <div>
+              <b>{{commits}}</b> contributions
+            </div>
+          </a>
+        {{/each}}
+      </div>
     </div>
-</section>
+  </section>
 {{/inline}}
 {{~> container ~}}

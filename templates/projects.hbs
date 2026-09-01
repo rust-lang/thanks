@@ -1,0 +1,39 @@
+{{#*inline "project"}}
+  <a href="{{link}}" class="db w-100 w-33-m w-25-l mb4 ph2 rust-version">
+    <h2 class="f1 f2-ns mb2">{{name}}</h2>
+    <div>
+      <b>{{people}}</b> people
+    </div>
+    <div>
+      <b>{{commits}}</b> contributions
+    </div>
+  </a>
+{{/inline}}
+
+{{#*inline "content"}}
+  <header class="mv3 mb4-ns">
+    <div class="w-100 mw-none ph3 mw8-m mw9-l center">
+      <h1>Thanks</h1>
+      <a href="/">Back to index</a>
+    </div>
+  </header>
+  <section class="purple" style="min-height: 400px;">
+    <div class="w-100 mw-none ph3 mw8-m mw9-l center f3">
+      <p>
+        Rust is a community project and is very thankful for the many community
+        contributions it receives. <a href="/about/">See this page for more
+        information</a>. Below you can find a list of Rust toolchain projects and their
+        contributions.
+      </p>
+
+      <div class="flex flex-wrap tc">
+        {{#each projects as |project| }}
+          {{> project name=project.name link=project.link }}
+        {{/each}}
+
+        {{> project name="All projects combined" link="/all-time.html" people=all_time_people commits=all_time_commits }}
+      </div>
+    </div>
+  </section>
+{{/inline}}
+{{~> container ~}}
