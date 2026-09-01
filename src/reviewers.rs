@@ -40,8 +40,12 @@ impl Reviewers {
 
         let mut insert = |name: &str, author: AddKind| {
             match author {
-                AddKind::New(author) => if map.insert(name.into(), author).is_some() {
-                    eprintln!("WARNING: Reviewer is already pulled in from rust-lang/team: {name}");
+                AddKind::New(author) => if let Some(previous) = map.insert(name.into(), author) {
+                    // Only warn if the reviewer pulled from rust-lang/team doesn't use an encrypted
+                    // email
+                    if !previous.email.starts_with("encrypted+") {
+                        eprintln!("WARNING: Reviewer is already pulled in from rust-lang/team: {name}");
+                    }
                 },
                 AddKind::Alias(aliased) => {
                     if let Some(author) = map.get(aliased).cloned() {
