@@ -70,18 +70,8 @@ jobs:
 
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
 
-      # Do the cloning here rather than via the git2 bindings so that we can
-      # ensure that the repo HEAD is checked out at a specific commit and the
-      # .mailmap content is static. actions/checkout does not support bare
-      # clones
-      - name: Clone rust-lang/rust
-        run: |
-          git clone --bare https://github.com/rust-lang/rust.git repos/rust-lang/rust
-          # Switch to a pinned commit
-          git -C repos/rust-lang/rust branch -f main 0490dd938541ad996c5ad1ec6e274012afe3e1d4
-
-      - name: Build static website
-        run: cargo run --release -- csv
+      - name: Build thanks
+        run: cargo build --release
 
       - name: Run tests
         run: cargo test
