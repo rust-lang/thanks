@@ -324,6 +324,14 @@ impl AuthorMap {
         self.map.iter().map(|(k, v)| (k, v.len()))
     }
 
+    /// Keep only authors who pass the given filter.
+    pub fn retain<F>(&mut self, filter: F)
+    where
+        F: Fn(&Author) -> bool,
+    {
+        self.map.retain(|author, _| filter(author));
+    }
+
     /// Merge in the authorship data from another instance.
     pub fn extend(&mut self, other: Self) {
         for (author, set) in other.map {

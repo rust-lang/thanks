@@ -2,11 +2,12 @@ use clap::Parser;
 use git2::Repository;
 use mailmap::Mailmap;
 use reviewers::Reviewers;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashSet};
 use std::io::BufWriter;
 use std::path::{Path, PathBuf};
 use std::str;
 use std::time::Instant;
+use unicase::UniCase;
 
 mod analyse;
 mod config;
@@ -56,6 +57,12 @@ fn generate_thanks(
         start.elapsed().as_secs_f64()
     );
 
+    let ignored_emails: HashSet<UniCase<String>> = project
+        .ignored_emails()
+        .iter()
+        .map(|email| UniCase::new(email.to_string()))
+        .collect();
+
     let start = Instant::now();
     let version_map = by_version
         .into_iter()
@@ -66,6 +73,9 @@ fn generate_thanks(
                 let subrepo = Repository::open(path)?;
                 author_map.extend(build_author_map(&subrepo, &reviewers, &mailmap, &commits)?);
             }
+
+            author_map.retain(|author| !ignored_emails.contains(&author.email));
+
             Ok::<_, Box<dyn std::error::Error>>((version, author_map))
         })
         .collect::<Result<_, _>>()?;
