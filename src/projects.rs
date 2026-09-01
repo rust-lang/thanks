@@ -1,83 +1,50 @@
-use crate::git::{VersionTag, get_versions};
+use crate::git::{VersionTag, get_versions, revision_latest_commit};
 use git2::Repository;
 use semver::Version;
 
 pub trait Project {
     /// Name of the project, displayed on the website.
-    fn name(&self) -> &'static str;
+    const NAME: &'static str;
 
     /// Path under which the project will be available on the web.
     /// If the `url` is e.g. `rust`, it will be available under `/rust/`.
-    fn url_path(&self) -> &'static str;
+    const URL_PATH: &'static str;
 
     /// Should this project be displayed as the main homepage project?
-    fn is_homepage(&self) -> bool {
-        false
-    }
+    const IS_HOMEPAGE: bool = false;
 
     /// URL of its GitHub repository.
-    fn repo_url(&self) -> &'static str;
+    const REPO_URL: &'static str;
 
     /// Identify the versions that have been tagged in the given repo, including
     /// any project-specific additional versions to add.
-    fn get_versions(
-        &self,
-        repo: &Repository,
-    ) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>>;
+    fn get_versions(repo: &Repository) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>>;
 
-    /// Returns true if the project does not track versions explicitly.
+    /// true if the project does not track versions explicitly.
     /// It will be rendered as a single page with all-time contributions.
-    fn is_versionless(&self) -> bool {
-        false
-    }
+    const IS_VERSIONLESS: bool = false;
 
     /// Contributions from users with these e-mail addresses will be ignored.
     /// The addresses will be compared in a case-insensitive manner.
-    fn ignored_emails(&self) -> &'static [&'static str] {
-        &[]
-    }
+    const IGNORED_EMAILS: &'static [&'static str] = &[];
 }
 
 pub struct Rust;
 
 impl Project for Rust {
-    fn name(&self) -> &'static str {
-        "Rust"
-    }
+    const NAME: &'static str = "Rust";
+    const URL_PATH: &'static str = "rust";
+    const IS_HOMEPAGE: bool = true;
+    const REPO_URL: &'static str = "https://github.com/rust-lang/rust.git";
 
-    fn url_path(&self) -> &'static str {
-        "rust"
-    }
-
-    fn is_homepage(&self) -> bool {
-        true
-    }
-
-    fn repo_url(&self) -> &'static str {
-        "https://github.com/rust-lang/rust.git"
-    }
-
-    fn get_versions(
-        &self,
-        repo: &Repository,
-    ) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
-        let mut versions = get_versions(repo, self.name())?;
+    fn get_versions(repo: &Repository) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
+        let mut versions = get_versions(repo, Self::NAME)?;
         let last_full_stable = versions
             .iter()
             .rfind(|v| v.raw_tag.ends_with(".0"))
             .unwrap()
             .version
             .clone();
-
-        // The nightly branch is the default one, fall back to "main" if it cannot
-        // be read
-        let nightly_branch = match repo.head() {
-            Ok(reference) => match reference.shorthand() {
-                Some(name) => name.to_string(),
-                None => "main".to_string(),
-            },
-            Err(_) => "main".to_string(),
-        };
 
         versions.push(VersionTag {
             name: String::from("Beta"),
@@ -87,12 +54,7 @@ impl Project for Rust {
                 last
             },
             raw_tag: String::from("beta"),
-            commit: repo
-                .revparse_single("beta")
-                .unwrap()
-                .peel_to_commit()
-                .unwrap()
-                .id(),
+            commit: revision_latest_commit(repo, "beta"),
             in_progress: true,
         });
         versions.push(VersionTag {
@@ -103,13 +65,8 @@ impl Project for Rust {
                 last.minor += 2;
                 last
             },
-            raw_tag: nightly_branch,
-            commit: repo
-                .revparse_single("HEAD")
-                .unwrap()
-                .peel_to_commit()
-                .unwrap()
-                .id(),
+            raw_tag: String::from("main"),
+            commit: revision_latest_commit(repo, "HEAD"),
             in_progress: true,
         });
 
@@ -120,23 +77,12 @@ impl Project for Rust {
 pub struct Rustup;
 
 impl Project for Rustup {
-    fn name(&self) -> &'static str {
-        "Rustup"
-    }
+    const NAME: &'static str = "Rustup";
+    const URL_PATH: &'static str = "rustup";
+    const REPO_URL: &'static str = "https://github.com/rust-lang/rustup.git";
 
-    fn url_path(&self) -> &'static str {
-        "rustup"
-    }
-
-    fn repo_url(&self) -> &'static str {
-        "https://github.com/rust-lang/rustup.git"
-    }
-
-    fn get_versions(
-        &self,
-        repo: &Repository,
-    ) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
-        let mut versions = get_versions(repo, self.name())?;
+    fn get_versions(repo: &Repository) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
+        let mut versions = get_versions(repo, Self::NAME)?;
         let last_full_stable = versions
             .iter()
             .rfind(|v| v.raw_tag.ends_with(".0"))
@@ -152,12 +98,7 @@ impl Project for Rustup {
                 last
             },
             raw_tag: String::from("main"),
-            commit: repo
-                .revparse_single("HEAD")
-                .unwrap()
-                .peel_to_commit()
-                .unwrap()
-                .id(),
+            commit: revision_latest_commit(repo, "HEAD"),
             in_progress: true,
         });
 
@@ -168,86 +109,45 @@ impl Project for Rustup {
 pub struct CratesIo;
 
 impl Project for CratesIo {
-    fn name(&self) -> &'static str {
-        "crates.io"
-    }
+    const NAME: &'static str = "crates.io";
+    const URL_PATH: &'static str = "crates.io";
+    const IS_VERSIONLESS: bool = true;
+    const REPO_URL: &'static str = "https://github.com/rust-lang/crates.io.git";
 
-    fn url_path(&self) -> &'static str {
-        "crates.io"
-    }
-
-    fn repo_url(&self) -> &'static str {
-        "https://github.com/rust-lang/crates.io.git"
-    }
-
-    fn get_versions(
-        &self,
-        repo: &Repository,
-    ) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
+    fn get_versions(repo: &Repository) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
         Ok(vec![VersionTag {
             name: String::from("Nightly"),
             version: Version::new(1, 0, 0),
             raw_tag: String::from("main"),
-            commit: repo
-                .revparse_single("HEAD")
-                .unwrap()
-                .peel_to_commit()
-                .unwrap()
-                .id(),
+            commit: revision_latest_commit(repo, "HEAD"),
             in_progress: true,
         }])
-    }
-
-    fn is_versionless(&self) -> bool {
-        true
     }
 }
 
 pub struct DocsRs;
 
 impl Project for DocsRs {
-    fn name(&self) -> &'static str {
-        "Docs.rs"
-    }
+    const NAME: &'static str = "Docs.rs";
+    const URL_PATH: &'static str = "docs.rs";
+    const IS_VERSIONLESS: bool = true;
+    const REPO_URL: &'static str = "https://github.com/rust-lang/docs.rs.git";
+    const IGNORED_EMAILS: &'static [&'static str] = &[
+        // CI bot
+        "docs.rs@users.noreply.github.com",
+        // Renovatebot
+        "29139614+renovate[bot]@users.noreply.github.com",
+        // Dependabot
+        "49699333+dependabot[bot]@users.noreply.github.com",
+    ];
 
-    fn url_path(&self) -> &'static str {
-        "docs.rs"
-    }
-
-    fn repo_url(&self) -> &'static str {
-        "https://github.com/rust-lang/docs.rs.git"
-    }
-
-    fn get_versions(
-        &self,
-        repo: &Repository,
-    ) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
+    fn get_versions(repo: &Repository) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
         Ok(vec![VersionTag {
             name: String::from("Nightly"),
             version: Version::new(1, 0, 0),
             raw_tag: String::from("main"),
-            commit: repo
-                .revparse_single("HEAD")
-                .unwrap()
-                .peel_to_commit()
-                .unwrap()
-                .id(),
+            commit: revision_latest_commit(repo, "HEAD"),
             in_progress: true,
         }])
-    }
-
-    fn ignored_emails(&self) -> &'static [&'static str] {
-        &[
-            // CI bot
-            "docs.rs@users.noreply.github.com",
-            // Renovatebot
-            "29139614+renovate[bot]@users.noreply.github.com",
-            // Dependabot
-            "49699333+dependabot[bot]@users.noreply.github.com",
-        ]
-    }
-
-    fn is_versionless(&self) -> bool {
-        true
     }
 }

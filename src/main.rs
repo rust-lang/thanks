@@ -19,19 +19,18 @@ mod score;
 mod site;
 
 use crate::analyse::{
-    AuthorMap, AuthorsWithScores, build_author_map, compute_data, gather_all_commits,
+    AuthorMap, AuthorsWithScores, ProjectData, build_author_map, compute_data, gather_all_commits,
 };
 use crate::git::{VersionTag, mailmap_from_repo, update_repo};
 use crate::projects::{CratesIo, DocsRs, Project, Rust, Rustup};
 use crate::score::AuthorScore;
 
-fn generate_thanks(
-    project: &dyn Project,
+fn generate_thanks<P: Project>(
     mailmap_path: Option<PathBuf>,
 ) -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::error::Error>> {
-    eprintln!("Generating {}", project.name());
+    eprintln!("Generating {}", P::NAME);
 
-    let path = update_repo(project.repo_url())?;
+    let path = update_repo(P::REPO_URL)?;
     let repo = git2::Repository::open(&path)?;
 
     let mailmap = match mailmap_path {
@@ -44,7 +43,7 @@ fn generate_thanks(
     };
     let reviewers = Reviewers::new()?;
 
-    let versions = project.get_versions(&repo)?;
+    let versions = P::get_versions(&repo)?;
 
     let start = Instant::now();
 
@@ -57,8 +56,7 @@ fn generate_thanks(
         start.elapsed().as_secs_f64()
     );
 
-    let ignored_emails: HashSet<UniCase<String>> = project
-        .ignored_emails()
+    let ignored_emails: HashSet<UniCase<String>> = P::IGNORED_EMAILS
         .iter()
         .map(|email| UniCase::new(email.to_string()))
         .collect();
@@ -87,33 +85,32 @@ fn generate_thanks(
     Ok(version_map)
 }
 
-/// Return all projects for which we currently generate contribution statistics.
-fn get_all_projects() -> Vec<Box<dyn Project>> {
-    vec![
-        Box::new(Rust),
-        Box::new(Rustup),
-        Box::new(CratesIo),
-        Box::new(DocsRs),
-    ]
-}
-
 fn run(
     mode: OutputMode,
     mailmap_path: Option<PathBuf>,
     selected_project: Option<&str>,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let mut projects = get_all_projects();
-    if let Some(selected) = selected_project {
-        projects.retain(|p| p.name().to_lowercase() == selected);
-        if projects.is_empty() {
-            panic!("No projects found with name {selected}");
+    macro_rules! known_projects {
+        ( $( $name:literal => $project:ty, )+ ) => {
+            match selected_project {
+                $(
+                    Some($name) => vec![compute_data::<$project>(mailmap_path.clone())?],
+                )+
+                Some(selected) => panic!("No projects found with name {selected}"),
+                None => vec![
+                    $(
+                        compute_data::<$project>(mailmap_path.clone())?
+                    ),+
+                ]
+            }
         }
     }
-
-    let mut data = vec![];
-    for project in projects {
-        data.push(compute_data(project, mailmap_path.clone())?);
-    }
+    let data: Vec<ProjectData> = known_projects! {
+        "rust" => Rust,
+        "rustup" => Rustup,
+        "crates.io" => CratesIo,
+        "docs.rs" => DocsRs,
+    };
 
     match mode {
         OutputMode::Html => {
@@ -140,7 +137,7 @@ fn run(
 
             let csv_dir = PathBuf::from("output/csv");
             for data in data {
-                let directory = csv_dir.join(data.project.name().to_lowercase());
+                let directory = csv_dir.join(data.display_config.name().to_lowercase());
                 std::fs::create_dir_all(&directory)?;
                 for (version, authors) in data.by_version {
                     write(&directory.join(format!("{version}.csv")), authors)?;
