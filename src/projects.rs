@@ -1,6 +1,29 @@
-use crate::Project;
 use crate::git::{VersionTag, get_versions};
 use git2::Repository;
+
+pub trait Project {
+    /// Name of the project, displayed on the website.
+    fn name(&self) -> &'static str;
+
+    /// Path under which the project will be available on the web.
+    /// If the `url` is e.g. `rust`, it will be available under `/rust/`.
+    fn url_path(&self) -> &'static str;
+
+    /// Should this project be displayed as the main homepage project?
+    fn is_homepage(&self) -> bool {
+        false
+    }
+
+    /// URL of its GitHub repository.
+    fn repo_url(&self) -> &'static str;
+
+    /// Identify the versions that have been tagged in the given repo, including
+    /// any project-specific additional versions to add.
+    fn get_versions(
+        &self,
+        repo: &Repository,
+    ) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>>;
+}
 
 pub struct Rust;
 
