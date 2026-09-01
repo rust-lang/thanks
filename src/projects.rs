@@ -52,16 +52,6 @@ impl Project for Rust {
             .version
             .clone();
 
-        // The nightly branch is the default one, fall back to "main" if it cannot
-        // be read
-        let nightly_branch = match repo.head() {
-            Ok(reference) => match reference.shorthand() {
-                Some(name) => name.to_string(),
-                None => "main".to_string(),
-            },
-            Err(_) => "main".to_string(),
-        };
-
         versions.push(VersionTag {
             name: String::from("Beta"),
             version: {
@@ -81,7 +71,7 @@ impl Project for Rust {
                 last.minor += 2;
                 last
             },
-            raw_tag: nightly_branch,
+            raw_tag: String::from("main"),
             commit: revision_latest_commit(repo, "HEAD"),
             in_progress: true,
         });
