@@ -90,18 +90,26 @@ fn run(
     mailmap_path: Option<PathBuf>,
     selected_project: Option<&str>,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let data: Vec<ProjectData> = match selected_project {
-        Some("rust") => vec![compute_data::<Rust>(mailmap_path.clone())?],
-        Some("rustup") => vec![compute_data::<Rustup>(mailmap_path.clone())?],
-        Some("crates.io") => vec![compute_data::<CratesIo>(mailmap_path.clone())?],
-        Some("docs.rs") => vec![compute_data::<DocsRs>(mailmap_path.clone())?],
-        Some(selected) => panic!("No projects found with name {selected}"),
-        None => vec![
-            compute_data::<Rust>(mailmap_path.clone())?,
-            compute_data::<Rustup>(mailmap_path.clone())?,
-            compute_data::<CratesIo>(mailmap_path.clone())?,
-            compute_data::<DocsRs>(mailmap_path.clone())?,
-        ],
+    macro_rules! known_projects {
+        ( $( $name:literal => $project:ty, )+ ) => {
+            match selected_project {
+                $(
+                    Some($name) => vec![compute_data::<$project>(mailmap_path.clone())?],
+                )+
+                Some(selected) => panic!("No projects found with name {selected}"),
+                None => vec![
+                    $(
+                        compute_data::<$project>(mailmap_path.clone())?
+                    ),+
+                ]
+            }
+        }
+    }
+    let data: Vec<ProjectData> = known_projects! {
+        "rust" => Rust,
+        "rustup" => Rustup,
+        "crates.io" => CratesIo,
+        "docs.rs" => DocsRs,
     };
 
     match mode {
