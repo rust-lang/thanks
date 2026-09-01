@@ -27,11 +27,11 @@ Ferris <ferris@rust-lang.org> <ferris@old1.rust-lang.org>
 Ferris <ferris@rust-lang.org> <ferris@old2.rust-lang.org>
 ```
 
-If you change your GitHub username or someone mistyped your GitHub username in an `r=` comment, you can re-map it by adding an entry in `src/reviewers.rs`.
-This is also useful if your GitHub username is not present in rust-lang/team or you encrypted the email there.
+If you want to test the output using a custom `.mailmap` (without merging a PR blindly and waiting for the next thanks refresh), you can provide `--mailmap-path <mailmap-path>` argument, to run `thanks` using a custom mailmap.
 
-Use the `DEBUG_EMAILS=1` environment variable locally to display the email address in the output,
-which is useful for debugging these missing mailmap entries.
+If you change your GitHub username or someone mistyped your GitHub username in an `r=` comment, you can re-map it by adding an entry in `src/reviewers.rs`. This is also useful if your GitHub username is not present in rust-lang/team or you encrypted the email there.
+
+Use the `DEBUG_EMAILS=1` environment variable locally to display the email address in the output, which is useful for debugging these missing mailmap entries.
 
 ## Refresh time
 
