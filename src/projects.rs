@@ -18,10 +18,7 @@ pub trait Project {
 
     /// Identify the versions that have been tagged in the given repo, including
     /// any project-specific additional versions to add.
-    fn get_versions(
-        &self,
-        repo: &Repository,
-    ) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>>;
+    fn get_versions(repo: &Repository) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>>;
 
     /// true if the project does not track versions explicitly.
     /// It will be rendered as a single page with all-time contributions.
@@ -40,10 +37,7 @@ impl Project for Rust {
     const IS_HOMEPAGE: bool = true;
     const REPO_URL: &'static str = "https://github.com/rust-lang/rust.git";
 
-    fn get_versions(
-        &self,
-        repo: &Repository,
-    ) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
+    fn get_versions(repo: &Repository) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
         let mut versions = get_versions(repo, Self::NAME)?;
         let last_full_stable = versions
             .iter()
@@ -87,10 +81,7 @@ impl Project for Rustup {
     const URL_PATH: &'static str = "rustup";
     const REPO_URL: &'static str = "https://github.com/rust-lang/rustup.git";
 
-    fn get_versions(
-        &self,
-        repo: &Repository,
-    ) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
+    fn get_versions(repo: &Repository) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
         let mut versions = get_versions(repo, Self::NAME)?;
         let last_full_stable = versions
             .iter()
@@ -123,10 +114,7 @@ impl Project for CratesIo {
     const IS_VERSIONLESS: bool = true;
     const REPO_URL: &'static str = "https://github.com/rust-lang/crates.io.git";
 
-    fn get_versions(
-        &self,
-        repo: &Repository,
-    ) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
+    fn get_versions(repo: &Repository) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
         Ok(vec![VersionTag {
             name: String::from("Nightly"),
             version: Version::new(1, 0, 0),
@@ -153,10 +141,7 @@ impl Project for DocsRs {
         "49699333+dependabot[bot]@users.noreply.github.com",
     ];
 
-    fn get_versions(
-        &self,
-        repo: &Repository,
-    ) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
+    fn get_versions(repo: &Repository) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
         Ok(vec![VersionTag {
             name: String::from("Nightly"),
             version: Version::new(1, 0, 0),

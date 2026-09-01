@@ -53,10 +53,9 @@ pub struct ProjectData {
 }
 
 pub fn compute_data<P: Project>(
-    project: P,
     mailmap_path: Option<PathBuf>,
 ) -> Result<ProjectData, Box<dyn std::error::Error>> {
-    let by_version = generate_thanks(&project, mailmap_path)?;
+    let by_version = generate_thanks::<P>(mailmap_path)?;
     let by_version: BTreeMap<_, _> = by_version
         .into_iter()
         .map(|(k, v)| (k, AuthorsWithScores::new(v)))

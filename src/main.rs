@@ -26,7 +26,6 @@ use crate::projects::{CratesIo, DocsRs, Project, Rust, Rustup};
 use crate::score::AuthorScore;
 
 fn generate_thanks<P: Project>(
-    project: &P,
     mailmap_path: Option<PathBuf>,
 ) -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::error::Error>> {
     eprintln!("Generating {}", P::NAME);
@@ -44,7 +43,7 @@ fn generate_thanks<P: Project>(
     };
     let reviewers = Reviewers::new()?;
 
-    let versions = project.get_versions(&repo)?;
+    let versions = P::get_versions(&repo)?;
 
     let start = Instant::now();
 
@@ -92,16 +91,16 @@ fn run(
     selected_project: Option<&str>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let data: Vec<ProjectData> = match selected_project {
-        Some("rust") => vec![compute_data(Rust, mailmap_path.clone())?],
-        Some("rustup") => vec![compute_data(Rustup, mailmap_path.clone())?],
-        Some("crates.io") => vec![compute_data(CratesIo, mailmap_path.clone())?],
-        Some("docs.rs") => vec![compute_data(DocsRs, mailmap_path.clone())?],
+        Some("rust") => vec![compute_data::<Rust>(mailmap_path.clone())?],
+        Some("rustup") => vec![compute_data::<Rustup>(mailmap_path.clone())?],
+        Some("crates.io") => vec![compute_data::<CratesIo>(mailmap_path.clone())?],
+        Some("docs.rs") => vec![compute_data::<DocsRs>(mailmap_path.clone())?],
         Some(selected) => panic!("No projects found with name {selected}"),
         None => vec![
-            compute_data(Rust, mailmap_path.clone())?,
-            compute_data(Rustup, mailmap_path.clone())?,
-            compute_data(CratesIo, mailmap_path.clone())?,
-            compute_data(DocsRs, mailmap_path.clone())?,
+            compute_data::<Rust>(mailmap_path.clone())?,
+            compute_data::<Rustup>(mailmap_path.clone())?,
+            compute_data::<CratesIo>(mailmap_path.clone())?,
+            compute_data::<DocsRs>(mailmap_path.clone())?,
         ],
     };
 
