@@ -24,12 +24,20 @@ struct BaselineData {
     commit: &'static str,
 }
 
-const BASELINES: &[BaselineData] = &[BaselineData {
-    url: "https://github.com/rust-lang/rust.git",
-    dir: "rust-lang/rust",
-    // Corresponds to ~Rust 1.95.0 in May 2026.
-    commit: "0490dd938541ad996c5ad1ec6e274012afe3e1d4",
-}];
+const BASELINES: &[BaselineData] = &[
+    BaselineData {
+        url: "https://github.com/rust-lang/rust.git",
+        dir: "rust-lang/rust",
+        // Corresponds to ~Rust 1.95.0 in May 2026.
+        commit: "0490dd938541ad996c5ad1ec6e274012afe3e1d4",
+    },
+    BaselineData {
+        url: "https://github.com/rust-lang/rustup.git",
+        dir: "rust-lang/rustup",
+        // Corresponds to ~Rustup 1.26.0 in August 2026.
+        commit: "54cbe77c2949d421573796414922722fced8c254",
+    },
+];
 
 /// Checks that the generated `actual` CSV file matches the `expected` snapshot.
 fn check_file(expected: &Path, actual: &Path) -> Result<(), String> {
