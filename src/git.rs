@@ -6,7 +6,7 @@ use std::collections::{HashMap, HashSet};
 use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
-use std::sync::Mutex;
+use std::sync::{LazyLock, Mutex};
 use std::{cmp, fmt};
 
 /// Run a `git` command with the given arguments.
@@ -38,9 +38,7 @@ pub fn git(args: &[&str]) -> Result<String, Box<dyn std::error::Error>> {
     Ok(String::from_utf8_lossy(&stdout).into_owned())
 }
 
-lazy_static::lazy_static! {
-    static ref UPDATED: Mutex<HashSet<String>> = Mutex::new(HashSet::new());
-}
+static UPDATED: LazyLock<Mutex<HashSet<String>>> = LazyLock::new(|| Mutex::new(HashSet::new()));
 
 /// Create or update the bare clone of the git repo at the given URL
 ///

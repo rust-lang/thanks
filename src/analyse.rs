@@ -7,7 +7,7 @@ use git2::{Commit, Oid, Repository};
 use mailmap::{Author, Mailmap};
 use regex::{Regex, RegexBuilder};
 use std::collections::{HashMap, HashSet};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, LazyLock, Mutex};
 use std::time::Instant;
 
 /// Gather all commits for the given versions from the given repository, including all of its
@@ -364,13 +364,12 @@ fn is_rollup_commit(commit: &Commit) -> bool {
 fn commit_coauthors(commit: &Commit) -> Vec<Author> {
     let mut coauthors = vec![];
     if let Some(msg) = commit.message_raw() {
-        lazy_static::lazy_static! {
-            static ref RE: Regex =
-                RegexBuilder::new(r"^Co-authored-by: (?P<name>.*) <(?P<email>.*)>")
-                    .case_insensitive(true)
-                    .build()
-                    .unwrap();
-        }
+        static RE: LazyLock<Regex> = LazyLock::new(|| {
+            RegexBuilder::new(r"^Co-authored-by: (?P<name>.*) <(?P<email>.*)>")
+                .case_insensitive(true)
+                .build()
+                .unwrap()
+        });
 
         for line in msg.lines().rev() {
             if line.starts_with("Co-authored-by")
