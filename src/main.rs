@@ -1,3 +1,4 @@
+use clap::Parser;
 use config::Config;
 use git2::{Commit, Oid, Repository};
 use mailmap::{Author, Mailmap};
@@ -834,6 +835,7 @@ fn checkout_all_submodules(
     Ok(())
 }
 
+#[derive(clap::ValueEnum, Clone)]
 enum OutputMode {
     Html,
     Csv,
@@ -901,14 +903,17 @@ fn run(mode: OutputMode) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn main() {
-    let mode = std::env::args().nth(1);
-    let mode = match mode {
-        None => OutputMode::Html,
-        Some(mode) => mode.parse().unwrap(),
-    };
+#[derive(clap::Parser)]
+struct Args {
+    /// Output mode to use.
+    #[arg(default_value = "html")]
+    mode: OutputMode,
+}
 
-    if let Err(err) = run(mode) {
+fn main() {
+    let args = Args::parse();
+
+    if let Err(err) = run(args.mode) {
         eprintln!("Error: {}", err);
         let mut cur = &*err;
         while let Some(cause) = cur.source() {
