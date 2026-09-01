@@ -20,7 +20,7 @@ mod site;
 use crate::analyse::{
     AuthorMap, AuthorsWithScores, build_author_map, compute_data, gather_all_commits,
 };
-use crate::git::{VersionTag, get_versions, mailmap_from_repo, update_repo};
+use crate::git::{VersionTag, mailmap_from_repo, update_repo};
 use crate::projects::{Rust, Rustup};
 use crate::score::AuthorScore;
 
@@ -40,8 +40,12 @@ trait Project {
     /// URL of its GitHub repository.
     fn repo_url(&self) -> &'static str;
 
-    /// Add additional versions to the ones found from the git repository.
-    fn augment_versions(&self, repo: &Repository, versions: &mut Vec<VersionTag>);
+    /// Identify the versions that have been tagged in the given repo, including
+    /// any project-specific additional versions to add.
+    fn get_versions(
+        &self,
+        repo: &Repository,
+    ) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>>;
 }
 
 fn generate_thanks(
@@ -63,8 +67,7 @@ fn generate_thanks(
     };
     let reviewers = Reviewers::new()?;
 
-    let mut versions = get_versions(&repo, project.name())?;
-    project.augment_versions(&repo, &mut versions);
+    let versions = project.get_versions(&repo)?;
 
     let start = Instant::now();
 
