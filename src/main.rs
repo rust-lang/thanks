@@ -9,7 +9,7 @@ use std::io::{BufWriter, Read};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::str::FromStr;
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use std::time::Instant;
 use std::{cmp, fmt, str};
 
@@ -646,6 +646,13 @@ fn gather_all_commits(
     // repeatedly. If we cache the repositories, this doesn't have to happen.
     let mut subrepo_cache: HashMap<String, Repository> = HashMap::new();
 
+    let start = Instant::now();
+    checkout_all_submodules(repo, &versions)?;
+    eprintln!(
+        "Checked out submodules in {:.2}s",
+        start.elapsed().as_secs_f64()
+    );
+
     // Iterate all version from the oldest to the newest
     for version in &versions {
         let mut walk = repo.revwalk()?;
@@ -762,6 +769,69 @@ fn gather_all_commits(
     }
 
     Ok(by_version)
+}
+
+/// This functions checks out all known submodules in parallel, to make it faster.
+///
+/// It walks through all versions and gathers the set of all submodules known in the history
+/// of the main `repo`. Then it checks them out in parallel.
+fn checkout_all_submodules(
+    repo: &Repository,
+    versions: &[VersionTag],
+) -> Result<(), Box<dyn std::error::Error>> {
+    let mut all_submodules: HashSet<String> = HashSet::new();
+
+    // Note that we have to walk all versions, because in the latest version of the repo, some past
+    // submodules might already be removed.
+    // It is still possible that we will later run into a submodule that was only present
+    // *in-between* two versions, but that should be rare, and if it happens, it will be just
+    // checked out serially later.
+    for version in versions {
+        let modules = get_submodules(repo, &repo.find_commit(version.commit)?)?;
+        all_submodules.extend(modules.into_iter().map(|module| module.repository));
+    }
+    let mut submodules: Vec<String> = all_submodules.into_iter().collect();
+    submodules.sort();
+
+    let (tx, rx) = std::sync::mpsc::channel();
+    let (res_tx, res_rx) = std::sync::mpsc::channel();
+
+    // Submit work
+    for submodule in &submodules {
+        tx.send(submodule.clone())?;
+    }
+    drop(tx);
+
+    // git is already partially parallel internally, and cloning involves network operations
+    // Spawn a low number of threads to avoid oversubscribing
+    let thread_count = 4;
+
+    let rx = Arc::new(Mutex::new(rx));
+    std::thread::scope(|scope| {
+        for _ in 0..thread_count {
+            let rx = rx.clone();
+            let res_tx = res_tx.clone();
+            scope.spawn(move || {
+                loop {
+                    let submodule = {
+                        let Ok(msg) = rx.lock().unwrap().recv() else {
+                            break;
+                        };
+                        msg
+                    };
+                    update_repo(&submodule)
+                        .unwrap_or_else(|e| panic!("Cannot checkout submodule {submodule}: {e:?}"));
+                    res_tx.send(()).unwrap();
+                }
+            });
+        }
+    });
+
+    // Wait for all submodules to be checked out
+    for _ in submodules {
+        res_rx.recv()?;
+    }
+    Ok(())
 }
 
 enum OutputMode {
