@@ -21,7 +21,7 @@ use crate::analyse::{
     AuthorMap, AuthorsWithScores, build_author_map, compute_data, gather_all_commits,
 };
 use crate::git::{VersionTag, mailmap_from_repo, update_repo};
-use crate::projects::{Project, Rust, Rustup};
+use crate::projects::{CratesIo, DocsRs, Project, Rust, Rustup};
 use crate::score::AuthorScore;
 
 fn generate_thanks(
@@ -77,12 +77,22 @@ fn generate_thanks(
     Ok(version_map)
 }
 
+/// Return all projects for which we currently generate contribution statistics.
+fn get_all_projects() -> Vec<Box<dyn Project>> {
+    vec![
+        Box::new(Rust),
+        Box::new(Rustup),
+        Box::new(CratesIo),
+        Box::new(DocsRs),
+    ]
+}
+
 fn run(
     mode: OutputMode,
     mailmap_path: Option<PathBuf>,
     selected_project: Option<&str>,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let mut projects: Vec<Box<dyn Project>> = vec![Box::new(Rust), Box::new(Rustup)];
+    let mut projects = get_all_projects();
     if let Some(selected) = selected_project {
         projects.retain(|p| p.name().to_lowercase() == selected);
         if projects.is_empty() {

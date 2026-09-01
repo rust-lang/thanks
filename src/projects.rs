@@ -1,5 +1,6 @@
 use crate::git::{VersionTag, get_versions};
 use git2::Repository;
+use semver::Version;
 
 pub trait Project {
     /// Name of the project, displayed on the website.
@@ -155,5 +156,81 @@ impl Project for Rustup {
         });
 
         Ok(versions)
+    }
+}
+
+pub struct CratesIo;
+
+impl Project for CratesIo {
+    fn name(&self) -> &'static str {
+        "crates.io"
+    }
+
+    fn url_path(&self) -> &'static str {
+        "crates.io"
+    }
+
+    fn repo_url(&self) -> &'static str {
+        "https://github.com/rust-lang/crates.io.git"
+    }
+
+    fn get_versions(
+        &self,
+        repo: &Repository,
+    ) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
+        Ok(vec![VersionTag {
+            name: String::from("Nightly"),
+            version: Version::new(1, 0, 0),
+            raw_tag: String::from("main"),
+            commit: repo
+                .revparse_single("HEAD")
+                .unwrap()
+                .peel_to_commit()
+                .unwrap()
+                .id(),
+            in_progress: true,
+        }])
+    }
+
+    fn is_versionless(&self) -> bool {
+        true
+    }
+}
+
+pub struct DocsRs;
+
+impl Project for DocsRs {
+    fn name(&self) -> &'static str {
+        "Docs.rs"
+    }
+
+    fn url_path(&self) -> &'static str {
+        "docs.rs"
+    }
+
+    fn repo_url(&self) -> &'static str {
+        "https://github.com/rust-lang/docs.rs.git"
+    }
+
+    fn get_versions(
+        &self,
+        repo: &Repository,
+    ) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
+        Ok(vec![VersionTag {
+            name: String::from("Nightly"),
+            version: Version::new(1, 0, 0),
+            raw_tag: String::from("main"),
+            commit: repo
+                .revparse_single("HEAD")
+                .unwrap()
+                .peel_to_commit()
+                .unwrap()
+                .id(),
+            in_progress: true,
+        }])
+    }
+
+    fn is_versionless(&self) -> bool {
+        true
     }
 }

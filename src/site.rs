@@ -285,7 +285,7 @@ fn render_all_time_page(
         },
     )?;
 
-    create_dir(&output_dir)?;
+    create_dir(output_dir)?;
     fs::write(output_dir.join("index.html"), res)?;
     Ok(())
 }
