@@ -19,7 +19,7 @@ mod score;
 mod site;
 
 use crate::analyse::{
-    AuthorMap, AuthorsWithScores, build_author_map, compute_data, gather_all_commits,
+    AuthorMap, AuthorsWithScores, ProjectData, build_author_map, compute_data, gather_all_commits,
 };
 use crate::git::{VersionTag, mailmap_from_repo, update_repo};
 use crate::projects::{CratesIo, DocsRs, Project, Rust, Rustup};
@@ -87,33 +87,24 @@ fn generate_thanks(
     Ok(version_map)
 }
 
-/// Return all projects for which we currently generate contribution statistics.
-fn get_all_projects() -> Vec<Box<dyn Project>> {
-    vec![
-        Box::new(Rust),
-        Box::new(Rustup),
-        Box::new(CratesIo),
-        Box::new(DocsRs),
-    ]
-}
-
 fn run(
     mode: OutputMode,
     mailmap_path: Option<PathBuf>,
     selected_project: Option<&str>,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let mut projects = get_all_projects();
-    if let Some(selected) = selected_project {
-        projects.retain(|p| p.name().to_lowercase() == selected);
-        if projects.is_empty() {
-            panic!("No projects found with name {selected}");
-        }
-    }
-
-    let mut data = vec![];
-    for project in projects {
-        data.push(compute_data(project, mailmap_path.clone())?);
-    }
+    let data: Vec<ProjectData> = match selected_project {
+        Some("rust") => vec![compute_data(Box::new(Rust), mailmap_path.clone())?],
+        Some("rustup") => vec![compute_data(Box::new(Rustup), mailmap_path.clone())?],
+        Some("crates.io") => vec![compute_data(Box::new(CratesIo), mailmap_path.clone())?],
+        Some("docs.rs") => vec![compute_data(Box::new(DocsRs), mailmap_path.clone())?],
+        Some(selected) => panic!("No projects found with name {selected}"),
+        None => vec![
+            compute_data(Box::new(Rust), mailmap_path.clone())?,
+            compute_data(Box::new(Rustup), mailmap_path.clone())?,
+            compute_data(Box::new(CratesIo), mailmap_path.clone())?,
+            compute_data(Box::new(DocsRs), mailmap_path.clone())?,
+        ],
+    };
 
     match mode {
         OutputMode::Html => {
