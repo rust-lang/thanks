@@ -13,12 +13,23 @@
 //! before running thanks, otherwise the results might differ.
 
 use std::fs;
+use std::fs::DirEntry;
 use std::path::Path;
 use std::process::Command;
 
-/// Reference Rust commit against which we compare the stored snapshots.
-/// Corresponds to ~Rust 1.95.0 in May 2026.
-const REFERENCE_COMMIT: &str = "0490dd938541ad996c5ad1ec6e274012afe3e1d4";
+/// Reference repositories and their commits against which we compare the stored snapshots.
+struct BaselineData {
+    url: &'static str,
+    dir: &'static str,
+    commit: &'static str,
+}
+
+const BASELINES: &[BaselineData] = &[BaselineData {
+    url: "https://github.com/rust-lang/rust.git",
+    dir: "rust-lang/rust",
+    // Corresponds to ~Rust 1.95.0 in May 2026.
+    commit: "0490dd938541ad996c5ad1ec6e274012afe3e1d4",
+}];
 
 /// Checks that the generated `actual` CSV file matches the `expected` snapshot.
 fn check_file(expected: &Path, actual: &Path) -> Result<(), String> {
@@ -53,44 +64,71 @@ fn check_file(expected: &Path, actual: &Path) -> Result<(), String> {
     }
 }
 
-/// Check that all files match expectations in the given `actual_dir`.
-fn check_dir(expected_dir: &Path, actual_dir: &Path) {
-    let mut files = std::fs::read_dir(expected_dir)
+fn get_sorted_paths(dir: &Path) -> Vec<DirEntry> {
+    let mut files = std::fs::read_dir(dir)
         .unwrap()
         .into_iter()
         .collect::<Result<Vec<_>, _>>()
         .unwrap();
     files.sort_by_key(|e| e.path());
+    files
+}
 
-    let mut failures = vec![];
-    for entry in files {
-        let expected_file = entry.path();
-        assert_eq!("csv", expected_file.extension().unwrap());
-        let binding = expected_file.with_extension("csv");
-        let version = binding.file_name().unwrap();
-        if let Err(failure) = check_file(&expected_file, &actual_dir.join(version)) {
-            failures.push((version.to_str().unwrap().to_string(), failure));
+/// Check that all files match expectations in the given `actual_dir`.
+fn check_dir(expected_dir: &Path, actual_dir: &Path) {
+    struct Failure {
+        project: String,
+        version: String,
+        diff: String,
+    }
+
+    let mut failures: Vec<Failure> = vec![];
+    for project in get_sorted_paths(expected_dir) {
+        let project_dir = project.path();
+        let project_name = project_dir
+            .file_name()
+            .unwrap()
+            .to_str()
+            .unwrap()
+            .to_string();
+
+        for entry in get_sorted_paths(&project_dir) {
+            let expected_file = entry.path();
+            assert_eq!("csv", expected_file.extension().unwrap());
+            let binding = expected_file.with_extension("csv");
+            let version = binding.file_name().unwrap();
+            if let Err(failure) = check_file(
+                &expected_file,
+                &actual_dir.join(&project_name).join(version),
+            ) {
+                failures.push(Failure {
+                    project: project_name.clone(),
+                    version: version.to_str().unwrap().to_string(),
+                    diff: failure,
+                });
+            }
         }
     }
 
-    failures.sort_by_key(|(version, _)| version.clone());
-    for (version, diff) in &failures {
-        eprintln!("Diff failed for {version}");
+    failures.sort_by_key(|failure| (failure.project.clone(), failure.version.clone()));
+    for failure in &failures {
+        eprintln!("Diff failed for {}@{}", failure.project, failure.version);
         eprintln!("----------");
-        eprintln!("{diff}");
+        eprintln!("{}", failure.diff);
         eprintln!("----------");
     }
     if !failures.is_empty() {
         panic!(
-            r#"Diffs failed for {}
+            r#"Diffs failed for:
+{}
 
 Run with TESTS_UPDATE_EXPECTED=1 to bless the expected snapshots.
 "#,
             failures
                 .into_iter()
-                .map(|(version, _)| version)
+                .map(|failure| format!("- {}@{}", failure.project, failure.version))
                 .collect::<Vec<_>>()
-                .join(", ")
+                .join("\n")
         );
     }
 }
@@ -122,17 +160,22 @@ fn verify_generated_output() {
         let root_dir = tmp_dir.path();
         eprintln!("Generating thanks data in {}", root_dir.display());
 
-        // Clone rust-lang/rust
-        run(Command::new("git").current_dir(root_dir).args([
-            "clone",
-            "--bare",
-            "https://github.com/rust-lang/rust.git",
-            "repos/rust-lang/rust",
-        ]));
-        // Set it to the reference commit
-        run(Command::new("git")
-            .current_dir(root_dir.join("repos/rust-lang/rust"))
-            .args(["branch", "-f", "main", REFERENCE_COMMIT]));
+        // Prepare the baseline repositories
+        for baseline in BASELINES {
+            let relative_dir = Path::new("repos").join(baseline.dir);
+
+            // Clone the repo
+            let mut cmd = Command::new("git");
+            cmd.current_dir(root_dir);
+            cmd.args(["clone", "--bare", baseline.url]);
+            cmd.arg(&relative_dir);
+            run(&mut cmd);
+
+            // Set it to the reference commit
+            run(Command::new("git")
+                .current_dir(root_dir.join(&relative_dir))
+                .args(["branch", "-f", "main", baseline.commit]));
+        }
         // Run thanks
         run(Command::new(binary).current_dir(root_dir).arg("csv"));
 
