@@ -1,40 +1,41 @@
 {{#*inline "content"}}
-<section class="white">
+  <section class="white">
     <div class="w-100 mw-none ph3 mw8-m mw8-l center f3">
-        <header class="pb0">
-            <h2>{{ release_title }} Contributors</h2>
-            <div class="highlight"></div>
-        </header>
-        <p class="mb3"><a href="/">Back to all releases</a></p>
-        <p class="mb3">
-            {{#if in_progress }}
-            We have had {{ count }} individuals contribute to {{ release }} so far.
-            Thank you so much!
-            {{else}}
-            We have had {{ count }} individuals contribute to {{ release }}.
-            Thank you so much!
-            {{/if}}
-        </p>
+      <header class="pb0">
+        <h2>{{ release_title }} Contributors</h2>
+        <div class="highlight"></div>
+      </header>
+      <p class="mb3"><a href="{{#if is_homepage_project }}/{{else}}../{{/if}}">Back to all
+        releases</a></p>
+      <p class="mb3">
+        {{#if in_progress }}
+          We have had {{ count }} individuals contribute to {{ release }} so far.
+          Thank you so much!
+        {{else}}
+          We have had {{ count }} individuals contribute to {{ release }}.
+          Thank you so much!
+        {{/if}}
+      </p>
 
-        <table class="post-list collapse w-100">
-            <thead>
-                <tr>
-                    <th>Rank</th>
-                    <th>Name</th>
-                    <th>Contributions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {{#each scores as |score| }}
-                <tr>
-                    <td class="bn">{{score.rank}}</td>
-                    <td class="bn">{{score.author}}</td>
-                    <td class="bn">{{score.commits}}</td>
-                </tr>
-                {{/each}}
-            </tbody>
-        </table>
+      <table class="post-list collapse w-100">
+        <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Name</th>
+          <th>Contributions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#each scores as |score| }}
+          <tr>
+            <td class="bn">{{score.rank}}</td>
+            <td class="bn">{{score.author}}</td>
+            <td class="bn">{{score.commits}}</td>
+          </tr>
+        {{/each}}
+        </tbody>
+      </table>
     </div>
-</section>
+  </section>
 {{/inline}}
 {{~> container ~}}

@@ -178,6 +178,7 @@ fn releases(data: &ProjectData, output_dir: &Path) -> Result<(), Box<dyn std::er
         count: usize,
         scores: &'a [AuthorScore],
         in_progress: bool,
+        is_homepage_project: bool,
     }
     let hb = hb()?;
 
@@ -191,6 +192,7 @@ fn releases(data: &ProjectData, output_dir: &Path) -> Result<(), Box<dyn std::er
             count: scores.len(),
             scores,
             in_progress: true,
+            is_homepage_project: data.project.is_homepage(),
         },
     )?;
 
@@ -209,6 +211,7 @@ fn releases(data: &ProjectData, output_dir: &Path) -> Result<(), Box<dyn std::er
                 count: scores.len(),
                 scores,
                 in_progress: version.in_progress,
+                is_homepage_project: data.project.is_homepage(),
             },
         )?;
 
