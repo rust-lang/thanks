@@ -31,7 +31,7 @@ fn generate_thanks<P: Project>(
 ) -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::error::Error>> {
     eprintln!("Generating {}", P::NAME);
 
-    let path = update_repo(project.repo_url())?;
+    let path = update_repo(P::REPO_URL)?;
     let repo = git2::Repository::open(&path)?;
 
     let mailmap = match mailmap_path {

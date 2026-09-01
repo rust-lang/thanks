@@ -14,7 +14,7 @@ pub trait Project {
     const IS_HOMEPAGE: bool = false;
 
     /// URL of its GitHub repository.
-    fn repo_url(&self) -> &'static str;
+    const REPO_URL: &'static str;
 
     /// Identify the versions that have been tagged in the given repo, including
     /// any project-specific additional versions to add.
@@ -40,10 +40,7 @@ impl Project for Rust {
     const NAME: &'static str = "Rust";
     const URL_PATH: &'static str = "rust";
     const IS_HOMEPAGE: bool = true;
-
-    fn repo_url(&self) -> &'static str {
-        "https://github.com/rust-lang/rust.git"
-    }
+    const REPO_URL: &'static str = "https://github.com/rust-lang/rust.git";
 
     fn get_versions(
         &self,
@@ -110,10 +107,7 @@ pub struct Rustup;
 impl Project for Rustup {
     const NAME: &'static str = "Rustup";
     const URL_PATH: &'static str = "rustup";
-
-    fn repo_url(&self) -> &'static str {
-        "https://github.com/rust-lang/rustup.git"
-    }
+    const REPO_URL: &'static str = "https://github.com/rust-lang/rustup.git";
 
     fn get_versions(
         &self,
@@ -154,10 +148,7 @@ impl Project for CratesIo {
     const NAME: &'static str = "crates.io";
     const URL_PATH: &'static str = "crates.io";
     const IS_VERSIONLESS: bool = true;
-
-    fn repo_url(&self) -> &'static str {
-        "https://github.com/rust-lang/crates.io.git"
-    }
+    const REPO_URL: &'static str = "https://github.com/rust-lang/crates.io.git";
 
     fn get_versions(
         &self,
@@ -184,10 +175,7 @@ impl Project for DocsRs {
     const NAME: &'static str = "Docs.rs";
     const URL_PATH: &'static str = "docs.rs";
     const IS_VERSIONLESS: bool = true;
-
-    fn repo_url(&self) -> &'static str {
-        "https://github.com/rust-lang/docs.rs.git"
-    }
+    const REPO_URL: &'static str = "https://github.com/rust-lang/docs.rs.git";
 
     fn get_versions(
         &self,
