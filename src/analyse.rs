@@ -69,10 +69,10 @@ pub fn compute_data<P: Project>(
     let all_time = AuthorsWithScores::new(all_time);
     Ok(ProjectData {
         display_config: ProjectDisplayConfig {
-            name: project.name(),
-            url_path: project.url_path(),
-            is_homepage: project.is_homepage(),
-            is_versionless: project.is_versionless(),
+            name: P::NAME,
+            url_path: P::URL_PATH,
+            is_homepage: P::IS_HOMEPAGE,
+            is_versionless: P::IS_VERSIONLESS,
         },
         by_version,
         all_time,

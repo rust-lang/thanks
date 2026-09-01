@@ -4,16 +4,14 @@ use semver::Version;
 
 pub trait Project {
     /// Name of the project, displayed on the website.
-    fn name(&self) -> &'static str;
+    const NAME: &'static str;
 
     /// Path under which the project will be available on the web.
     /// If the `url` is e.g. `rust`, it will be available under `/rust/`.
-    fn url_path(&self) -> &'static str;
+    const URL_PATH: &'static str;
 
     /// Should this project be displayed as the main homepage project?
-    fn is_homepage(&self) -> bool {
-        false
-    }
+    const IS_HOMEPAGE: bool = false;
 
     /// URL of its GitHub repository.
     fn repo_url(&self) -> &'static str;
@@ -25,11 +23,9 @@ pub trait Project {
         repo: &Repository,
     ) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>>;
 
-    /// Returns true if the project does not track versions explicitly.
+    /// true if the project does not track versions explicitly.
     /// It will be rendered as a single page with all-time contributions.
-    fn is_versionless(&self) -> bool {
-        false
-    }
+    const IS_VERSIONLESS: bool = false;
 
     /// Contributions from users with these e-mail addresses will be ignored.
     /// The addresses will be compared in a case-insensitive manner.
@@ -41,17 +37,9 @@ pub trait Project {
 pub struct Rust;
 
 impl Project for Rust {
-    fn name(&self) -> &'static str {
-        "Rust"
-    }
-
-    fn url_path(&self) -> &'static str {
-        "rust"
-    }
-
-    fn is_homepage(&self) -> bool {
-        true
-    }
+    const NAME: &'static str = "Rust";
+    const URL_PATH: &'static str = "rust";
+    const IS_HOMEPAGE: bool = true;
 
     fn repo_url(&self) -> &'static str {
         "https://github.com/rust-lang/rust.git"
@@ -61,7 +49,7 @@ impl Project for Rust {
         &self,
         repo: &Repository,
     ) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
-        let mut versions = get_versions(repo, self.name())?;
+        let mut versions = get_versions(repo, Self::NAME)?;
         let last_full_stable = versions
             .iter()
             .rfind(|v| v.raw_tag.ends_with(".0"))
@@ -120,13 +108,8 @@ impl Project for Rust {
 pub struct Rustup;
 
 impl Project for Rustup {
-    fn name(&self) -> &'static str {
-        "Rustup"
-    }
-
-    fn url_path(&self) -> &'static str {
-        "rustup"
-    }
+    const NAME: &'static str = "Rustup";
+    const URL_PATH: &'static str = "rustup";
 
     fn repo_url(&self) -> &'static str {
         "https://github.com/rust-lang/rustup.git"
@@ -136,7 +119,7 @@ impl Project for Rustup {
         &self,
         repo: &Repository,
     ) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
-        let mut versions = get_versions(repo, self.name())?;
+        let mut versions = get_versions(repo, Self::NAME)?;
         let last_full_stable = versions
             .iter()
             .rfind(|v| v.raw_tag.ends_with(".0"))
@@ -168,13 +151,9 @@ impl Project for Rustup {
 pub struct CratesIo;
 
 impl Project for CratesIo {
-    fn name(&self) -> &'static str {
-        "crates.io"
-    }
-
-    fn url_path(&self) -> &'static str {
-        "crates.io"
-    }
+    const NAME: &'static str = "crates.io";
+    const URL_PATH: &'static str = "crates.io";
+    const IS_VERSIONLESS: bool = true;
 
     fn repo_url(&self) -> &'static str {
         "https://github.com/rust-lang/crates.io.git"
@@ -197,22 +176,14 @@ impl Project for CratesIo {
             in_progress: true,
         }])
     }
-
-    fn is_versionless(&self) -> bool {
-        true
-    }
 }
 
 pub struct DocsRs;
 
 impl Project for DocsRs {
-    fn name(&self) -> &'static str {
-        "Docs.rs"
-    }
-
-    fn url_path(&self) -> &'static str {
-        "docs.rs"
-    }
+    const NAME: &'static str = "Docs.rs";
+    const URL_PATH: &'static str = "docs.rs";
+    const IS_VERSIONLESS: bool = true;
 
     fn repo_url(&self) -> &'static str {
         "https://github.com/rust-lang/docs.rs.git"
@@ -245,9 +216,5 @@ impl Project for DocsRs {
             // Dependabot
             "49699333+dependabot[bot]@users.noreply.github.com",
         ]
-    }
-
-    fn is_versionless(&self) -> bool {
-        true
     }
 }
