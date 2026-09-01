@@ -34,7 +34,7 @@ const BASELINES: &[BaselineData] = &[
     BaselineData {
         url: "https://github.com/rust-lang/rustup.git",
         dir: "rust-lang/rustup",
-        // Corresponds to ~Rustup 1.26.0 in August 2026.
+        // Corresponds to ~Rustup 1.30.0 in August 2026.
         commit: "54cbe77c2949d421573796414922722fced8c254",
     },
 ];
