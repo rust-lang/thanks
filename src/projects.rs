@@ -1,5 +1,5 @@
 use crate::Project;
-use crate::git::VersionTag;
+use crate::git::{VersionTag, get_versions};
 use git2::Repository;
 
 pub struct Rust;
@@ -21,7 +21,11 @@ impl Project for Rust {
         "https://github.com/rust-lang/rust.git"
     }
 
-    fn augment_versions(&self, repo: &Repository, versions: &mut Vec<VersionTag>) {
+    fn get_versions(
+        &self,
+        repo: &Repository,
+    ) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
+        let mut versions = get_versions(repo, self.name())?;
         let last_full_stable = versions
             .iter()
             .rfind(|v| v.raw_tag.ends_with(".0"))
@@ -72,6 +76,8 @@ impl Project for Rust {
                 .id(),
             in_progress: true,
         });
+
+        Ok(versions)
     }
 }
 
@@ -90,7 +96,11 @@ impl Project for Rustup {
         "https://github.com/rust-lang/rustup.git"
     }
 
-    fn augment_versions(&self, repo: &Repository, versions: &mut Vec<VersionTag>) {
+    fn get_versions(
+        &self,
+        repo: &Repository,
+    ) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
+        let mut versions = get_versions(repo, self.name())?;
         let last_full_stable = versions
             .iter()
             .rfind(|v| v.raw_tag.ends_with(".0"))
@@ -114,5 +124,7 @@ impl Project for Rustup {
                 .id(),
             in_progress: true,
         });
+
+        Ok(versions)
     }
 }
