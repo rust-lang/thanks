@@ -99,8 +99,18 @@ fn generate_thanks(
     Ok(version_map)
 }
 
-fn run(mode: OutputMode, mailmap_path: Option<PathBuf>) -> Result<(), Box<dyn std::error::Error>> {
-    let projects: Vec<Box<dyn Project>> = vec![Box::new(Rust), Box::new(Rustup)];
+fn run(
+    mode: OutputMode,
+    mailmap_path: Option<PathBuf>,
+    selected_project: Option<&str>,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let mut projects: Vec<Box<dyn Project>> = vec![Box::new(Rust), Box::new(Rustup)];
+    if let Some(selected) = selected_project {
+        projects.retain(|p| p.name().to_lowercase() == selected);
+        if projects.is_empty() {
+            panic!("No projects found with name {selected}");
+        }
+    }
 
     let mut data = vec![];
     for project in projects {
@@ -155,6 +165,12 @@ struct Args {
     /// Can be used to test mailmap changes before committing them to the main repo.
     #[arg(long)]
     mailmap_path: Option<PathBuf>,
+
+    /// Render only the selected project.
+    /// If not given, all projects are rendered.
+    /// The value should correspond to the project's lowercase name.
+    #[arg(long)]
+    project: Option<String>,
 }
 
 #[derive(clap::ValueEnum, Copy, Clone)]
@@ -180,7 +196,7 @@ impl FromStr for OutputMode {
 fn main() {
     let args = Args::parse();
 
-    if let Err(err) = run(args.mode, args.mailmap_path) {
+    if let Err(err) = run(args.mode, args.mailmap_path, args.project.as_deref()) {
         eprintln!("Error: {}", err);
         let mut cur = &*err;
         while let Some(cause) = cur.source() {
