@@ -30,7 +30,7 @@ trait Project {
 
     /// Path under which the project will be available on the web.
     /// If the `url` is e.g. `rust`, it will be available under `/rust/`.
-    fn url(&self) -> &'static str;
+    fn url_path(&self) -> &'static str;
 
     /// Should this project be displayed as the main homepage project?
     fn is_homepage(&self) -> bool {

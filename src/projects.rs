@@ -9,7 +9,7 @@ impl Project for Rust {
         "Rust"
     }
 
-    fn url(&self) -> &'static str {
+    fn url_path(&self) -> &'static str {
         "rust"
     }
 
@@ -82,7 +82,7 @@ impl Project for Rustup {
         "Rustup"
     }
 
-    fn url(&self) -> &'static str {
+    fn url_path(&self) -> &'static str {
         "rustup"
     }
 
