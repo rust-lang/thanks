@@ -28,12 +28,17 @@ pub fn render_projects(
         create_dir(&project_out_dir)?;
 
         if data.project.is_homepage() {
-            render_project_index_page(&hb, data, &project_out_dir)?;
+            assert!(!data.project.is_versionless());
             render_project_index_page(&hb, data, root_dir)?;
+        }
+
+        if data.project.is_versionless() {
+            render_all_time_page(&hb, data, &project_out_dir)?;
         } else {
             render_project_index_page(&hb, data, &project_out_dir)?;
+            render_release_pages(&hb, data, &project_out_dir)?;
+            render_all_time_page(&hb, data, &project_out_dir.join("all-time"))?;
         }
-        render_release_pages(&hb, data, &project_out_dir)?;
 
         combined_all_time.extend(data.all_time.authors.clone());
     }
@@ -261,7 +266,7 @@ struct Release<'a> {
     is_homepage_project: bool,
 }
 
-fn render_release_pages(
+fn render_all_time_page(
     hb: &Handlebars<'_>,
     data: &ProjectData,
     output_dir: &Path,
@@ -280,10 +285,16 @@ fn render_release_pages(
         },
     )?;
 
-    let all_time_dir = output_dir.join("all-time");
-    create_dir(&all_time_dir)?;
-    fs::write(all_time_dir.join("index.html"), res)?;
+    create_dir(&output_dir)?;
+    fs::write(output_dir.join("index.html"), res)?;
+    Ok(())
+}
 
+fn render_release_pages(
+    hb: &Handlebars<'_>,
+    data: &ProjectData,
+    output_dir: &Path,
+) -> Result<(), Box<dyn std::error::Error>> {
     for (version, map) in &data.by_version {
         let scores = &map.scores;
         let res = hb.render(

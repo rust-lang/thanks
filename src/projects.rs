@@ -23,6 +23,12 @@ pub trait Project {
         &self,
         repo: &Repository,
     ) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>>;
+
+    /// Returns true if the project does not track versions explicitly.
+    /// It will be rendered as a single page with all-time contributions.
+    fn is_versionless(&self) -> bool {
+        false
+    }
 }
 
 pub struct Rust;
