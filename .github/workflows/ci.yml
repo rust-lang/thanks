@@ -80,7 +80,11 @@ jobs:
     name: Deploy
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.repository_owner == 'rust-lang'
-    needs: build
+    needs:
+      - build
+      - test
+      - regression
+    concurrency: deploy
 
     permissions:
       pages: write
