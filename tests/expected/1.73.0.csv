@@ -1,0 +1,330 @@
+1,bors,bors@rust-lang.org,837
+2,Michael Goulet,michael@errs.io,224
+3,Ralf Jung,post@ralfj.de,191
+4,Oliver Scherer,oli-obk@users.noreply.github.com,154
+5,Camille Gillot,gillot.camille@gmail.com,118
+6,Lukas Wirth,lukastw97@gmail.com,108
+7,Weihang Lo,me@weihanglo.tw,103
+8,Eric Huss,eric@huss.org,98
+9,lcnr,rust@lcnr.de,95
+10,Guillaume Gomez,contact@guillaume-gomez.fr,88
+11,Nicholas Nethercote,n.nethercote@gmail.com,83
+11,hamidreza kalbasi,hamidrezakalbasi@protonmail.com,83
+13,bjorn3,17426603+bjorn3@users.noreply.github.com,82
+14,Matthias Krüger,matthias.krueger@famsik.de,77
+15,Ed Page,eopage@gmail.com,71
+16,Laurențiu Nicola,lnicola@dend.ro,63
+17,Jubilee Young,workingjubilee@gmail.com,58
+17,Mark Rousskov,mark.simulacrum@gmail.com,58
+19,Josh Stone,cuviper@gmail.com,55
+20,Jynn Nelson,github@jyn.dev,50
+21,Santiago Pastorino,spastorino@gmail.com,46
+22,Vadim Petrochenkov,vadim.petrochenkov@gmail.com,41
+22,y21,30553356+y21@users.noreply.github.com,41
+24,The Miri Conjob Bot,miri@cron.bot,39
+25,Philipp Krones,hello@philkrones.com,38
+26,Ryo Yoshida,low.ryoshida@gmail.com,37
+27,Tetsuharu Ohzeki,tetsuharu.ohzeki@gmail.com,35
+27,Urgau,urgau@numericable.fr,35
+29,Erik Desjardins,erikdesjardins@users.noreply.github.com,34
+30,Catherine,catherine3.flores@gmail.com,33
+31,David Wood,david@davidtw.co,32
+32,Deadbeef,ent3rm4n@gmail.com,31
+33,León Orell Valerian Liehr,me@fmease.dev,30
+33,Michael Howell,michael@notriddle.com,30
+35,İsmail Arılık,arilik.ismail@gmail.com,29
+36,David Tolnay,dtolnay@gmail.com,28
+36,Esteban Küber,esteban@kuber.com.ar,28
+36,Jakub Beránek,berykubik@gmail.com,28
+36,Waffle Lapkin,waffle.lapkin@gmail.com,28
+36,yukang,moorekang@gmail.com,28
+41,Alex Macleod,alex@macleod.io,27
+42,Catherine,114838443+Centri3@users.noreply.github.com,26
+42,Kyle Lin,minecraft.kyle.train@gmail.com,26
+42,Nikita Popov,nikita.ppv@gmail.com,26
+42,Tshepang Mbambo,hopsi@tuta.io,26
+46,Ali Bektas,bektasali@protonmail.com,25
+46,Josh Triplett,josh@joshtriplett.org,25
+46,Noratrieb,48135649+Noratrieb@users.noreply.github.com,25
+49,DropDemBits,r3usrlnd@gmail.com,24
+49,Martin Nordholts,martin.nordholts@codetale.se,24
+49,Rémy Rakic,remy.rakic@gmail.com,24
+52,Wesley Wiser,wwiser@gmail.com,23
+52,b-naber,bn263@gmx.de,23
+54,Arlo Siemsen,arsiem@microsoft.com,22
+54,Zalathar,Zalathar@users.noreply.github.com,22
+56,Amanieu d'Antras,amanieu@gmail.com,21
+57,Manish Goregaokar,manishsmail@gmail.com,20
+58,Alejandra González,blyxyas@goose.love,19
+58,Onur Özkan,onurozkan.dev@outlook.com,19
+60,Fridtjof Stoldt,xFrednet@gmail.com,18
+61,Jack Huey,jackh726@gmail.com,16
+61,Jason Newcomb,jsnewcomb@pm.me,16
+61,Mara Bos,m-ou.se@m-ou.se,16
+61,Thom Chiovoloni,chiovolonit@gmail.com,16
+65,Taras Tsugrii,taras.tsugriy@gmail.com,15
+66,dirreke,mingyang_ge@163.com,14
+67,Lukas Markeffsky,@,13
+67,Moulins,arthur.heuillard@orange.fr,13
+67,Scott McMurray,scottmcm@users.noreply.github.com,13
+70,Felix Klock,pnkfelix@pnkfx.org,12
+70,Gary Guo,gary@garyguo.net,12
+70,Oğuz Ağcayazı,oguz.agcayazi@gmail.com,12
+73,Morten Lohne,lohnemorten@gmail.com,11
+73,Trevor Gross,tmgross@umich.edu,11
+73,klensy,klensy@users.noreply.github.com,11
+76,Andre Bogus,bogusandre@gmail.com,10
+76,BoxyUwU,rust@boxyuwu.dev,10
+76,Eric Mark Martin,ericmarkmartin@gmail.com,10
+76,Takayuki Nakata,f.seasons017@gmail.com,10
+76,clubby789,jamie@hill-daniel.co.uk,10
+81,Mu001999,mu001999@outlook.com,9
+81,bohan,bohan-zhang@foxmail.com,9
+83,Albert Larsan,albert.larsan@gmail.com,8
+83,Alex Kladov,aleksey.kladov@gmail.com,8
+83,Ben Kimock,kimockb@gmail.com,8
+83,Jieyou Xu,jieyouxu@outlook.com,8
+83,Martin Kröning,martin.kroening@eonerc.rwth-aachen.de,8
+83,Samuel Moelius,sam@moeli.us,8
+83,The8472,git@infinite-source.de,8
+83,darklyspaced,srohanjd@gmail.com,8
+83,nxya,nathacutlan@gmail.com,8
+92,Adenine,adenine.dev@gmail.com,7
+92,Caleb Zulawski,caleb.zulawski@gmail.com,7
+92,Mahdi Dibaiee,mdibaiee@pm.me,7
+92,Yuki Okushi,jtitor@2k36.org,7
+92,est31,est31@protonmail.com,7
+97,Caio,c410.f3r@gmail.com,6
+97,David Lattimore,dvdlttmr@gmail.com,6
+97,Dharma Saputra Wijaya,dswijj@gmail.com,6
+97,Eduardo Sánchez Muñoz,eduardosm-dev@e64.io,6
+97,Max Heller,max.a.heller@gmail.com,6
+97,Meng Xiangzhuo,aumo@foxmail.com,6
+97,Tomasz Miąsko,tomasz.miasko@gmail.com,6
+97,oxalica,oxalicc@pm.me,6
+105,Ali MJ Al-Nasrawy,alimjalnasrawy@gmail.com,5
+105,Arlo Siemsen,arkixml@gmail.com,5
+105,Caleb Cartwright,caleb.cartwright@outlook.com,5
+105,Chris Denton,chris@chrisdenton.dev,5
+105,DrMeepster,19316085+DrMeepster@users.noreply.github.com,5
+105,Georgii Rylov,g0dj4n@gmail.com,5
+105,Jacob Pratt,jacob@jhpratt.dev,5
+105,Jan-Mirko Otter,janmirko.otter@googlemail.com,5
+105,John Kåre Alsaker,john.kare.alsaker@gmail.com,5
+105,Lokathor,zefria@gmail.com,5
+105,Pietro Albini,pietro@pietroalbini.org,5
+105,Raghul Nanth A,61490162+NanthR@users.noreply.github.com,5
+105,Seth Pellegrino,seth@codecopse.net,5
+105,SparrowLii,liyuan179@huawei.com,5
+105,est31,MTest31@outlook.com,5
+120,Alona Enraght-Moony,code@alona.page,4
+120,AmrDeveloper,amr96@programmer.net,4
+120,Eric Holk,eric.holk@gmail.com,4
+120,Jonathan Pallant (Ferrous Systems),jonathan.pallant@ferrous-systems.com,4
+120,Krasimir Georgiev,krasimir@google.com,4
+120,Maciej Zwoliński,mac.zwolinski@gmail.com,4
+120,Mario Idival,marioidival@gmail.com,4
+120,Neven Villani,vanille@crans.org,4
+120,Stefan Lankes,slankes@eonerc.rwth-aachen.de,4
+120,Taiki Endo,te316e89@gmail.com,4
+120,Yuri Astrakhan,YuriAstrakhan@gmail.com,4
+120,alcolmenar,aljcolmenar@gmail.com,4
+120,chenx97,chenx97@aosc.io,4
+120,joboet,jonasboettiger@icloud.com,4
+120,kadiwa,kalle.wachsmuth@gmail.com,4
+120,ltdk,usr@ltdk.xyz,4
+120,sslime336,sslime@yeah.net,4
+137,Alex Zepeda,github@inferiorhumanorgans.com,3
+137,Andrew Tribick,ajtribick@googlemail.com,3
+137,Andrius Pukšta,54238857+yjhn@users.noreply.github.com,3
+137,Bryan Garza,1396101+bryangarza@users.noreply.github.com,3
+137,Celina G. Val,celinval@amazon.com,3
+137,Chris Copeland,chris@chrisnc.net,3
+137,Chris Wailes,chriswailes@google.com,3
+137,Cyborus04,87248184+Cyborus04@users.noreply.github.com,3
+137,DianQK,dianqk@dianqk.net,3
+137,Ian Jackson,ijackson@chiark.greenend.org.uk,3
+137,Isaac van Bakel,ivb@vanbakel.io,3
+137,Jakob Degen,jakob.e.degen@gmail.com,3
+137,Michael Woerister,michaelwoerister@posteo,3
+137,Milo Moisson,milomoisson@gmail.com,3
+137,Mohsen Alizadeh,mohsen@alizadeh.us,3
+137,MoskalykA,100430077+MoskalykA@users.noreply.github.com,3
+137,Oleksandr Babak,alexanderbabak@proton.me,3
+137,Patrick Walton,pcwalton@fb.com,3
+137,Raoul Strackx,raoul.strackx@fortanix.com,3
+137,Sebastian Toh,sebas.tsj.98@gmail.com,3
+137,WANG Rui,wangrui@loongson.cn,3
+137,Wilfred Hughes,wilfred@meta.com,3
+137,khei4,kk.asano.luxy@gmail.com,3
+137,rustbot,47979223+rustbot@users.noreply.github.com,3
+137,vsrs,vit@conrlab.com,3
+137,Красимир Беров,berov@cpan.org,3
+163,Adenine,22418744+adenine-dev@users.noreply.github.com,2
+163,Alex Kirszenberg,alex.kirszenberg@vercel.com,2
+163,Alex Saveau,saveau.alexandre@gmail.com,2
+163,Alyssa Haroldsen,kupiakos@google.com,2
+163,Andrew Kane,andrew@ankane.org,2
+163,Arthur Cohen,arthur.cohen@embecosm.com,2
+163,Charles Lew,crlf0710@gmail.com,2
+163,David Rheinsberg,david@readahead.eu,2
+163,Dayo,dayo05@daum.net,2
+163,Dirkjan Ochtman,dirkjan@ochtman.nl,2
+163,Emmanuel Ferdman,emmanuelferdman@gmail.com,2
+163,Florian Diebold,flodiebold@gmail.com,2
+163,Frank Steffahn,fdsteffahn@gmail.com,2
+163,Gurinder Singh,frederick.the.fool@gmail.com,2
+163,Gus Caplan,me@gus.host,2
+163,Gábor Szabó,gabor@szabgab.com,2
+163,Jacob Finkelman,eh2406@wayne.edu,2
+163,James Dietz,jamesthespeedy@gmail.com,2
+163,Jhonny Bill Mena,jhonnybillm@gmail.com,2
+163,Josiah Bills,josiah@adoniram.net,2
+163,João M. Bezerra,marcospb19@hotmail.com,2
+163,Kevin Reid,kpreid@switchb.org,2
+163,Konrad Borowski,konrad@borowski.pw,2
+163,Lan, Jian,jilan@conviva.com,2
+163,Martin Kröning,mkroening@posteo.net,2
+163,Matt Fellenz,matt@felle.nz,2
+163,Matthew Woodcraft,matthew@woodcraft.me.uk,2
+163,Max Niederman,max@maxniederman.com,2
+163,Nicky Lim,nickylim.p@gmail.com,2
+163,Pedro Lobo,pedrocerqueiralobo@gmail.com,2
+163,Ramon de C Valle,rcvalle@users.noreply.github.com,2
+163,Rustin-Liu,rustin.liu@gmail.com,2
+163,Samuel Tardieu,sam@rfc1149.net,2
+163,Sylvestre Ledru,sylvestre@debian.org,2
+163,Tadeo Kondrak,me@tadeo.ca,2
+163,Takayuki Maeda,takoyaki0316@gmail.com,2
+163,Tobias Bucher,tobiasbucher5991@gmail.com,2
+163,asquared31415,34665709+asquared31415@users.noreply.github.com,2
+163,cedihegi,hegglinc@student.ethz.ch,2
+163,cui fliter,imcusg@gmail.com,2
+163,dfireBird,me@dfirebird.dev,2
+163,macaujack,101852015+macaujack@users.noreply.github.com,2
+163,renovate[bot],29139614+renovate[bot]@users.noreply.github.com,2
+163,sanchit,sahaysanchit14@gmail.com,2
+163,syvb,smitty@timescale.com,2
+163,wackbyte,wackbyte@pm.me,2
+209,+merlan #flirora,uruwi@protonmail.com,1
+209,1Kinoti,kinoti@tuta.io,1
+209,Adam Leventhal,ahl@oxide.computer,1
+209,Albert Larsan,albertlarsan@unbon.cafe,1
+209,Alejandro González,7822554+AlexTMjugador@users.noreply.github.com,1
+209,Aleksandr Kovalev,aleksandr@kovalev.engineer,1
+209,Alex Povel,git@alexpovel.de,1
+209,Alexander Zaitsev,zamazan4ik@tut.by,1
+209,Alexis (Poliorcetics) Bourget,ab_github@poliorcetiq.eu,1
+209,Allen Wild,allenwild93@gmail.com,1
+209,Amos Bird,amosbird@gmail.com,1
+209,Angelo Ross,angelo.ross@objective.com.br,1
+209,Ariadne Conill,ariadne@dereferenced.org,1
+209,Arlie Davis,ardavis@microsoft.com,1
+209,Bart Massey,bart.massey@gmail.com,1
+209,Benedikt Radtke,benediktradtke@gmail.com,1
+209,Benoît du Garreau,bdgdlm@outlook.com,1
+209,Bernardo Sulzbach,bernardo@bernardosulzbach.com,1
+209,Bruce Mitchener,bruce.mitchener@gmail.com,1
+209,Bryanskiy,ivakin.kir@gmail.com,1
+209,Caleb Cartwright,calebcartwright@users.noreply.github.com,1
+209,Carol (Nichols || Goulding),carol.nichols@gmail.com,1
+209,Charisee,chiw@google.com,1
+209,ChoKyuWon,kyuwoncho18@gmail.com,1
+209,ChristianSchott,56631269+ChristianSchott@users.noreply.github.com,1
+209,Crystal Durham,cad97@cad97.com,1
+209,Cyan,cyanoxygen@aosc.io,1
+209,Daniil Belov,70999565+BelovDV@users.noreply.github.com,1
+209,David Barsky,me@davidbarsky.com,1
+209,David Carlier,devnexen@gmail.com,1
+209,DragonBillow,DragonBillow@outlook.com,1
+209,Dylan DPC,dylan.dpc@gmail.com,1
+209,Dániel Buga,bugadani@gmail.com,1
+209,Easyoakland,97992568+Easyoakland@users.noreply.github.com,1
+209,Edgar Luque,git@edgarluque.com,1
+209,Emily Albini,emily@emilyalbini.it,1
+209,Eva Pace,eba.pachi@gmail.com,1
+209,Folyd,lyshuhow@gmail.com,1
+209,Frank King,frankking1729@gmail.com,1
+209,Gabriel de Perthuis,g2p.code@gmail.com,1
+209,Georg Semmler,github@weiznich.de,1
+209,Greg Schmit,14255284+gregschmit@users.noreply.github.com,1
+209,Gregory N. Schmit,schmitgreg@gmail.com,1
+209,Havard Eidnes,he@NetBSD.org,1
+209,Ibraheem Ahmed,ibraheem@ibraheem.ca,1
+209,Ivan Tham,pickfire@riseup.net,1
+209,Jacob Hoffman-Andrews,rust@hoffman-andrews.com,1
+209,Jaime Terreu,jaime@Jaimes-MBP.lan,1
+209,Jake Goulding,jake.goulding@integer32.com,1
+209,James Farrell,jamesfarrell@google.com,1
+209,Joakim Holm,mail@joakimholm.xyz,1
+209,Joe Chen,geometryolife@gmail.com,1
+209,Joe ST,joe@fbstj.net,1
+209,Joel Dice,joel.dice@fermyon.com,1
+209,July Tikhonov,july.tikh@gmail.com,1
+209,Keith Smiley,keithbsmiley@gmail.com,1
+209,Luca Barbato,lu_zero@gentoo.org,1
+209,Lucas Kent,rubickent@gmail.com,1
+209,Lukas Kalbertodt,lukas.kalbertodt@gmail.com,1
+209,Mateusz Mikuła,oss@mateuszmikula.dev,1
+209,Matthias Beyer,mail@beyermatthias.de,1
+209,Meysam Azad,MeysamAzad81@gmail.com,1
+209,Michael Watzko,michael@watzko.de,1
+209,Miguel Ojeda,ojeda@kernel.org,1
+209,Mike Hommey,mh@glandium.org,1
+209,Mike Krisher,michael@bluelava.io,1
+209,Mingwei Samuel,mingwei.samuel@gmail.com,1
+209,Nazaré da Piedade,nazarepiedady@gmail.com,1
+209,Nicholas Bishop,nbishop@nbishop.net,1
+209,Nico Burns,nico@nicoburns.com,1
+209,Omer Tuchfeld,omer@tuchfeld.dev,1
+209,Panagiotis Foliadis,pfoliadis@hotmail.com,1
+209,Peter Collingbourne,pcc@google.com,1
+209,Piotr Osiewicz,24362066+osiewicz@users.noreply.github.com,1
+209,Predrag Gruevski,2348618+obi1kenobi@users.noreply.github.com,1
+209,Raghul Nanth A,nanth.raghul@gmail.com,1
+209,Robin Appelman,robin@icewind.nl,1
+209,Ryan Lowe,rytheo@users.noreply.github.com,1
+209,Ryan O'Neill,ryanoneill@gmail.com,1
+209,Ryan Scheel,ryan.havvy@gmail.com,1
+209,Scott Schafer,schaferjscott@gmail.com,1
+209,Sebastian Sturm,s.sturm@arkona-technologies.de,1
+209,Seth Junot,xsetech@gmail.com,1
+209,ShE3py,52315535+she3py@users.noreply.github.com,1
+209,Simon Sapin,simon@exyr.org,1
+209,Simon Schöning,simon.schoening@rwth-aachen.de,1
+209,Simonas Kazlauskas,git@kazlauskas.me,1
+209,Steven Trotter,stevetrot@gmail.com,1
+209,Tamir Duberstein,tamird@gmail.com,1
+209,Thibaut Vandervelden,thvdveld@vub.be,1
+209,Thom Chiovoloni,thom@shift.click,1
+209,Tim Kurdov,tim.kurdov@gmail.com,1
+209,Travis Finkenauer,tmfinken@gmail.com,1
+209,Vas,vasilii.novikov@fortanix.com,1
+209,Veera,sveera.2001@gmail.com,1
+209,Vidhan Bhatt,me@vidhan.io,1
+209,Your Name,you@example.com,1
+209,Zachary S,zasample18+github@gmail.com,1
+209,abhiram,16094597+abhiramiyer@users.noreply.github.com,1
+209,agnarrarendelle,danny20001102@gmail.com,1
+209,allaboutevemirolive,xkmxlfirdxus@gmail.com,1
+209,beetrees,b@beetr.ee,1
+209,cherryblossom000,31467609+cherryblossom000@users.noreply.github.com,1
+209,chloekek,50083900+chloekek@users.noreply.github.com,1
+209,danflapjax,12000932+danflapjax@users.noreply.github.com,1
+209,dependabot[bot],dependabot[bot]@users.noreply.github.com,1
+209,ekusiadadus,ekusiadadus@gmail.com,1
+209,est31,est31@users.noreply.github.com,1
+209,hehaoqian,haoqianhe1@gmail.com,1
+209,igorskyflyer,igor.dvlpr@gmail.com,1
+209,kernelmethod,17100608+kernelmethod@users.noreply.github.com,1
+209,lena,lenawanel@proton.me,1
+209,lengyijun,sjtu5140809011@gmail.com,1
+209,nipzu,sampo.siitonen@gmail.com,1
+209,prez,prez@national.shitposting.agency,1
+209,syvb,me@iter.ca,1
+209,vallentin,mail@vallentin.dev,1
+209,w1kee,31793948+w1kee@users.noreply.github.com,1
+209,wayne warren,wayne.warren.s@gmail.com,1
+209,xstaticxgpx,gabe@gabe.tech,1
+209,zica,59327276+zica87@users.noreply.github.com,1
+209,天命剑主,yuanhonglong@outlook.com,1

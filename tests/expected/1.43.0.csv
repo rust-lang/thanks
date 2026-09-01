@@ -1,0 +1,236 @@
+1,bors,bors@rust-lang.org,406
+2,Mazdak Farrokhzad,twingoow@gmail.com,218
+3,Ralf Jung,post@ralfj.de,204
+4,Philipp Krones,hello@philkrones.com,154
+5,Yuki Okushi,jtitor@2k36.org,112
+6,Dylan MacKenzie,ecstaticmorse@gmail.com,106
+7,Dylan DPC,dylan.dpc@gmail.com,104
+8,Esteban Küber,esteban@kuber.com.ar,103
+9,Eric Huss,eric@huss.org,100
+10,Ghost,ghost,98
+11,Vadim Petrochenkov,vadim.petrochenkov@gmail.com,85
+12,Mark Rousskov,mark.simulacrum@gmail.com,82
+13,Matthias Krüger,matthias.krueger@famsik.de,71
+14,Matthew Jasper,mjjasper1@gmail.com,70
+15,Carol (Nichols || Goulding),carol.nichols@gmail.com,66
+16,David Cook,divergentdave@gmail.com,49
+16,Guillaume Gomez,contact@guillaume-gomez.fr,49
+18,Alex Crichton,alex@alexcrichton.com,48
+18,John Kåre Alsaker,john.kare.alsaker@gmail.com,48
+20,Camille Gillot,gillot.camille@gmail.com,43
+21,Eduard-Mihai Burtescu,edy.burt@gmail.com,40
+22,bjorn3,17426603+bjorn3@users.noreply.github.com,38
+23,Santiago Pastorino,spastorino@gmail.com,35
+24,Oliver Scherer,oli-obk@users.noreply.github.com,34
+25,varkor,github@varkor.com,33
+26,Niko Matsakis,rust@nikomatsakis.com,32
+26,Tomasz Miąsko,tomasz.miasko@gmail.com,32
+28,Krishna Sai Veera Reddy,veerareddy@email.arizona.edu,29
+29,Léo Lanteri Thauvin,leseulartichaut@gmail.com,26
+30,Jane Lusby,jlusby42@gmail.com,23
+31,Aaron Hill,aa1ronham@gmail.com,21
+31,Mark Mansi,markm@cs.wisc.edu,21
+31,Nicholas Nethercote,n.nethercote@gmail.com,21
+34,Igor Matuszewski,Xanewok@gmail.com,20
+34,Simonas Kazlauskas,git@kazlauskas.me,20
+36,Linus Färnstrand,faern@faern.net,19
+36,Phil Hansch,dev@phansch.net,19
+38,Chris Simpkins,git.simpkins@gmail.com,18
+39,Christian Poveda,git@pvdrz.com,17
+39,Felix S. Klock II,pnkfelix@pnkfx.org,17
+41,Lzu Tao,taolzu@gmail.com,16
+42,David Ross,daboross@daboross.net,15
+43,Amanieu d'Antras,amanieu@gmail.com,14
+43,Luca Barbato,lu_zero@gentoo.org,14
+43,jumbatm,jumbatm@gmail.com,14
+46,Josh White,jwhite927@gmail.com,13
+47,JarredAllen,jarredallen73@gmail.com,12
+47,Kinrany,kinrany@yandex.com,12
+47,Stein Somers,git@steinsomers.be,12
+47,Tim Diekmann,tim.diekmann@3dvision.de,12
+47,Wesley Wiser,wwiser@gmail.com,12
+52,David Wood,david@davidtw.co,11
+52,gnzlbg,gonzalobg88@gmail.com,11
+54,Ben Lewis,benlewisj@gmail.com,10
+54,Michael Woerister,michaelwoerister@posteo,10
+54,Mikhail Babenko,misha-babenko@yandex.ru,10
+54,Youngsuk Kim,joseph942010@gmail.com,10
+58,David Tolnay,dtolnay@gmail.com,9
+58,Jacob Finkelman,eh2406@wayne.edu,9
+58,king6cong,king6cong@gmail.com,9
+61,Amos Onn,amosonn@gmail.com,8
+61,Christian Duerr,contact@christianduerr.com,8
+61,Lukas Kalbertodt,lukas.kalbertodt@gmail.com,8
+61,Nikita Popov,nikita.ppv@gmail.com,8
+61,Oliver Middleton,olliemail27@gmail.com,8
+61,Steve Klabnik,steve@steveklabnik.com,8
+61,Taylor Cramer,cramertaylorj@gmail.com,8
+68,Ashley Mannix,kodraus@hey.com,7
+68,Josh Stone,cuviper@gmail.com,7
+68,Pietro Albini,pietro@pietroalbini.org,7
+68,Tyler Mandry,tmandry@gmail.com,7
+72,Alex Tokarev,aleksator@gmail.com,6
+72,Charles Gleason,charles_gleason@alumni.brown.edu,6
+72,Emily Albini,emily@emilyalbini.it,6
+72,Manish Goregaokar,manishsmail@gmail.com,6
+72,Markus Legner,markus@legner.ch,6
+72,Mateusz Mikuła,oss@mateuszmikula.dev,6
+72,Matthew Kuo,matthew.kuo@dialexa.com,6
+72,Shotaro Yamada,sinkuu@sinkuu.xyz,6
+72,ThibsG,Thibs@debian.com,6
+72,Who? Me?!,mark-i-m@users.noreply.github.com,6
+82,Andreas Molzer,andreas.molzer@gmx.de,5
+82,Christoph Schmidler,c.schmidler@gmail.com,5
+82,Mario Idival,marioidival@gmail.com,5
+82,Rob Pilling,robpilling@gmail.com,5
+82,Steven Fackler,sfackler@gmail.com,5
+82,Taiki Endo,te316e89@gmail.com,5
+82,XAMPPRocky,4464295+XAMPPRocky@users.noreply.github.com,5
+82,daxpedda,daxpedda@gmail.com,5
+90,Caleb Cartwright,caleb.cartwright@outlook.com,4
+90,Crystal Durham,cad97@cad97.com,4
+90,Hanif Bin Ariffin,hanif.ariffin.4326@gmail.com,4
+90,Jethro Beekman,jethro@fortanix.com,4
+90,Kinsey Favre,kinseytamsin@tutanota.com,4
+90,Makoto Kato,m_kato@ga2.so-net.ne.jp,4
+90,Markus Westerlind,markus.westerlind@distilnetworks.com,4
+90,Michael Morehouse,640167+yawpitch@users.noreply.github.com,4
+90,SuperSamus,40663462+SuperSamus@users.noreply.github.com,4
+90,Tobias Thiel,tobias011@gmail.com,4
+90,Trevor Spiteri,tspiteri@ieee.org,4
+90,Tyler Lanphear,animemachine13@gmail.com,4
+90,ljedrz,ljedrz@gmail.com,4
+103,Ana-Maria Mihalache,mihalacheana.maria@yahoo.com,3
+103,Andre Bogus,bogusandre@gmail.com,3
+103,Andy Russell,arussell123@gmail.com,3
+103,Brian Anderson,banderson@mozilla.com,3
+103,Christian Vallentin,vallentinsource@gmail.com,3
+103,Erin Power,xampprocky@gmail.com,3
+103,Hiroki Noda,kubo39@gmail.com,3
+103,Ian Kronquist,iankronquist@gmail.com,3
+103,John VanEnk,jvanenk@fastly.com,3
+103,Josh Triplett,josh@joshtriplett.org,3
+103,Martin Kröning,m.kroening@hotmail.de,3
+103,Michael Bradshaw,mjbshaw@google.com,3
+103,Michael Mc Donnell,michael@mcdonnell.dk,3
+103,O01eg,o01eg@yandex.ru,3
+103,Rui,xiongmao86dev@sina.com,3
+103,Rémy Rakic,remy.rakic@gmail.com,3
+119,Andreas Jonson,andjo403@users.noreply.github.com,2
+119,Andrew Paverd,andrew.paverd@microsoft.com,2
+119,Daniel Henry-Mantilla,daniel.henry.mantilla@gmail.com,2
+119,Daniel Silverstone,dsilvers@digital-scurf.org,2
+119,David Renshaw,dwrenshaw@gmail.com,2
+119,DutchGhost,kasper199914@gmail.com,2
+119,Dylan Nugent,dylnuge@gmail.com,2
+119,John Ericson,John.Ericson@Obsidian.Systems,2
+119,John Van Enk,vanenkj@gmail.com,2
+119,Josh White,josh@animind.space,2
+119,Kornel Lesiński,kornel@geekhood.net,2
+119,Lily Chung,lily@commure.com,2
+119,Ludwig Stecher,ludwig.stecher@gmx.de,2
+119,Marc-Antoine Perennou,Marc-Antoine@Perennou.com,2
+119,Marcus Rådell,marcus@radell.net,2
+119,Matthew Healy,matthew.healy@soundcloud.com,2
+119,Matthias Prechtl,m.sleepypanda@gmail.com,2
+119,Peter Todd,pete@petertodd.org,2
+119,Pyry Kontio,pyry.kontio@drasa.eu,2
+119,Raoul Strackx,raoul.strackx@fortanix.com,2
+119,Takayuki Nakata,f.seasons017@gmail.com,2
+119,Tom Jakubowski,tom@crystae.net,2
+119,Victor Ding,victording@google.com,2
+119,Waffle Lapkin,waffle.lapkin@gmail.com,2
+119,kennytm,kennytm@gmail.com,2
+119,matthewjasper,20113453+matthewjasper@users.noreply.github.com,2
+119,msizanoen1,qtmlabs@protonmail.com,2
+119,sd234678,sd234678@protonmail.com,2
+119,spunit262,45582704+spunit262@users.noreply.github.com,2
+148,Alberto Piai,apiai@sensational.ch,1
+148,Aleksey Kladov,aleksey.kladov@gmail.com,1
+148,AlphaHot,58410019+AlphaHot@users.noreply.github.com,1
+148,Amanda Stjerna,mail@amandastjerna.se,1
+148,Andre Richter,andre.o.richter@gmail.com,1
+148,Andrea Canciani,ranma42@gmail.com,1
+148,Anthony Ramine,nox@nox.paris,1
+148,Ben Orchard,thefirstmuffinman@gmail.com,1
+148,Bijan Tabatabai,bijan311@yahoo.com,1
+148,Billy Rieger,wrieger@protonmail.com,1
+148,Björn Steinbrink,bsteinbr@gmail.com,1
+148,Brendan Jackman,bjackman@users.noreply.github.com,1
+148,Charles Gleason,36055314+crgl@users.noreply.github.com,1
+148,Dan Chiarlone,danilochiarlone@gmail.com,1
+148,Dan Robertson,dan@dlrobertson.com,1
+148,Dario Gonzalez,dario.gonzalez@fortanix.com,1
+148,Drew Ripberger,drew.ripberger@gmail.com,1
+148,Eddy Petrișor,eddy.petrisor@gmail.com,1
+148,Fisher Darling,fdarling@mines.edu,1
+148,Friedrich von Never,friedrich@fornever.me,1
+148,Giles Cope,giles.cope@gmail.com,1
+148,Gregor Peach,gregorpeach@gmail.com,1
+148,Grzegorz Szymaszek,gszymaszek@short.pl,1
+148,Hanna Kruppe,hanna.kruppe@gmail.com,1
+148,ImgBotApp,ImgBotHelp@gmail.com,1
+148,Ingvar Stepanyan,rreverser@google.com,1
+148,Jack O'Connor,oconnor663@gmail.com,1
+148,Jacob Rothstein,hi@jbr.me,1
+148,Jake Goulding,jake.goulding@integer32.com,1
+148,Jake Vossen,jake@vossen.dev,1
+148,Jakub Konka,kubkon@jakubkonka.com,1
+148,Jason Liquorish,jason@liquori.sh,1
+148,John Hörnvall,trolledwoods@gmail.com,1
+148,Jon Gjengset,jon@thesquareplanet.com,1
+148,Jonathan Giddy,jongiddy@gmail.com,1
+148,Jorge Aparicio,jorge@japaric.io,1
+148,Joël J. Présent,36854931+joeljpresent@users.noreply.github.com,1
+148,Jun Wu,quark@fb.com,1
+148,KaneGreen,737445366KG@Gmail.com,1
+148,Konrad Borowski,konrad@borowski.pw,1
+148,LORIS INTERGALACTIQUE,51478929+loris-intergalactique@users.noreply.github.com,1
+148,LitoMore,litomore@gmail.com,1
+148,Loris-intergalactique,loris.sierra@zenika.com,1
+148,Ludwig Stecher,4567.angel@gmail.com,1
+148,Lukas,lukas-code@outlook.com,1
+148,Maja Kądziołka,maya@compilercrim.es,1
+148,Malcolm Parsons,malcolm.parsons@gmail.com,1
+148,Marcel Hellwig,github@cookiesoft.de,1
+148,Marincia Catalin,35623921+cata0309@users.noreply.github.com,1
+148,Markus Pettersson,markus.pettersson1998@gmail.com,1
+148,Markus Westerlind,markus.westerlind@imperva.com,1
+148,Max Blachman,blachmanmax@gmail.com,1
+148,Maxim Baz,github@maximbaz.com,1
+148,Maxim Zholobak,maxim.zholobak@grammarly.com,1
+148,Michael Burge,michaelburge@pobox.com,1
+148,Nicolai Unrein,info@auxcontrol.io,1
+148,Nils ANDRÉ-CHANG,nils@nilsand.re,1
+148,Nipunn Koorapati,nipunn@dropbox.com,1
+148,Pankaj Chaudhary,pankajchaudhary172@gmail.com,1
+148,Patricio Palladino,email@patriciopalladino.com,1
+148,Patryk Wychowaniec,wychowaniec.patryk@gmail.com,1
+148,Paul,45183782+rovyko@users.noreply.github.com,1
+148,Pedro de Brito,ped.de.brito@gmail.com,1
+148,Penelope Phippen,penelopedotzone@gmail.com,1
+148,Pulkit Goyal,7895pulkit@gmail.com,1
+148,SarthakSingh31,35749450+SarthakSingh31@users.noreply.github.com,1
+148,Sebastian Hahn,sebastian@torproject.org,1
+148,Seiichi Uchida,seuchida@gmail.com,1
+148,Shaleen Jain,shaleen@jain.sh,1
+148,Steven Degutis,sbdegutis@gmail.com,1
+148,Tim Diekmann,21277928+TimDiekmann@users.noreply.github.com,1
+148,Timur,timka@users.noreply.github.com,1
+148,Tom A. Wagner,tom.a.wagner@protonmail.com,1
+148,Tomasz Miąsko,tomaszmiasko@gmail.com,1
+148,YI,uuuuuu@protonmail.com,1
+148,Yichao 'Peak' Ji,peakji@users.noreply.github.com,1
+148,Yoshua Wuyts,yoshuawuyts@gmail.com,1
+148,Zack M. Davis,code@zackmdavis.net,1
+148,Zan Tysor,zantysor@yahoo.com,1
+148,dependabot[bot],dependabot[bot]@users.noreply.github.com,1
+148,freund17,lukas.aymans@googlemail.com,1
+148,gorilskij,43991400+gorilskij@users.noreply.github.com,1
+148,hman523,shbarbella@gmail.com,1
+148,japm48,japm48@users.noreply.github.com,1
+148,kngwyu,yuji.kngw.80s.revive@gmail.com,1
+148,memoryruins,memoryruinsmusic@gmail.com,1
+148,rgossiaux,ryan.gossiaux@gmail.com,1
+148,ridiculousfish,corydoras@ridiculousfish.com,1
+148,unknown,vlade.maksimovski@gmail.com,1
