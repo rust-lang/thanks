@@ -255,6 +255,18 @@ impl VersionCommits {
     }
 }
 
+/// Identify the versions that have been tagged in the given repo.
+///
+/// A [`VersionTag`] is created for each tagged commit in the given repository
+/// where either
+/// * the name of the tag can be parsed with [`Version::parse()`]
+/// * the name of the tag, followed by ".0", can be parsed with
+///   [`Version::parse()`]
+///
+/// The values of [`VersionTag::version`] are the results of the successful
+/// [`Version::parse()`] calls (i.e. they might include extra ".0"s not in the
+/// tag names). Each of the returned version tags has the
+/// [`in_progress`][VersionTag::in_progress] field as `false`.
 fn get_versions(repo: &Repository) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
     let tags = repo
         .tag_names(None)?
@@ -865,6 +877,13 @@ impl FromStr for OutputMode {
     }
 }
 
+/// Primary entrypoint to generate and render the thanks information.
+///
+/// Thanks information will be rendered for
+/// * each version identified by [`get_versions()`]
+/// * the unreleased version "Beta"
+/// * the unreleased version "Nightly"
+/// * "all time" contributions across any of those versions
 fn run(mode: OutputMode, mailmap_path: Option<PathBuf>) -> Result<(), Box<dyn std::error::Error>> {
     let by_version = generate_thanks(mailmap_path)?;
     let by_version: BTreeMap<_, _> = by_version
@@ -949,6 +968,17 @@ struct Submodule {
     repository: String,
 }
 
+/// Identify the submodules present in a repository as-of the given commit.
+///
+/// The actual submodules are identified based on [`modules_file()`]. These
+/// are then filtered to only include submodules where the source URL includes
+/// "rust-lang" or "rust-lang-nursery", and also filtered to excluded a few
+/// specific repositories.
+///
+/// The returned [`Submodule`] objects include not only the repository the
+/// submodule was cloned from, but also the commit *of the submodule* present
+/// in the primary repository *as of the given `at` commit*. This information is
+/// used to include thanks information for contributions to submodules.
 fn get_submodules(
     repo: &Repository,
     at: &Commit,
