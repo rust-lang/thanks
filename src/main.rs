@@ -6,7 +6,6 @@ use std::collections::BTreeMap;
 use std::io::BufWriter;
 use std::path::{Path, PathBuf};
 use std::str;
-use std::str::FromStr;
 use std::time::Instant;
 
 mod analyse;
@@ -177,20 +176,6 @@ struct Args {
 enum OutputMode {
     Html,
     Csv,
-}
-
-impl FromStr for OutputMode {
-    type Err = String;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "html" => Ok(Self::Html),
-            "csv" => Ok(Self::Csv),
-            _ => Err(format!(
-                "Invalid output mode {s}. Possible values: `html` or `csv`."
-            )),
-        }
-    }
 }
 
 fn main() {
