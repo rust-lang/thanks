@@ -1,4 +1,4 @@
-1,bors,bors@rust-lang.org,428
+1,bors,bors@rust-lang.org,426
 2,bjorn3,17426603+bjorn3@users.noreply.github.com,114
 3,Mark Rousskov,mark.simulacrum@gmail.com,104
 4,David Tolnay,dtolnay@gmail.com,96
@@ -13,7 +13,7 @@
 13,Amanieu d'Antras,amanieu@gmail.com,56
 14,Jack Huey,jackh726@gmail.com,55
 15,Aaron Hill,aa1ronham@gmail.com,48
-15,Philipp Krones,hello@philkrones.com,48
+16,Philipp Krones,hello@philkrones.com,46
 17,Fridtjof Stoldt,xFrednet@gmail.com,45
 17,Josh Triplett,josh@joshtriplett.org,45
 19,Vadim Petrochenkov,vadim.petrochenkov@gmail.com,41
@@ -50,7 +50,7 @@
 50,Chris Denton,chris@chrisdenton.dev,14
 50,Michael Howell,michael@notriddle.com,14
 50,Tomasz Miąsko,tomasz.miasko@gmail.com,14
-53,Igor Matuszewski,xanewok@gmail.com,13
+53,Igor Matuszewski,Xanewok@gmail.com,13
 53,Jakub Beránek,berykubik@gmail.com,13
 53,Jane Lusby,jlusby42@gmail.com,13
 53,Laurențiu Nicola,lnicola@dend.ro,13
@@ -264,7 +264,6 @@
 179,Seo Sanghyeon,sanxiyn@gmail.com,1
 179,Shadlock0133,tomek-kubel2@wp.pl,1
 179,Shivani Bhardwaj,57791542+inashivb@users.noreply.github.com,1
-179,Slanterns,slanterns.w@gmail.com,1
 179,Sprite,SpriteOvO@gmail.com,1
 179,Sudhir Balaji,sud.balaji@gmail.com,1
 179,Sylvan Bowdler,sylvanbowdler18@gmail.com,1
@@ -301,6 +300,7 @@
 179,pinkforest,36498018+pinkforest@users.noreply.github.com,1
 179,rdambrosio,rdambrosio016@gmail.com,1
 179,rhysd,lin90162@yahoo.co.jp,1
+179,slanterns,slanterns.w@gmail.com,1
 179,vallentin,mail@vallentin.dev,1
 179,worldeva,centraun@gmail.com,1
 179,ye.sijun,junnplus@gmail.com,1

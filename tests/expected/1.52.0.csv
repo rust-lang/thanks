@@ -1,4 +1,4 @@
-1,bors,bors@rust-lang.org,435
+1,bors,bors@rust-lang.org,434
 2,Jynn Nelson,github@jyn.dev,229
 3,Eric Huss,eric@huss.org,141
 4,Camille Gillot,gillot.camille@gmail.com,126
@@ -18,9 +18,9 @@
 18,Léo Lanteri Thauvin,leseulartichaut@gmail.com,57
 19,Who? Me?!,mark-i-m@users.noreply.github.com,56
 20,Santiago Pastorino,spastorino@gmail.com,55
-21,Cameron Steffen,cam.steffen94@gmail.com,51
-22,Chris Field,chris@fieldrndservices.com,50
-22,Takayuki Maeda,takoyaki0316@gmail.com,50
+21,Chris Field,chris@fieldrndservices.com,50
+21,Takayuki Maeda,takoyaki0316@gmail.com,50
+23,Cameron Steffen,cam.steffen94@gmail.com,48
 24,Tomasz Miąsko,tomasz.miasko@gmail.com,46
 24,Yoshitomo Nakanishi,yurayura.rounin.3@gmail.com,46
 26,Alex Crichton,alex@alexcrichton.com,45
@@ -144,7 +144,7 @@
 131,Pierre-Andre Gagnon,pagagnon@gmail.com,4
 131,ThibsG,thibsg@pm.me,4
 131,Thom Chiovoloni,chiovolonit@gmail.com,4
-131,YOUNGSUK_KIM,ykim837@gatech.edu,4
+131,Youngsuk_Kim,ykim837@gatech.edu,4
 131,asquared31415,34665709+asquared31415@users.noreply.github.com,4
 131,follower,follower@rancidbacon.com,4
 131,oxalica,oxalicc@pm.me,4
@@ -245,7 +245,6 @@
 215,Drew Youngwerth,drew@youngwerth.com,1
 215,Dzmitry Lahoda,dzmitry@lahoda.pro,1
 215,Eduard-Mihai Burtescu,edy.burt@gmail.com,1
-215,Eduardo Broto,ebroto@tutanota.com,1
 215,Emil Luta,virgil.luta@gmail.com,1
 215,Emily Albini,emily@emilyalbini.it,1
 215,Erik Jensen,erikjensen@rkjnsn.net,1

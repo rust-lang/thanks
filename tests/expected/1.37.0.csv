@@ -1,7 +1,7 @@
-1,bors,bors@rust-lang.org,371
+1,bors,bors@rust-lang.org,370
 2,Ralf Jung,post@ralfj.de,268
 3,Mazdak Farrokhzad,twingoow@gmail.com,232
-4,Oliver Scherer,oli-obk@users.noreply.github.com,191
+4,Oliver Scherer,oli-obk@users.noreply.github.com,187
 5,Alex Crichton,alex@alexcrichton.com,158
 6,Niko Matsakis,rust@nikomatsakis.com,128
 7,Vadim Petrochenkov,vadim.petrochenkov@gmail.com,110
@@ -15,14 +15,14 @@
 15,Igor Matuszewski,Xanewok@gmail.com,42
 15,Seiichi Uchida,seuchida@gmail.com,42
 17,Stéphane Campinas,stephane.campinas@gmail.com,41
-18,Manish Goregaokar,manishsmail@gmail.com,40
-19,Nicholas Nethercote,n.nethercote@gmail.com,39
-19,Philipp Krones,hello@philkrones.com,39
-19,Pietro Albini,pietro@pietroalbini.org,39
-22,Lzu Tao,taolzu@gmail.com,37
-22,Matthias Krüger,matthias.krueger@famsik.de,37
-22,Phil Hansch,dev@phansch.net,37
-25,Santiago Pastorino,spastorino@gmail.com,36
+18,Nicholas Nethercote,n.nethercote@gmail.com,39
+18,Pietro Albini,pietro@pietroalbini.org,39
+20,Philipp Krones,hello@philkrones.com,38
+21,Lzu Tao,taolzu@gmail.com,37
+21,Manish Goregaokar,manishsmail@gmail.com,37
+23,Matthias Krüger,matthias.krueger@famsik.de,36
+23,Santiago Pastorino,spastorino@gmail.com,36
+25,Phil Hansch,dev@phansch.net,35
 26,Alexander Regueiro,alexreg@me.com,33
 26,Carol (Nichols || Goulding),carol.nichols@gmail.com,33
 28,Tau Gärtli,git@tau.garden,32
@@ -113,7 +113,6 @@
 109,Fabian Drinck,fabian.drinck@rwth-aachen.de,2
 109,Felix Rabe,felix@rabe.io,2
 109,Gregory Szorc,gregory.szorc@gmail.com,2
-109,Grzegorz Bartoszek,grzegorz.bartoszek@thaumatec.com,2
 109,Iñaki Garay,igarai@gmail.com,2
 109,John Downey,jdowney@gmail.com,2
 109,John Erickson,jerick@microsoft.com,2
@@ -135,78 +134,78 @@
 109,lcolaholicl,lcolaholicl@gmail.com,2
 109,mdsimmo,mdsimmo2+git@gmail.com,2
 109,vlad20012,beskvlad@yandex.ru,2
-138,0x1793d1,2362128+0x1793d1@users.noreply.github.com,1
-138,Aaron Kutch,aaronkutch@att.net,1
-138,Amanieu d'Antras,amanieu@gmail.com,1
-138,Amanjeev Sethi,aj@amanjeev.com,1
-138,Andre Bogus,bogusandre@gmail.com,1
-138,Andrea Corradi,andreac@unstable.it,1
-138,Andrei Homescu,ah@immunant.com,1
-138,Andrew Champion,andrew.champion@gmail.com,1
-138,Bastian Germann,bage@linutronix.de,1
-138,Caio,c410.f3r@gmail.com,1
-138,Cerberuser,computers05@mail.ru,1
-138,Charles Lew,crlf0710@gmail.com,1
-138,Christian,chris_veenman@hotmail.com,1
-138,Christian Rondeau,christian.rondeau@mediaclip.ca,1
-138,Claude-Alban RANÉLY-VERGÉ-DÉPRÉ,claude.alban.ranely@gmail.com,1
-138,Daniel Silverstone,dsilvers@digital-scurf.org,1
-138,Daniele D'Orazio,daniele@develer.com,1
-138,Dario Gonzalez,dario.gonzalez@fortanix.com,1
-138,David Alber,alber.david@gmail.com,1
-138,Ed Barnard,eabarnard@gmail.com,1
-138,Edd Barrett,vext01@gmail.com,1
-138,Ethan Dagner,napen123@gmail.com,1
-138,Gurwinder Singh,vargwin@gmail.com,1
-138,Harrison McCullough,mccullough.harrison@gmail.com,1
-138,Ivan Enderlin,ivan.enderlin@hoa-project.net,1
-138,Ivan Tham,pickfire@riseup.net,1
-138,Jake Goulding,jake.goulding@integer32.com,1
-138,Janusz Marcinkiewicz,virrages@gmail.com,1
-138,Jaro Fietz,jaro.fietz@gmx.de,1
-138,Jason Shirk,jason@truewheels.net,1
-138,Jason Shirk,jasonsh@microsoft.com,1
-138,John Paul Adrian Glaubitz,glaubitz@physik.fu-berlin.de,1
-138,John Wrenn,john_wrenn@brown.edu,1
-138,Jon Gjengset,jon@thesquareplanet.com,1
-138,Jonathan Goodman,goodmanjonathan@sbcglobal.net,1
-138,Jonathan Lee,j.l@utexas.edu,1
-138,Josh Triplett,josh@joshtriplett.org,1
-138,Julian Wollersberger,julian.derzocker@gmx.at,1
-138,Jynn Nelson,github@jyn.dev,1
-138,Jörg Sommer,joerg@jo-so.de,1
-138,L117,l117@l117.xyz,1
-138,Martins Polakovs,martins.polakovs@gmail.com,1
-138,Michael Lamparski,diagonaldevice@gmail.com,1
-138,Michael Lass,bevan@bi-co.net,1
-138,Niels Sascha Reedijk,niels.reedijk@gmail.com,1
-138,Nikolai Vazquez,nikvzqz@gmail.com,1
-138,OptimisticPeach,patrikbuhring@yahoo.com,1
-138,Paolo Teti,paolo.teti@gmail.com,1
-138,Philipp Oppermann,dev@phil-opp.com,1
-138,Rijenkii,me@rijenkii.tk,1
-138,Rusty Blitzerr,rusty.blitzerr@gmail.com,1
-138,Sean McArthur,sean@seanmonstar.com,1
-138,Thiago Arrais,thiago.arrais@gmail.com,1
-138,Thomas Bracht Laumann Jespersen,laumann.thomas@gmail.com,1
-138,Thomas Heck,t@b128.net,1
-138,Tobia,tobia.conforto@gruppo4.it,1
-138,Wim Looman,wim@nemo157.com,1
-138,YVT,i@yvt.jp,1
-138,adispring,sunnyadi@163.com,1
-138,airt,airtial@gmail.com,1
-138,b41sh,baishen2009@gmail.com,1
-138,bgermann,bgermann@users.noreply.github.com,1
-138,coypoop,coypu@sdf.org,1
-138,dependabot[bot],dependabot[bot]@users.noreply.github.com,1
-138,diwic,diwic@users.noreply.github.com,1
-138,ironyman,ironyman@users.noreply.github.com,1
-138,mgr-inz-rafal,rchabowski@gmail.com,1
-138,mikerite,33983332+mikerite@users.noreply.github.com,1
-138,mikong,4162+mikong@users.noreply.github.com,1
-138,s3bk,48330868+s3bk@users.noreply.github.com,1
-138,scturtle,scturtle@gmail.com,1
-138,soc,simon@ochsenreither.de,1
-138,utsavoza,utsavoza96@gmail.com,1
-138,vishalsodani,vishal_sodani@yahoo.com,1
-138,zkonge,zkonge@outlook.com,1
+137,0x1793d1,2362128+0x1793d1@users.noreply.github.com,1
+137,Aaron Kutch,aaronkutch@att.net,1
+137,Amanieu d'Antras,amanieu@gmail.com,1
+137,Amanjeev Sethi,aj@amanjeev.com,1
+137,Andre Bogus,bogusandre@gmail.com,1
+137,Andrea Corradi,andreac@unstable.it,1
+137,Andrei Homescu,ah@immunant.com,1
+137,Andrew Champion,andrew.champion@gmail.com,1
+137,Bastian Germann,bage@linutronix.de,1
+137,Caio,c410.f3r@gmail.com,1
+137,Cerberuser,computers05@mail.ru,1
+137,Charles Lew,crlf0710@gmail.com,1
+137,Christian,chris_veenman@hotmail.com,1
+137,Christian Rondeau,christian.rondeau@mediaclip.ca,1
+137,Claude-Alban RANÉLY-VERGÉ-DÉPRÉ,claude.alban.ranely@gmail.com,1
+137,Daniel Silverstone,dsilvers@digital-scurf.org,1
+137,Daniele D'Orazio,daniele@develer.com,1
+137,Dario Gonzalez,dario.gonzalez@fortanix.com,1
+137,David Alber,alber.david@gmail.com,1
+137,Ed Barnard,eabarnard@gmail.com,1
+137,Edd Barrett,vext01@gmail.com,1
+137,Ethan Dagner,napen123@gmail.com,1
+137,Grzegorz Bartoszek,grzegorz.bartoszek@thaumatec.com,1
+137,Gurwinder Singh,vargwin@gmail.com,1
+137,Harrison McCullough,mccullough.harrison@gmail.com,1
+137,Ivan Enderlin,ivan.enderlin@hoa-project.net,1
+137,Ivan Tham,pickfire@riseup.net,1
+137,Jake Goulding,jake.goulding@integer32.com,1
+137,Janusz Marcinkiewicz,virrages@gmail.com,1
+137,Jaro Fietz,jaro.fietz@gmx.de,1
+137,Jason Shirk,jason@truewheels.net,1
+137,Jason Shirk,jasonsh@microsoft.com,1
+137,John Paul Adrian Glaubitz,glaubitz@physik.fu-berlin.de,1
+137,John Wrenn,john_wrenn@brown.edu,1
+137,Jon Gjengset,jon@thesquareplanet.com,1
+137,Jonathan Goodman,goodmanjonathan@sbcglobal.net,1
+137,Jonathan Lee,j.l@utexas.edu,1
+137,Josh Triplett,josh@joshtriplett.org,1
+137,Julian Wollersberger,julian.derzocker@gmx.at,1
+137,Jynn Nelson,github@jyn.dev,1
+137,Jörg Sommer,joerg@jo-so.de,1
+137,L117,l117@l117.xyz,1
+137,Michael Lamparski,diagonaldevice@gmail.com,1
+137,Michael Lass,bevan@bi-co.net,1
+137,Niels Sascha Reedijk,niels.reedijk@gmail.com,1
+137,Nikolai Vazquez,nikvzqz@gmail.com,1
+137,OptimisticPeach,patrikbuhring@yahoo.com,1
+137,Paolo Teti,paolo.teti@gmail.com,1
+137,Philipp Oppermann,dev@phil-opp.com,1
+137,Rijenkii,me@rijenkii.tk,1
+137,Rusty Blitzerr,rusty.blitzerr@gmail.com,1
+137,Sean McArthur,sean@seanmonstar.com,1
+137,Thiago Arrais,thiago.arrais@gmail.com,1
+137,Thomas Bracht Laumann Jespersen,laumann.thomas@gmail.com,1
+137,Thomas Heck,t@b128.net,1
+137,Tobia,tobia.conforto@gruppo4.it,1
+137,Wim Looman,wim@nemo157.com,1
+137,YVT,i@yvt.jp,1
+137,adispring,sunnyadi@163.com,1
+137,airt,airtial@gmail.com,1
+137,b41sh,baishen2009@gmail.com,1
+137,bgermann,bgermann@users.noreply.github.com,1
+137,coypoop,coypu@sdf.org,1
+137,dependabot[bot],dependabot[bot]@users.noreply.github.com,1
+137,diwic,diwic@users.noreply.github.com,1
+137,ironyman,ironyman@users.noreply.github.com,1
+137,mgr-inz-rafal,rchabowski@gmail.com,1
+137,mikerite,33983332+mikerite@users.noreply.github.com,1
+137,mikong,4162+mikong@users.noreply.github.com,1
+137,s3bk,48330868+s3bk@users.noreply.github.com,1
+137,scturtle,scturtle@gmail.com,1
+137,soc,simon@ochsenreither.de,1
+137,utsavoza,utsavoza96@gmail.com,1
+137,vishalsodani,vishal_sodani@yahoo.com,1
+137,zkonge,zkonge@outlook.com,1

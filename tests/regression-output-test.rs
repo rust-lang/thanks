@@ -11,7 +11,18 @@ use std::ffi::OsStr;
 use std::fs;
 use std::path::Path;
 
-fn assert_file_content_matches(expected: &Path, actual: &Path, version: &OsStr) {
+struct TestFailure {
+    file: String,
+    diff: String,
+}
+
+fn assert_file_content_matches(
+    expected: &Path,
+    actual: &Path,
+    version: &OsStr,
+) -> Result<(), TestFailure> {
+    use std::fmt::Write;
+
     // Running the thanks command via `std::process::Command` is a lot slower
     // that if we just require that it have been run beforehand
     let actual_content = fs::read_to_string(actual).expect(&format!(
@@ -29,14 +40,21 @@ fn assert_file_content_matches(expected: &Path, actual: &Path, version: &OsStr) 
     // the way assert_eq! would, so that various diff tools can be used to
     // understand the comparison
     if expected_content != actual_content {
+        let mut total_diff = String::new();
         for diff in diff::lines(&expected_content, &actual_content) {
             match diff {
-                diff::Result::Left(l) => println!("-{}", l),
-                diff::Result::Both(l, _) => println!(" {}", l),
-                diff::Result::Right(r) => println!("+{}", r),
+                diff::Result::Left(l) => writeln!(total_diff, "-{l}").unwrap(),
+                diff::Result::Both(l, _) => writeln!(total_diff, " {l}").unwrap(),
+                diff::Result::Right(r) => writeln!(total_diff, "+{r}").unwrap(),
             }
         }
-        panic!("CSV for {version:?} does not match");
+
+        Err(TestFailure {
+            file: version.to_str().unwrap().to_string(),
+            diff: total_diff,
+        })
+    } else {
+        Ok(())
     }
 }
 
@@ -49,12 +67,39 @@ fn verify_generated_output() {
     let expectation_dir = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests")
         .join("expected");
+
+    let mut failures = vec![];
     for entry in fs::read_dir(expectation_dir).unwrap() {
         let entry = entry.unwrap();
         let expected_file = entry.path();
         assert_eq!("csv", expected_file.extension().unwrap());
         let binding = expected_file.with_extension("csv");
         let version = binding.file_name().unwrap();
-        assert_file_content_matches(&expected_file, &output_dir.join(version), version);
+        if let Err(failure) =
+            assert_file_content_matches(&expected_file, &output_dir.join(version), version)
+        {
+            failures.push(failure);
+        }
+    }
+
+    failures.sort_by_key(|f| f.file.clone());
+    for failure in &failures {
+        eprintln!("Diff failed for {}", failure.file);
+        eprintln!("----------");
+        eprintln!("{}", failure.diff);
+        eprintln!("----------");
+    }
+    if !failures.is_empty() {
+        panic!(
+            r#"Diffs failed for {}
+
+Run with TESTS_UPDATE_EXPECTED=1 to bless the expected snapshots.
+"#,
+            failures
+                .into_iter()
+                .map(|f| f.file)
+                .collect::<Vec<_>>()
+                .join(", ")
+        );
     }
 }
