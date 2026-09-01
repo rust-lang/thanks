@@ -1,8 +1,9 @@
 use crate::error::ErrorContext;
 use crate::git::{Submodule, VersionTag, update_repo};
+use crate::projects::Project;
 use crate::reviewers::Reviewers;
 use crate::score::{AuthorScore, author_map_to_scores};
-use crate::{Project, generate_thanks, git, reviewers};
+use crate::{generate_thanks, git, reviewers};
 use git2::{Commit, Oid, Repository};
 use mailmap::{Author, Mailmap};
 use regex::{Regex, RegexBuilder};

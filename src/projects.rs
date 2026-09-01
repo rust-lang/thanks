@@ -1,6 +1,36 @@
-use crate::Project;
 use crate::git::{VersionTag, get_versions};
 use git2::Repository;
+use semver::Version;
+
+pub trait Project {
+    /// Name of the project, displayed on the website.
+    fn name(&self) -> &'static str;
+
+    /// Path under which the project will be available on the web.
+    /// If the `url` is e.g. `rust`, it will be available under `/rust/`.
+    fn url_path(&self) -> &'static str;
+
+    /// Should this project be displayed as the main homepage project?
+    fn is_homepage(&self) -> bool {
+        false
+    }
+
+    /// URL of its GitHub repository.
+    fn repo_url(&self) -> &'static str;
+
+    /// Identify the versions that have been tagged in the given repo, including
+    /// any project-specific additional versions to add.
+    fn get_versions(
+        &self,
+        repo: &Repository,
+    ) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>>;
+
+    /// Returns true if the project does not track versions explicitly.
+    /// It will be rendered as a single page with all-time contributions.
+    fn is_versionless(&self) -> bool {
+        false
+    }
+}
 
 pub struct Rust;
 
@@ -126,5 +156,81 @@ impl Project for Rustup {
         });
 
         Ok(versions)
+    }
+}
+
+pub struct CratesIo;
+
+impl Project for CratesIo {
+    fn name(&self) -> &'static str {
+        "crates.io"
+    }
+
+    fn url_path(&self) -> &'static str {
+        "crates.io"
+    }
+
+    fn repo_url(&self) -> &'static str {
+        "https://github.com/rust-lang/crates.io.git"
+    }
+
+    fn get_versions(
+        &self,
+        repo: &Repository,
+    ) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
+        Ok(vec![VersionTag {
+            name: String::from("Nightly"),
+            version: Version::new(1, 0, 0),
+            raw_tag: String::from("main"),
+            commit: repo
+                .revparse_single("HEAD")
+                .unwrap()
+                .peel_to_commit()
+                .unwrap()
+                .id(),
+            in_progress: true,
+        }])
+    }
+
+    fn is_versionless(&self) -> bool {
+        true
+    }
+}
+
+pub struct DocsRs;
+
+impl Project for DocsRs {
+    fn name(&self) -> &'static str {
+        "Docs.rs"
+    }
+
+    fn url_path(&self) -> &'static str {
+        "docs.rs"
+    }
+
+    fn repo_url(&self) -> &'static str {
+        "https://github.com/rust-lang/docs.rs.git"
+    }
+
+    fn get_versions(
+        &self,
+        repo: &Repository,
+    ) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
+        Ok(vec![VersionTag {
+            name: String::from("Nightly"),
+            version: Version::new(1, 0, 0),
+            raw_tag: String::from("main"),
+            commit: repo
+                .revparse_single("HEAD")
+                .unwrap()
+                .peel_to_commit()
+                .unwrap()
+                .id(),
+            in_progress: true,
+        }])
+    }
+
+    fn is_versionless(&self) -> bool {
+        true
     }
 }

@@ -21,32 +21,8 @@ use crate::analyse::{
     AuthorMap, AuthorsWithScores, build_author_map, compute_data, gather_all_commits,
 };
 use crate::git::{VersionTag, mailmap_from_repo, update_repo};
-use crate::projects::{Rust, Rustup};
+use crate::projects::{CratesIo, DocsRs, Project, Rust, Rustup};
 use crate::score::AuthorScore;
-
-trait Project {
-    /// Name of the project, displayed on the website.
-    fn name(&self) -> &'static str;
-
-    /// Path under which the project will be available on the web.
-    /// If the `url` is e.g. `rust`, it will be available under `/rust/`.
-    fn url_path(&self) -> &'static str;
-
-    /// Should this project be displayed as the main homepage project?
-    fn is_homepage(&self) -> bool {
-        false
-    }
-
-    /// URL of its GitHub repository.
-    fn repo_url(&self) -> &'static str;
-
-    /// Identify the versions that have been tagged in the given repo, including
-    /// any project-specific additional versions to add.
-    fn get_versions(
-        &self,
-        repo: &Repository,
-    ) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>>;
-}
 
 fn generate_thanks(
     project: &dyn Project,
@@ -101,12 +77,22 @@ fn generate_thanks(
     Ok(version_map)
 }
 
+/// Return all projects for which we currently generate contribution statistics.
+fn get_all_projects() -> Vec<Box<dyn Project>> {
+    vec![
+        Box::new(Rust),
+        Box::new(Rustup),
+        Box::new(CratesIo),
+        Box::new(DocsRs),
+    ]
+}
+
 fn run(
     mode: OutputMode,
     mailmap_path: Option<PathBuf>,
     selected_project: Option<&str>,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let mut projects: Vec<Box<dyn Project>> = vec![Box::new(Rust), Box::new(Rustup)];
+    let mut projects = get_all_projects();
     if let Some(selected) = selected_project {
         projects.retain(|p| p.name().to_lowercase() == selected);
         if projects.is_empty() {
