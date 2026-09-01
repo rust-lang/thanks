@@ -1,8 +1,10 @@
 name: CI
 on:
-  push: { }
-  pull_request: { }
-  workflow_dispatch: { }
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
   schedule:
     - cron: "0 0 * * *" # Every day at 00:00 UTC
 
@@ -19,6 +21,8 @@ jobs:
           rustup update stable
           rustup component add rustfmt clippy
           rustup override set stable
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
 
       - name: Build
         run: cargo build --all-targets --locked
@@ -41,6 +45,8 @@ jobs:
           rustup update stable
           rustup override set stable
 
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+
       - name: Build static website
         run: cargo run --release
 
@@ -62,14 +68,17 @@ jobs:
           rustup update stable
           rustup override set stable
 
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+
       # Do the cloning here rather than via the git2 bindings so that we can
       # ensure that the repo HEAD is checked out at a specific commit and the
       # .mailmap content is static. actions/checkout does not support bare
       # clones
       - name: Clone rust-lang/rust
         run: |
-          git clone --bare https://github.com/rust-lang/rust.git $GITHUB_WORKSPACE/repos/rust-lang/rust
-          git -C $GITHUB_WORKSPACE/repos/rust-lang/rust branch -f main 0490dd938541ad996c5ad1ec6e274012afe3e1d4
+          git clone --bare https://github.com/rust-lang/rust.git repos/rust-lang/rust
+          # Switch to a pinned commit
+          git -C repos/rust-lang/rust branch -f main 0490dd938541ad996c5ad1ec6e274012afe3e1d4
 
       - name: Build static website
         run: cargo run --release -- csv
