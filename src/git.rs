@@ -1,9 +1,10 @@
-use git2::{Oid, Repository};
+use crate::config::Config;
+use git2::{Commit, Oid, Repository};
 use mailmap::Mailmap;
 use semver::Version;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::io::Read;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::Mutex;
 use std::{cmp, fmt};
@@ -165,6 +166,68 @@ pub fn mailmap_from_repo(repo: &git2::Repository) -> Result<Mailmap, Box<dyn std
     };
     let file = String::from_utf8(file.to_object(repo)?.peel_to_blob()?.content().into())?;
     Mailmap::from_string(file)
+}
+
+/// A submodule that is used in a parent repository.
+#[derive(Debug)]
+pub struct Submodule {
+    /// The commit of the submodule.
+    pub commit: Oid,
+    /// The URL of the submodule.
+    pub repository: String,
+}
+
+pub fn get_submodules(
+    repo: &Repository,
+    at: &Commit,
+) -> Result<Vec<Submodule>, Box<dyn std::error::Error>> {
+    let submodule_cfg = modules_file(repo, at)?;
+    let submodule_cfg = Config::parse(&submodule_cfg)?;
+    let mut path_to_url = HashMap::new();
+    let entries = submodule_cfg.entries(None)?;
+    for entry in &entries {
+        let entry = entry?;
+        let name = entry.name().unwrap();
+        if name.ends_with(".path") {
+            let url = name.replace(".path", ".url");
+            let url = submodule_cfg.get_string(&url).unwrap();
+            path_to_url.insert(entry.value().unwrap().to_owned(), url);
+        }
+    }
+    let mut submodules = Vec::new();
+    let tree = at.tree()?;
+    for (path, url) in &path_to_url {
+        let path = Path::new(&path);
+        let entry = tree.get_path(path);
+        // the submodule may not actually exist
+        let entry = match entry {
+            Ok(e) => e,
+            Err(_) => continue,
+        };
+        assert_eq!(entry.kind().unwrap(), git2::ObjectType::Commit);
+        submodules.push(Submodule {
+            commit: entry.id(),
+            repository: url.to_owned(),
+        });
+    }
+
+    // Sort the submodules to ensure deterministic commit iteration order
+    submodules.sort_by(|a, b| a.repository.cmp(&b.repository));
+    Ok(submodules)
+}
+
+/// Extract the contents of a `.gitmodules` file as of a specific commit.
+///
+/// If the file does not exist as of the given commit, an empty string is
+/// returned in the result instead.
+fn modules_file(repo: &Repository, at: &Commit) -> Result<String, Box<dyn std::error::Error>> {
+    if let Some(modules) = at.tree()?.get_name(".gitmodules") {
+        Ok(String::from_utf8(
+            modules.to_object(repo)?.peel_to_blob()?.content().into(),
+        )?)
+    } else {
+        Ok(String::new())
+    }
 }
 
 /// Information about a git tag or other reference to treat as a tag.
