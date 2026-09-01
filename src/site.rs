@@ -1,5 +1,6 @@
+use crate::git::VersionTag;
 use crate::score::AuthorScore;
-use crate::{AuthorMap, AuthorsWithScores, VersionTag};
+use crate::{AuthorMap, AuthorsWithScores};
 use handlebars::Handlebars;
 use std::collections::BTreeMap;
 use std::fs;
