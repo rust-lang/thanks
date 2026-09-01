@@ -357,7 +357,7 @@ fn generate_thanks(
     };
     let reviewers = Reviewers::new()?;
 
-    let mut versions = get_versions(&repo)?;
+    let mut versions = get_versions(&repo, "Rust")?;
     let last_full_stable = versions
         .iter()
         .rfind(|v| v.raw_tag.ends_with(".0"))

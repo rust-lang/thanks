@@ -115,7 +115,10 @@ fn should_update() -> bool {
 /// [`Version::parse()`] calls (i.e. they might include extra ".0"s not in the
 /// tag names). Each of the returned version tags has the
 /// [`in_progress`][VersionTag::in_progress] field as `false`.
-pub fn get_versions(repo: &Repository) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
+pub fn get_versions(
+    repo: &Repository,
+    name_prefix: &str,
+) -> Result<Vec<VersionTag>, Box<dyn std::error::Error>> {
     let tags = repo
         .tag_names(None)?
         .into_iter()
@@ -129,7 +132,7 @@ pub fn get_versions(repo: &Repository) -> Result<Vec<VersionTag>, Box<dyn std::e
                 .or_else(|_| Version::parse(&format!("{}.0", tag)))
                 .ok()
                 .map(|v| VersionTag {
-                    name: format!("Rust {}", v),
+                    name: format!("{name_prefix} {}", v),
                     version: v,
                     raw_tag: tag.clone(),
                     commit: repo
