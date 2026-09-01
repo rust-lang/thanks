@@ -17,14 +17,110 @@ mod reviewers;
 mod score;
 mod site;
 
-use crate::analyse::{AuthorMap, AuthorsWithScores, build_author_map, gather_all_commits};
+use crate::analyse::{
+    AuthorMap, AuthorsWithScores, build_author_map, compute_data, gather_all_commits,
+};
 use crate::git::{VersionTag, get_versions, mailmap_from_repo, update_repo};
 use crate::score::AuthorScore;
 
+trait Project {
+    /// Name of the project, displayed on the website.
+    fn name(&self) -> &'static str;
+
+    /// Path under which the project will be available on the web.
+    /// If the `url` is e.g. `rust`, it will be available under `/rust/`.
+    fn url(&self) -> &'static str;
+
+    /// Should this project be displayed as the main homepage project?
+    fn is_homepage(&self) -> bool;
+
+    /// URL of its GitHub repository.
+    fn repo_url(&self) -> &'static str;
+
+    /// Add additional versions to the ones found from the git repository.
+    fn augment_versions(&self, repo: &Repository, versions: &mut Vec<VersionTag>);
+}
+
+struct Rust;
+
+impl Project for Rust {
+    fn name(&self) -> &'static str {
+        "Rust"
+    }
+
+    fn url(&self) -> &'static str {
+        "rust"
+    }
+
+    fn is_homepage(&self) -> bool {
+        true
+    }
+
+    fn repo_url(&self) -> &'static str {
+        "https://github.com/rust-lang/rust.git"
+    }
+
+    fn augment_versions(&self, repo: &Repository, versions: &mut Vec<VersionTag>) {
+        let last_full_stable = versions
+            .iter()
+            .rfind(|v| v.raw_tag.ends_with(".0"))
+            .unwrap()
+            .version
+            .clone();
+
+        // The nightly branch is the default one, fall back to "main" if it cannot
+        // be read
+        let nightly_branch = match repo.head() {
+            Ok(reference) => match reference.shorthand() {
+                Some(name) => name.to_string(),
+                None => "main".to_string(),
+            },
+            Err(_) => "main".to_string(),
+        };
+
+        versions.push(VersionTag {
+            name: String::from("Beta"),
+            version: {
+                let mut last = last_full_stable.clone();
+                last.minor += 1;
+                last
+            },
+            raw_tag: String::from("beta"),
+            commit: repo
+                .revparse_single("beta")
+                .unwrap()
+                .peel_to_commit()
+                .unwrap()
+                .id(),
+            in_progress: true,
+        });
+        versions.push(VersionTag {
+            name: String::from("Nightly"),
+            version: {
+                // main is plus 1 minor versions off of beta, which we just pushed
+                let mut last = last_full_stable.clone();
+                last.minor += 2;
+                last
+            },
+            raw_tag: nightly_branch,
+            commit: repo
+                .revparse_single("HEAD")
+                .unwrap()
+                .peel_to_commit()
+                .unwrap()
+                .id(),
+            in_progress: true,
+        });
+    }
+}
+
 fn generate_thanks(
+    project: &dyn Project,
     mailmap_path: Option<PathBuf>,
 ) -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::error::Error>> {
-    let path = update_repo("https://github.com/rust-lang/rust.git")?;
+    eprintln!("Generating {}", project.name());
+
+    let path = update_repo(project.repo_url())?;
     let repo = git2::Repository::open(&path)?;
 
     let mailmap = match mailmap_path {
@@ -37,57 +133,8 @@ fn generate_thanks(
     };
     let reviewers = Reviewers::new()?;
 
-    let mut versions = get_versions(&repo, "Rust")?;
-    let last_full_stable = versions
-        .iter()
-        .rfind(|v| v.raw_tag.ends_with(".0"))
-        .unwrap()
-        .version
-        .clone();
-
-    // The nightly branch is the default one, fall back to "main" if it cannot
-    // be read
-    let nightly_branch = match repo.head() {
-        Ok(reference) => match reference.shorthand() {
-            Some(name) => name.to_string(),
-            None => "main".to_string(),
-        },
-        Err(_) => "main".to_string(),
-    };
-
-    versions.push(VersionTag {
-        name: String::from("Beta"),
-        version: {
-            let mut last = last_full_stable.clone();
-            last.minor += 1;
-            last
-        },
-        raw_tag: String::from("beta"),
-        commit: repo
-            .revparse_single("beta")
-            .unwrap()
-            .peel_to_commit()
-            .unwrap()
-            .id(),
-        in_progress: true,
-    });
-    versions.push(VersionTag {
-        name: String::from("Nightly"),
-        version: {
-            // main is plus 1 minor versions off of beta, which we just pushed
-            let mut last = last_full_stable.clone();
-            last.minor += 2;
-            last
-        },
-        raw_tag: nightly_branch,
-        commit: repo
-            .revparse_single("HEAD")
-            .unwrap()
-            .peel_to_commit()
-            .unwrap()
-            .id(),
-        in_progress: true,
-    });
+    let mut versions = get_versions(&repo, project.name())?;
+    project.augment_versions(&repo, &mut versions);
 
     let start = Instant::now();
 
@@ -121,49 +168,12 @@ fn generate_thanks(
     Ok(version_map)
 }
 
-#[derive(clap::ValueEnum, Clone)]
-enum OutputMode {
-    Html,
-    Csv,
-}
-
-impl FromStr for OutputMode {
-    type Err = String;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "html" => Ok(Self::Html),
-            "csv" => Ok(Self::Csv),
-            _ => Err(format!(
-                "Invalid output mode {s}. Possible values: `html` or `csv`."
-            )),
-        }
-    }
-}
-
-/// Primary entrypoint to generate and render the thanks information.
-///
-/// Thanks information will be rendered for
-/// * each version identified by [`get_versions()`]
-/// * the unreleased version "Beta"
-/// * the unreleased version "Nightly"
-/// * "all time" contributions across any of those versions
 fn run(mode: OutputMode, mailmap_path: Option<PathBuf>) -> Result<(), Box<dyn std::error::Error>> {
-    let by_version = generate_thanks(mailmap_path)?;
-    let by_version: BTreeMap<_, _> = by_version
-        .into_iter()
-        .map(|(k, v)| (k, AuthorsWithScores::new(v)))
-        .collect();
-
-    let mut all_time = by_version.values().next().unwrap().authors.clone();
-    for authors in by_version.values().skip(1) {
-        all_time.extend(authors.authors.clone());
-    }
-    let all_time = AuthorsWithScores::new(all_time);
+    let projects = vec![compute_data(Box::new(Rust), mailmap_path)?];
 
     match mode {
         OutputMode::Html => {
-            site::render(by_version, all_time)?;
+            site::render_projects(&projects, Path::new("output"))?;
         }
         OutputMode::Csv => {
             use std::io::Write;
@@ -184,12 +194,15 @@ fn run(mode: OutputMode, mailmap_path: Option<PathBuf>) -> Result<(), Box<dyn st
                 Ok(())
             };
 
-            let directory = PathBuf::from("output/csv");
-            std::fs::create_dir_all(&directory)?;
-            for (version, authors) in by_version {
-                write(&directory.join(format!("{version}.csv")), authors)?;
+            let csv_dir = PathBuf::from("output/csv");
+            for data in projects {
+                let directory = csv_dir.join(data.project.name().to_lowercase());
+                std::fs::create_dir_all(&directory)?;
+                for (version, authors) in data.by_version {
+                    write(&directory.join(format!("{version}.csv")), authors)?;
+                }
+                write(&directory.join("all-time.csv"), data.all_time)?;
             }
-            write(&directory.join("all-time.csv"), all_time)?;
         }
     }
 
@@ -206,6 +219,26 @@ struct Args {
     /// Can be used to test mailmap changes before committing them to the main repo.
     #[arg(long)]
     mailmap_path: Option<PathBuf>,
+}
+
+#[derive(clap::ValueEnum, Copy, Clone)]
+enum OutputMode {
+    Html,
+    Csv,
+}
+
+impl FromStr for OutputMode {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "html" => Ok(Self::Html),
+            "csv" => Ok(Self::Csv),
+            _ => Err(format!(
+                "Invalid output mode {s}. Possible values: `html` or `csv`."
+            )),
+        }
+    }
 }
 
 fn main() {

@@ -2,13 +2,42 @@ use crate::error::ErrorContext;
 use crate::git::{Submodule, VersionTag, update_repo};
 use crate::reviewers::Reviewers;
 use crate::score::{AuthorScore, author_map_to_scores};
-use crate::{git, reviewers};
+use crate::{Project, generate_thanks, git, reviewers};
 use git2::{Commit, Oid, Repository};
 use mailmap::{Author, Mailmap};
 use regex::{Regex, RegexBuilder};
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
+use std::path::PathBuf;
 use std::sync::{Arc, LazyLock, Mutex};
 use std::time::Instant;
+
+pub struct ProjectData {
+    pub project: Box<dyn Project>,
+    pub by_version: BTreeMap<VersionTag, AuthorsWithScores>,
+    pub all_time: AuthorsWithScores,
+}
+
+pub fn compute_data(
+    project: Box<dyn Project>,
+    mailmap_path: Option<PathBuf>,
+) -> Result<ProjectData, Box<dyn std::error::Error>> {
+    let by_version = generate_thanks(project.as_ref(), mailmap_path)?;
+    let by_version: BTreeMap<_, _> = by_version
+        .into_iter()
+        .map(|(k, v)| (k, AuthorsWithScores::new(v)))
+        .collect();
+
+    let mut all_time = by_version.values().next().unwrap().authors.clone();
+    for authors in by_version.values().skip(1) {
+        all_time.extend(authors.authors.clone());
+    }
+    let all_time = AuthorsWithScores::new(all_time);
+    Ok(ProjectData {
+        project,
+        by_version,
+        all_time,
+    })
+}
 
 /// Gather all commits for the given versions from the given repository, including all of its
 /// submodules.

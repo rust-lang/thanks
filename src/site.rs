@@ -1,19 +1,54 @@
-use crate::git::VersionTag;
+use crate::analyse::ProjectData;
 use crate::score::AuthorScore;
-use crate::{AuthorMap, AuthorsWithScores};
 use handlebars::Handlebars;
-use std::collections::BTreeMap;
 use std::fs;
 use std::path::Path;
 
-pub fn render(
-    by_version: BTreeMap<VersionTag, AuthorsWithScores>,
-    all_time_map: AuthorsWithScores,
+pub fn render_projects(
+    projects: &[ProjectData],
+    root_dir: &Path,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    copy_public()?;
-    index(&all_time_map.authors, &by_version)?;
-    about()?;
-    releases(&by_version, &all_time_map)?;
+    eprintln!(
+        "Rendering {} project{} to HTML",
+        projects.len(),
+        if projects.len() == 1 { "" } else { "s" }
+    );
+
+    // Validate that there is exactly one homepage project
+    let mut homepage_project = None;
+    for data in projects {
+        if data.project.is_homepage() {
+            if let Some(other) = homepage_project {
+                panic!(
+                    "Multiple projects that are marked as a homepage project: {} and {other}",
+                    data.project.name()
+                );
+            }
+            homepage_project = Some(data.project.name().to_string());
+        }
+    }
+    assert!(
+        homepage_project.is_some(),
+        "There must be exactly one homepage project"
+    );
+
+    create_dir(root_dir)?;
+
+    copy_public_assets(root_dir)?;
+    about(root_dir)?;
+
+    for data in projects {
+        let project_out_dir = root_dir.join(data.project.url());
+        create_dir(&project_out_dir)?;
+
+        let index_dir = if data.project.is_homepage() {
+            root_dir
+        } else {
+            &project_out_dir
+        };
+        index(data, index_dir)?;
+        releases(data, &project_out_dir)?;
+    }
 
     Ok(())
 }
@@ -54,27 +89,23 @@ fn create_dir<P: AsRef<Path>>(p: P) -> Result<(), std::io::Error> {
     Ok(())
 }
 
-fn copy_public() -> Result<(), Box<dyn std::error::Error>> {
+fn copy_public_assets(output_dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
     let wd = walkdir::WalkDir::new("public");
-    fs::create_dir_all("output")?;
     for entry in wd {
         let entry = entry?;
         if entry.file_type().is_file() {
             fs::copy(
                 entry.path(),
-                Path::new("output").join(entry.path().strip_prefix("public/")?),
+                output_dir.join(entry.path().strip_prefix("public/")?),
             )?;
         } else if entry.file_type().is_dir() {
-            create_dir(Path::new("output").join(entry.path().strip_prefix("public/")?))?;
+            create_dir(output_dir.join(entry.path().strip_prefix("public/")?))?;
         }
     }
     Ok(())
 }
 
-fn index(
-    all_time: &AuthorMap,
-    by_version: &BTreeMap<VersionTag, AuthorsWithScores>,
-) -> Result<(), Box<dyn std::error::Error>> {
+fn index(data: &ProjectData, output_dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
     #[derive(serde::Serialize)]
     struct Release {
         name: String,
@@ -92,14 +123,14 @@ fn index(
     let mut releases = Vec::new();
     releases.push(Release {
         name: "All time".into(),
-        url: "/rust/all-time/".into(),
-        people: all_time.iter().count(),
-        commits: all_time.iter().map(|(_, count)| count).sum(),
+        url: format!("/{}/all-time/", data.project.url()),
+        people: data.all_time.authors.iter().count(),
+        commits: data.all_time.authors.iter().map(|(_, count)| count).sum(),
     });
-    for (version, stats) in by_version.iter().rev() {
+    for (version, stats) in data.by_version.iter().rev() {
         releases.push(Release {
             name: version.name.clone(),
-            url: format!("/rust/{}/", version.version),
+            url: format!("/{}/{}/", data.project.url(), version.version),
             people: stats.authors.iter().count(),
             commits: stats.authors.iter().map(|(_, count)| count).sum(),
         });
@@ -108,16 +139,17 @@ fn index(
     let res = hb.render(
         "index",
         &Index {
-            common: CommonData::new("Rust Contributors".into()).without_thanks_in_logo(),
+            common: CommonData::new(format!("{} Contributors", data.project.name()))
+                .without_thanks_in_logo(),
             releases,
         },
     )?;
 
-    fs::write("output/index.html", res)?;
+    fs::write(output_dir.join("index.html"), res)?;
     Ok(())
 }
 
-fn about() -> Result<(), Box<dyn std::error::Error>> {
+fn about(output_dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
     #[derive(serde::Serialize)]
     struct About {
         common: CommonData,
@@ -131,15 +163,13 @@ fn about() -> Result<(), Box<dyn std::error::Error>> {
         },
     )?;
 
-    create_dir("output/about")?;
-    fs::write("output/about/index.html", res)?;
+    let about_dir = output_dir.join("about");
+    create_dir(&about_dir)?;
+    fs::write(about_dir.join("index.html"), res)?;
     Ok(())
 }
 
-fn releases(
-    by_version: &BTreeMap<VersionTag, AuthorsWithScores>,
-    all_time: &AuthorsWithScores,
-) -> Result<(), Box<dyn std::error::Error>> {
+fn releases(data: &ProjectData, output_dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
     #[derive(serde::Serialize)]
     struct Release<'a> {
         common: CommonData,
@@ -151,28 +181,29 @@ fn releases(
     }
     let hb = hb()?;
 
-    let scores = &all_time.scores;
+    let scores = &data.all_time.scores;
     let res = hb.render(
         "stats",
         &Release {
-            common: CommonData::new("All-time Rust Contributors".into()),
+            common: CommonData::new(format!("All-time {} Contributors", data.project.name())),
             release_title: String::from("All-time"),
-            release: String::from("all of Rust"),
+            release: format!("all of {}", data.project.name()),
             count: scores.len(),
             scores,
             in_progress: true,
         },
     )?;
 
-    create_dir("output/rust/all-time")?;
-    fs::write("output/rust/all-time/index.html", res)?;
+    let all_time_dir = output_dir.join("all-time");
+    create_dir(&all_time_dir)?;
+    fs::write(all_time_dir.join("index.html"), res)?;
 
-    for (version, map) in by_version {
+    for (version, map) in &data.by_version {
         let scores = &map.scores;
         let res = hb.render(
             "stats",
             &Release {
-                common: CommonData::new(format!("Rust {} Contributors", version)),
+                common: CommonData::new(format!("{} {version} Contributors", data.project.name())),
                 release_title: version.name.clone(),
                 release: version.to_string(),
                 count: scores.len(),
@@ -181,8 +212,9 @@ fn releases(
             },
         )?;
 
-        create_dir(format!("output/rust/{}", version))?;
-        fs::write(format!("output/rust/{}/index.html", version), res)?;
+        let version_dir = output_dir.join(version.to_string());
+        create_dir(&version_dir)?;
+        fs::write(version_dir.join("index.html"), res)?;
     }
     Ok(())
 }
