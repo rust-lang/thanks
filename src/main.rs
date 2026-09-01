@@ -6,13 +6,13 @@ use std::collections::BTreeMap;
 use std::io::BufWriter;
 use std::path::{Path, PathBuf};
 use std::str;
-use std::str::FromStr;
 use std::time::Instant;
 
 mod analyse;
 mod config;
 mod error;
 mod git;
+mod projects;
 mod reviewers;
 mod score;
 mod site;
@@ -21,6 +21,7 @@ use crate::analyse::{
     AuthorMap, AuthorsWithScores, build_author_map, compute_data, gather_all_commits,
 };
 use crate::git::{VersionTag, get_versions, mailmap_from_repo, update_repo};
+use crate::projects::{Rust, Rustup};
 use crate::score::AuthorScore;
 
 trait Project {
@@ -32,86 +33,15 @@ trait Project {
     fn url(&self) -> &'static str;
 
     /// Should this project be displayed as the main homepage project?
-    fn is_homepage(&self) -> bool;
+    fn is_homepage(&self) -> bool {
+        false
+    }
 
     /// URL of its GitHub repository.
     fn repo_url(&self) -> &'static str;
 
     /// Add additional versions to the ones found from the git repository.
     fn augment_versions(&self, repo: &Repository, versions: &mut Vec<VersionTag>);
-}
-
-struct Rust;
-
-impl Project for Rust {
-    fn name(&self) -> &'static str {
-        "Rust"
-    }
-
-    fn url(&self) -> &'static str {
-        "rust"
-    }
-
-    fn is_homepage(&self) -> bool {
-        true
-    }
-
-    fn repo_url(&self) -> &'static str {
-        "https://github.com/rust-lang/rust.git"
-    }
-
-    fn augment_versions(&self, repo: &Repository, versions: &mut Vec<VersionTag>) {
-        let last_full_stable = versions
-            .iter()
-            .rfind(|v| v.raw_tag.ends_with(".0"))
-            .unwrap()
-            .version
-            .clone();
-
-        // The nightly branch is the default one, fall back to "main" if it cannot
-        // be read
-        let nightly_branch = match repo.head() {
-            Ok(reference) => match reference.shorthand() {
-                Some(name) => name.to_string(),
-                None => "main".to_string(),
-            },
-            Err(_) => "main".to_string(),
-        };
-
-        versions.push(VersionTag {
-            name: String::from("Beta"),
-            version: {
-                let mut last = last_full_stable.clone();
-                last.minor += 1;
-                last
-            },
-            raw_tag: String::from("beta"),
-            commit: repo
-                .revparse_single("beta")
-                .unwrap()
-                .peel_to_commit()
-                .unwrap()
-                .id(),
-            in_progress: true,
-        });
-        versions.push(VersionTag {
-            name: String::from("Nightly"),
-            version: {
-                // main is plus 1 minor versions off of beta, which we just pushed
-                let mut last = last_full_stable.clone();
-                last.minor += 2;
-                last
-            },
-            raw_tag: nightly_branch,
-            commit: repo
-                .revparse_single("HEAD")
-                .unwrap()
-                .peel_to_commit()
-                .unwrap()
-                .id(),
-            in_progress: true,
-        });
-    }
 }
 
 fn generate_thanks(
@@ -168,12 +98,27 @@ fn generate_thanks(
     Ok(version_map)
 }
 
-fn run(mode: OutputMode, mailmap_path: Option<PathBuf>) -> Result<(), Box<dyn std::error::Error>> {
-    let projects = vec![compute_data(Box::new(Rust), mailmap_path)?];
+fn run(
+    mode: OutputMode,
+    mailmap_path: Option<PathBuf>,
+    selected_project: Option<&str>,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let mut projects: Vec<Box<dyn Project>> = vec![Box::new(Rust), Box::new(Rustup)];
+    if let Some(selected) = selected_project {
+        projects.retain(|p| p.name().to_lowercase() == selected);
+        if projects.is_empty() {
+            panic!("No projects found with name {selected}");
+        }
+    }
+
+    let mut data = vec![];
+    for project in projects {
+        data.push(compute_data(project, mailmap_path.clone())?);
+    }
 
     match mode {
         OutputMode::Html => {
-            site::render_projects(&projects, Path::new("output"))?;
+            site::render_projects(&data, Path::new("output"))?;
         }
         OutputMode::Csv => {
             use std::io::Write;
@@ -195,7 +140,7 @@ fn run(mode: OutputMode, mailmap_path: Option<PathBuf>) -> Result<(), Box<dyn st
             };
 
             let csv_dir = PathBuf::from("output/csv");
-            for data in projects {
+            for data in data {
                 let directory = csv_dir.join(data.project.name().to_lowercase());
                 std::fs::create_dir_all(&directory)?;
                 for (version, authors) in data.by_version {
@@ -219,6 +164,12 @@ struct Args {
     /// Can be used to test mailmap changes before committing them to the main repo.
     #[arg(long)]
     mailmap_path: Option<PathBuf>,
+
+    /// Render only the selected project.
+    /// If not given, all projects are rendered.
+    /// The value should correspond to the project's lowercase name.
+    #[arg(long)]
+    project: Option<String>,
 }
 
 #[derive(clap::ValueEnum, Copy, Clone)]
@@ -227,24 +178,10 @@ enum OutputMode {
     Csv,
 }
 
-impl FromStr for OutputMode {
-    type Err = String;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "html" => Ok(Self::Html),
-            "csv" => Ok(Self::Csv),
-            _ => Err(format!(
-                "Invalid output mode {s}. Possible values: `html` or `csv`."
-            )),
-        }
-    }
-}
-
 fn main() {
     let args = Args::parse();
 
-    if let Err(err) = run(args.mode, args.mailmap_path) {
+    if let Err(err) = run(args.mode, args.mailmap_path, args.project.as_deref()) {
         eprintln!("Error: {}", err);
         let mut cur = &*err;
         while let Some(cause) = cur.source() {

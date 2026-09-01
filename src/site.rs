@@ -27,10 +27,11 @@ pub fn render_projects(
             homepage_project = Some(data.project.name().to_string());
         }
     }
-    assert!(
-        homepage_project.is_some(),
-        "There must be exactly one homepage project"
-    );
+    if homepage_project.is_none() {
+        eprintln!(
+            "Warning: no rendered project is marked as homepage project, the index page will be missing"
+        );
+    }
 
     create_dir(root_dir)?;
 
@@ -178,6 +179,7 @@ fn releases(data: &ProjectData, output_dir: &Path) -> Result<(), Box<dyn std::er
         count: usize,
         scores: &'a [AuthorScore],
         in_progress: bool,
+        is_homepage_project: bool,
     }
     let hb = hb()?;
 
@@ -191,6 +193,7 @@ fn releases(data: &ProjectData, output_dir: &Path) -> Result<(), Box<dyn std::er
             count: scores.len(),
             scores,
             in_progress: true,
+            is_homepage_project: data.project.is_homepage(),
         },
     )?;
 
@@ -209,6 +212,7 @@ fn releases(data: &ProjectData, output_dir: &Path) -> Result<(), Box<dyn std::er
                 count: scores.len(),
                 scores,
                 in_progress: version.in_progress,
+                is_homepage_project: data.project.is_homepage(),
             },
         )?;
 
