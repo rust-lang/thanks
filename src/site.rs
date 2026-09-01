@@ -1,4 +1,4 @@
-use crate::analyse::ProjectData;
+use crate::analyse::{AuthorMap, AuthorsWithScores, ProjectData};
 use crate::score::AuthorScore;
 use handlebars::Handlebars;
 use std::fs;
@@ -14,7 +14,53 @@ pub fn render_projects(
         if projects.len() == 1 { "" } else { "s" }
     );
 
-    // Validate that there is exactly one homepage project
+    validate_homepage(projects);
+
+    let hb = hb()?;
+
+    create_dir(root_dir)?;
+
+    copy_public_assets(root_dir)?;
+    about(&hb, root_dir)?;
+
+    let mut combined_all_time = AuthorMap::new();
+    for data in projects {
+        let project_out_dir = root_dir.join(data.project.url_path());
+        create_dir(&project_out_dir)?;
+
+        let index_dir = if data.project.is_homepage() {
+            root_dir
+        } else {
+            &project_out_dir
+        };
+        index(&hb, data, index_dir)?;
+        releases(&hb, data, &project_out_dir)?;
+
+        combined_all_time.extend(data.all_time.authors.clone());
+    }
+
+    // Render combined all time data
+    let combined_all_time = AuthorsWithScores::new(combined_all_time);
+    let res = hb.render(
+        "stats",
+        &Release {
+            common: CommonData::new("All-time upstream Rust Contributors".to_string()),
+            release_title: String::from("All-time"),
+            release: "the Rust toolchain".to_string(),
+            count: combined_all_time.scores.len(),
+            scores: &combined_all_time.scores,
+            in_progress: true,
+            is_homepage_project: true,
+        },
+    )?;
+
+    fs::write(root_dir.join("all-time.html"), res)?;
+
+    Ok(())
+}
+
+/// Validate that there is exactly one homepage project
+fn validate_homepage(projects: &[ProjectData]) {
     let mut homepage_project = None;
     for data in projects {
         if data.project.is_homepage() {
@@ -32,26 +78,6 @@ pub fn render_projects(
             "Warning: no rendered project is marked as homepage project, the index page will be missing"
         );
     }
-
-    create_dir(root_dir)?;
-
-    copy_public_assets(root_dir)?;
-    about(root_dir)?;
-
-    for data in projects {
-        let project_out_dir = root_dir.join(data.project.url_path());
-        create_dir(&project_out_dir)?;
-
-        let index_dir = if data.project.is_homepage() {
-            root_dir
-        } else {
-            &project_out_dir
-        };
-        index(data, index_dir)?;
-        releases(data, &project_out_dir)?;
-    }
-
-    Ok(())
 }
 
 #[derive(serde::Serialize)]
@@ -106,7 +132,11 @@ fn copy_public_assets(output_dir: &Path) -> Result<(), Box<dyn std::error::Error
     Ok(())
 }
 
-fn index(data: &ProjectData, output_dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
+fn index(
+    hb: &Handlebars<'_>,
+    data: &ProjectData,
+    output_dir: &Path,
+) -> Result<(), Box<dyn std::error::Error>> {
     #[derive(serde::Serialize)]
     struct Release {
         name: String,
@@ -119,7 +149,6 @@ fn index(data: &ProjectData, output_dir: &Path) -> Result<(), Box<dyn std::error
         common: CommonData,
         releases: Vec<Release>,
     }
-    let hb = hb()?;
 
     let mut releases = Vec::new();
     releases.push(Release {
@@ -150,12 +179,11 @@ fn index(data: &ProjectData, output_dir: &Path) -> Result<(), Box<dyn std::error
     Ok(())
 }
 
-fn about(output_dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
+fn about(hb: &Handlebars<'_>, output_dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
     #[derive(serde::Serialize)]
     struct About {
         common: CommonData,
     }
-    let hb = hb()?;
 
     let res = hb.render(
         "about",
@@ -170,19 +198,22 @@ fn about(output_dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn releases(data: &ProjectData, output_dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
-    #[derive(serde::Serialize)]
-    struct Release<'a> {
-        common: CommonData,
-        release_title: String,
-        release: String,
-        count: usize,
-        scores: &'a [AuthorScore],
-        in_progress: bool,
-        is_homepage_project: bool,
-    }
-    let hb = hb()?;
+#[derive(serde::Serialize)]
+struct Release<'a> {
+    common: CommonData,
+    release_title: String,
+    release: String,
+    count: usize,
+    scores: &'a [AuthorScore],
+    in_progress: bool,
+    is_homepage_project: bool,
+}
 
+fn releases(
+    hb: &Handlebars<'_>,
+    data: &ProjectData,
+    output_dir: &Path,
+) -> Result<(), Box<dyn std::error::Error>> {
     let scores = &data.all_time.scores;
     let res = hb.render(
         "stats",

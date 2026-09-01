@@ -305,7 +305,7 @@ pub struct AuthorMap {
 
 impl AuthorMap {
     /// Create an empty `AuthorMap`.
-    fn new() -> Self {
+    pub fn new() -> Self {
         AuthorMap {
             map: HashMap::new(),
         }
