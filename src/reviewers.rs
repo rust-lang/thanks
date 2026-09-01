@@ -85,7 +85,6 @@ impl Reviewers {
         insert("gereeter", a("Jonathan S", "gereeter+code@gmail.com"));
         insert("gnzlbg", a("gnzlbg", "gonzalobg88@gmail.com"));
         insert("graydon", a("Graydon Hoare", "graydon@pobox.com"));
-        insert("hanna-kruppe", a("Hanna Kruppe", "hanna.kruppe@gmail.com"));
         insert("hellow554", a("Marcel Hellwig", "github@cookiesoft.de"));
         insert("ilyoan", a("ILYONG CHO", "ilyoan@gmail.com"));
         insert("jakub", a("Jakub Kądziołka", "kuba@kadziolka.net"));
@@ -112,7 +111,6 @@ impl Reviewers {
         insert("mjbshaw", a("Michael Bradshaw", "mjbshaw@google.com"));
         insert("msullivan", a("Michael J. Sullivan", "sully@msully.net"));
         insert("pczarn", a("Piotr Czarnecki", "pioczarn@gmail.com"));
-        insert("petrhosek", a("Petr Hosek", "phosek@gmail.com"));
         insert("pickfire", a("Ivan Tham", "pickfire@riseup.net"));
         insert("poliorcetics", a("Alexis Bourget", "alexis.bourget@gmail.com"));
         insert("raoulstrackx", a("Raoul Strackx", "raoul.strackx@fortanix.com"));
@@ -128,7 +126,6 @@ impl Reviewers {
         insert("tlively", a("Thomas Lively", "tlively@google.com"));
         insert("tromey", a("Tom Tromey", "tom@tromey.com"));
         insert("vadimcn", a("Vadim Chugunov", "vadimcn@gmail.com"));
-        insert("willcrichton", a("Will Crichton", "wcrichto@cs.stanford.edu"));
         insert("xfix", a("Konrad Borowski", "konrad@borowski.pw"));
         insert("yichoi", a("Young-il Choi", "duddlf.choi@samsung.com"));
         insert("y-nak", a("Yoshitomo Nakanishi", "yurayura.rounin.3@gmail.com"));
