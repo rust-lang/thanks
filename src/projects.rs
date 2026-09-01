@@ -29,9 +29,7 @@ pub trait Project {
 
     /// Contributions from users with these e-mail addresses will be ignored.
     /// The addresses will be compared in a case-insensitive manner.
-    fn ignored_emails(&self) -> &'static [&'static str] {
-        &[]
-    }
+    const IGNORED_EMAILS: &'static [&'static str] = &[];
 }
 
 pub struct Rust;
@@ -176,6 +174,14 @@ impl Project for DocsRs {
     const URL_PATH: &'static str = "docs.rs";
     const IS_VERSIONLESS: bool = true;
     const REPO_URL: &'static str = "https://github.com/rust-lang/docs.rs.git";
+    const IGNORED_EMAILS: &'static [&'static str] = &[
+        // CI bot
+        "docs.rs@users.noreply.github.com",
+        // Renovatebot
+        "29139614+renovate[bot]@users.noreply.github.com",
+        // Dependabot
+        "49699333+dependabot[bot]@users.noreply.github.com",
+    ];
 
     fn get_versions(
         &self,
@@ -193,16 +199,5 @@ impl Project for DocsRs {
                 .id(),
             in_progress: true,
         }])
-    }
-
-    fn ignored_emails(&self) -> &'static [&'static str] {
-        &[
-            // CI bot
-            "docs.rs@users.noreply.github.com",
-            // Renovatebot
-            "29139614+renovate[bot]@users.noreply.github.com",
-            // Dependabot
-            "49699333+dependabot[bot]@users.noreply.github.com",
-        ]
     }
 }

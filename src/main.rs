@@ -57,8 +57,7 @@ fn generate_thanks<P: Project>(
         start.elapsed().as_secs_f64()
     );
 
-    let ignored_emails: HashSet<UniCase<String>> = project
-        .ignored_emails()
+    let ignored_emails: HashSet<UniCase<String>> = P::IGNORED_EMAILS
         .iter()
         .map(|email| UniCase::new(email.to_string()))
         .collect();
