@@ -1,3 +1,4 @@
+use clap::Parser;
 use config::Config;
 use git2::{Commit, Oid, Repository};
 use mailmap::{Author, Mailmap};
@@ -537,10 +538,20 @@ fn mailmap_from_repo(repo: &git2::Repository) -> Result<Mailmap, Box<dyn std::er
     Mailmap::from_string(file)
 }
 
-fn generate_thanks() -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::error::Error>> {
+fn generate_thanks(
+    mailmap_path: Option<PathBuf>,
+) -> Result<BTreeMap<VersionTag, AuthorMap>, Box<dyn std::error::Error>> {
     let path = update_repo("https://github.com/rust-lang/rust.git")?;
     let repo = git2::Repository::open(&path)?;
-    let mailmap = mailmap_from_repo(&repo)?;
+
+    let mailmap = match mailmap_path {
+        Some(mailmap) => {
+            let mailmap = std::fs::read_to_string(&mailmap)
+                .map_err(|e| format!("Cannot read mailmap from {mailmap:?}: {e:?}"))?;
+            Mailmap::from_string(mailmap)?
+        }
+        None => mailmap_from_repo(&repo)?,
+    };
     let reviewers = Reviewers::new()?;
 
     let mut versions = get_versions(&repo)?;
@@ -834,6 +845,7 @@ fn checkout_all_submodules(
     Ok(())
 }
 
+#[derive(clap::ValueEnum, Clone)]
 enum OutputMode {
     Html,
     Csv,
@@ -853,8 +865,8 @@ impl FromStr for OutputMode {
     }
 }
 
-fn run(mode: OutputMode) -> Result<(), Box<dyn std::error::Error>> {
-    let by_version = generate_thanks()?;
+fn run(mode: OutputMode, mailmap_path: Option<PathBuf>) -> Result<(), Box<dyn std::error::Error>> {
+    let by_version = generate_thanks(mailmap_path)?;
     let by_version: BTreeMap<_, _> = by_version
         .into_iter()
         .map(|(k, v)| (k, AuthorsWithScores::new(v)))
@@ -901,14 +913,22 @@ fn run(mode: OutputMode) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn main() {
-    let mode = std::env::args().nth(1);
-    let mode = match mode {
-        None => OutputMode::Html,
-        Some(mode) => mode.parse().unwrap(),
-    };
+#[derive(clap::Parser)]
+struct Args {
+    /// Output mode to use.
+    #[arg(default_value = "html")]
+    mode: OutputMode,
 
-    if let Err(err) = run(mode) {
+    /// Path to a .mailmap file.
+    /// Can be used to test mailmap changes before committing them to the main repo.
+    #[arg(long)]
+    mailmap_path: Option<PathBuf>,
+}
+
+fn main() {
+    let args = Args::parse();
+
+    if let Err(err) = run(args.mode, args.mailmap_path) {
         eprintln!("Error: {}", err);
         let mut cur = &*err;
         while let Some(cause) = cur.source() {
