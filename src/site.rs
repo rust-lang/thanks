@@ -18,7 +18,7 @@ pub fn render_projects(
     copy_public_assets(root_dir)?;
 
     let hb = hb()?;
-    render_about_page(&hb, root_dir)?;
+    render_about_page(&hb, projects, root_dir)?;
 
     let mut combined_all_time = AuthorMap::new();
     for data in projects {
@@ -156,17 +156,33 @@ fn render_project_index_page(
 
 fn render_about_page(
     hb: &Handlebars<'_>,
+    projects: &[ProjectData],
     output_dir: &Path,
 ) -> Result<(), Box<dyn std::error::Error>> {
     #[derive(serde::Serialize)]
+    struct ProjectInfo {
+        url: String,
+        name: String,
+    }
+
+    #[derive(serde::Serialize)]
     struct About {
         common: CommonData,
+        additional_projects: Vec<ProjectInfo>,
     }
 
     let res = hb.render(
         "about",
         &About {
             common: CommonData::new("About - Rust Contributors".into()),
+            additional_projects: projects
+                .iter()
+                .filter(|p| p.project.name() != "Rust")
+                .map(|p| ProjectInfo {
+                    url: p.project.repo_url().to_string(),
+                    name: p.project.name().to_string(),
+                })
+                .collect(),
         },
     )?;
 
