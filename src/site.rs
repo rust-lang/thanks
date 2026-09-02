@@ -66,20 +66,11 @@ pub fn render_projects(
 #[derive(serde::Serialize)]
 struct CommonData {
     title: String,
-    show_thanks_in_logo: bool,
 }
 
 impl CommonData {
     fn new(title: String) -> Self {
-        CommonData {
-            title,
-            show_thanks_in_logo: true,
-        }
-    }
-
-    fn without_thanks_in_logo(mut self) -> Self {
-        self.show_thanks_in_logo = false;
-        self
+        CommonData { title }
     }
 }
 
@@ -153,8 +144,7 @@ fn render_project_index_page(
     let res = hb.render(
         "index",
         &Index {
-            common: CommonData::new(format!("{} Contributors", data.project.name()))
-                .without_thanks_in_logo(),
+            common: CommonData::new(format!("{} Contributors", data.project.name())),
             name: data.project.name(),
             releases,
         },
