@@ -14,8 +14,6 @@ pub fn render_projects(
         if projects.len() == 1 { "" } else { "s" }
     );
 
-    validate_homepage(projects);
-
     create_dir(root_dir)?;
     copy_public_assets(root_dir)?;
 
@@ -26,11 +24,6 @@ pub fn render_projects(
     for data in projects {
         let project_out_dir = root_dir.join(data.project.url_path());
         create_dir(&project_out_dir)?;
-
-        if data.project.is_homepage() {
-            assert!(!data.project.is_versionless());
-            render_project_index_page(&hb, data, root_dir)?;
-        }
 
         if data.project.is_versionless() {
             render_all_time_page(&hb, data, &project_out_dir)?;
@@ -54,36 +47,20 @@ pub fn render_projects(
             count: combined_all_time.scores.len(),
             scores: &combined_all_time.scores,
             in_progress: true,
-            is_homepage_project: true,
+            backlink: "all projects",
         },
     )?;
 
     fs::write(root_dir.join("all-time.html"), res)?;
 
-    render_projects_page(&hb, projects, &combined_all_time, root_dir)?;
+    render_projects_page(
+        &hb,
+        projects,
+        &combined_all_time,
+        &root_dir.join("index.html"),
+    )?;
 
     Ok(())
-}
-
-/// Validate that there is exactly one homepage project
-fn validate_homepage(projects: &[ProjectData]) {
-    let mut homepage_project = None;
-    for data in projects {
-        if data.project.is_homepage() {
-            if let Some(other) = homepage_project {
-                panic!(
-                    "Multiple projects that are marked as a homepage project: {} and {other}",
-                    data.project.name()
-                );
-            }
-            homepage_project = Some(data.project.name().to_string());
-        }
-    }
-    if homepage_project.is_none() {
-        eprintln!(
-            "Warning: no rendered project is marked as homepage project, the index page will be missing"
-        );
-    }
 }
 
 #[derive(serde::Serialize)]
@@ -213,7 +190,7 @@ fn render_projects_page(
     hb: &Handlebars<'_>,
     projects: &[ProjectData],
     all_time: &AuthorsWithScores,
-    output_dir: &Path,
+    path: &Path,
 ) -> Result<(), Box<dyn std::error::Error>> {
     #[derive(serde::Serialize)]
     struct ProjectInfo {
@@ -251,7 +228,7 @@ fn render_projects_page(
         },
     )?;
 
-    fs::write(output_dir.join("projects.html"), res)?;
+    fs::write(path, res)?;
     Ok(())
 }
 
@@ -263,7 +240,7 @@ struct Release<'a> {
     count: usize,
     scores: &'a [AuthorScore],
     in_progress: bool,
-    is_homepage_project: bool,
+    backlink: &'static str,
 }
 
 fn render_all_time_page(
@@ -281,7 +258,11 @@ fn render_all_time_page(
             count: scores.len(),
             scores,
             in_progress: true,
-            is_homepage_project: data.project.is_homepage(),
+            backlink: if data.project.is_versionless() {
+                "all projects"
+            } else {
+                "all releases"
+            },
         },
     )?;
 
@@ -306,7 +287,7 @@ fn render_release_pages(
                 count: scores.len(),
                 scores,
                 in_progress: version.in_progress,
-                is_homepage_project: data.project.is_homepage(),
+                backlink: "all releases",
             },
         )?;
 
