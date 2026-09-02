@@ -89,6 +89,7 @@ fn generate_thanks(
 
 /// Return all projects for which we currently generate contribution statistics.
 fn get_all_projects() -> Vec<Box<dyn Project>> {
+    // When adding new projects here, be sure to also update templates/about.hbs
     vec![
         Box::new(Rust),
         Box::new(Rustup),
