@@ -281,3 +281,12 @@ impl fmt::Debug for VersionTag {
         write!(f, "{}", self.version)
     }
 }
+
+/// Get the Oid of the latest commit to the given revision spec
+pub fn revspec_latest_commit(repo: &Repository, revision: &str) -> Oid {
+    repo.revparse_single(revision)
+        .unwrap()
+        .peel_to_commit()
+        .unwrap()
+        .id()
+}

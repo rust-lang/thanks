@@ -1,4 +1,4 @@
-use crate::git::{VersionTag, get_versions};
+use crate::git::{VersionTag, get_versions, revspec_latest_commit};
 use git2::Repository;
 use semver::Version;
 
@@ -77,12 +77,7 @@ impl Project for Rust {
                 last
             },
             raw_tag: String::from("beta"),
-            commit: repo
-                .revparse_single("beta")
-                .unwrap()
-                .peel_to_commit()
-                .unwrap()
-                .id(),
+            commit: revspec_latest_commit(repo, "beta"),
             in_progress: true,
         });
         versions.push(VersionTag {
@@ -94,12 +89,7 @@ impl Project for Rust {
                 last
             },
             raw_tag: String::from("main"),
-            commit: repo
-                .revparse_single("HEAD")
-                .unwrap()
-                .peel_to_commit()
-                .unwrap()
-                .id(),
+            commit: revspec_latest_commit(repo, "HEAD"),
             in_progress: true,
         });
 
@@ -142,12 +132,7 @@ impl Project for Rustup {
                 last
             },
             raw_tag: String::from("main"),
-            commit: repo
-                .revparse_single("HEAD")
-                .unwrap()
-                .peel_to_commit()
-                .unwrap()
-                .id(),
+            commit: revspec_latest_commit(repo, "HEAD"),
             in_progress: true,
         });
 
@@ -178,12 +163,7 @@ impl Project for CratesIo {
             name: String::from("Nightly"),
             version: Version::new(1, 0, 0),
             raw_tag: String::from("main"),
-            commit: repo
-                .revparse_single("HEAD")
-                .unwrap()
-                .peel_to_commit()
-                .unwrap()
-                .id(),
+            commit: revspec_latest_commit(repo, "HEAD"),
             in_progress: true,
         }])
     }
@@ -216,12 +196,7 @@ impl Project for DocsRs {
             name: String::from("Nightly"),
             version: Version::new(1, 0, 0),
             raw_tag: String::from("main"),
-            commit: repo
-                .revparse_single("HEAD")
-                .unwrap()
-                .peel_to_commit()
-                .unwrap()
-                .id(),
+            commit: revspec_latest_commit(repo, "HEAD"),
             in_progress: true,
         }])
     }
