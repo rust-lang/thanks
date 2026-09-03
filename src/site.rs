@@ -14,23 +14,16 @@ pub fn render_projects(
         if projects.len() == 1 { "" } else { "s" }
     );
 
-    validate_homepage(projects);
-
     create_dir(root_dir)?;
     copy_public_assets(root_dir)?;
 
     let hb = hb()?;
-    render_about_page(&hb, root_dir)?;
+    render_about_page(&hb, projects, root_dir)?;
 
     let mut combined_all_time = AuthorMap::new();
     for data in projects {
         let project_out_dir = root_dir.join(data.project.url_path());
         create_dir(&project_out_dir)?;
-
-        if data.project.is_homepage() {
-            assert!(!data.project.is_versionless());
-            render_project_index_page(&hb, data, root_dir)?;
-        }
 
         if data.project.is_versionless() {
             render_all_time_page(&hb, data, &project_out_dir)?;
@@ -54,55 +47,30 @@ pub fn render_projects(
             count: combined_all_time.scores.len(),
             scores: &combined_all_time.scores,
             in_progress: true,
-            is_homepage_project: true,
+            backlink: "all projects",
         },
     )?;
 
     fs::write(root_dir.join("all-time.html"), res)?;
 
-    render_projects_page(&hb, projects, &combined_all_time, root_dir)?;
+    render_projects_page(
+        &hb,
+        projects,
+        &combined_all_time,
+        &root_dir.join("index.html"),
+    )?;
 
     Ok(())
-}
-
-/// Validate that there is exactly one homepage project
-fn validate_homepage(projects: &[ProjectData]) {
-    let mut homepage_project = None;
-    for data in projects {
-        if data.project.is_homepage() {
-            if let Some(other) = homepage_project {
-                panic!(
-                    "Multiple projects that are marked as a homepage project: {} and {other}",
-                    data.project.name()
-                );
-            }
-            homepage_project = Some(data.project.name().to_string());
-        }
-    }
-    if homepage_project.is_none() {
-        eprintln!(
-            "Warning: no rendered project is marked as homepage project, the index page will be missing"
-        );
-    }
 }
 
 #[derive(serde::Serialize)]
 struct CommonData {
     title: String,
-    show_thanks_in_logo: bool,
 }
 
 impl CommonData {
     fn new(title: String) -> Self {
-        CommonData {
-            title,
-            show_thanks_in_logo: true,
-        }
-    }
-
-    fn without_thanks_in_logo(mut self) -> Self {
-        self.show_thanks_in_logo = false;
-        self
+        CommonData { title }
     }
 }
 
@@ -176,8 +144,7 @@ fn render_project_index_page(
     let res = hb.render(
         "index",
         &Index {
-            common: CommonData::new(format!("{} Contributors", data.project.name()))
-                .without_thanks_in_logo(),
+            common: CommonData::new(format!("{} Contributors", data.project.name())),
             name: data.project.name(),
             releases,
         },
@@ -189,17 +156,33 @@ fn render_project_index_page(
 
 fn render_about_page(
     hb: &Handlebars<'_>,
+    projects: &[ProjectData],
     output_dir: &Path,
 ) -> Result<(), Box<dyn std::error::Error>> {
     #[derive(serde::Serialize)]
+    struct ProjectInfo {
+        url: String,
+        name: String,
+    }
+
+    #[derive(serde::Serialize)]
     struct About {
         common: CommonData,
+        additional_projects: Vec<ProjectInfo>,
     }
 
     let res = hb.render(
         "about",
         &About {
             common: CommonData::new("About - Rust Contributors".into()),
+            additional_projects: projects
+                .iter()
+                .filter(|p| p.project.name() != "Rust")
+                .map(|p| ProjectInfo {
+                    url: p.project.repo_url().to_string(),
+                    name: p.project.name().to_string(),
+                })
+                .collect(),
         },
     )?;
 
@@ -213,7 +196,7 @@ fn render_projects_page(
     hb: &Handlebars<'_>,
     projects: &[ProjectData],
     all_time: &AuthorsWithScores,
-    output_dir: &Path,
+    path: &Path,
 ) -> Result<(), Box<dyn std::error::Error>> {
     #[derive(serde::Serialize)]
     struct ProjectInfo {
@@ -251,7 +234,7 @@ fn render_projects_page(
         },
     )?;
 
-    fs::write(output_dir.join("projects.html"), res)?;
+    fs::write(path, res)?;
     Ok(())
 }
 
@@ -263,7 +246,7 @@ struct Release<'a> {
     count: usize,
     scores: &'a [AuthorScore],
     in_progress: bool,
-    is_homepage_project: bool,
+    backlink: &'static str,
 }
 
 fn render_all_time_page(
@@ -281,7 +264,11 @@ fn render_all_time_page(
             count: scores.len(),
             scores,
             in_progress: true,
-            is_homepage_project: data.project.is_homepage(),
+            backlink: if data.project.is_versionless() {
+                "all projects"
+            } else {
+                "all releases"
+            },
         },
     )?;
 
@@ -306,7 +293,7 @@ fn render_release_pages(
                 count: scores.len(),
                 scores,
                 in_progress: version.in_progress,
-                is_homepage_project: data.project.is_homepage(),
+                backlink: "all releases",
             },
         )?;
 

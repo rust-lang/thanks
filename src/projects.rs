@@ -10,11 +10,6 @@ pub trait Project {
     /// If the `url` is e.g. `rust`, it will be available under `/rust/`.
     fn url_path(&self) -> &'static str;
 
-    /// Should this project be displayed as the main homepage project?
-    fn is_homepage(&self) -> bool {
-        false
-    }
-
     /// URL of its GitHub repository.
     fn repo_url(&self) -> &'static str;
 
@@ -47,10 +42,6 @@ impl Project for Rust {
 
     fn url_path(&self) -> &'static str {
         "rust"
-    }
-
-    fn is_homepage(&self) -> bool {
-        true
     }
 
     fn repo_url(&self) -> &'static str {

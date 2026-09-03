@@ -13,13 +13,18 @@
       </p>
       <p>
         Currently, we are only tracking commits and reviews to
-        <code>rust-lang/rust</code>, most of its related submodules, and
-        the <code>rust-lang/rustup</code>, <code>rust-lang/docs.rs</code>, and
-        <code>rust-lang/crates.io</code> projects. In
-        the future, we have plans to add tracking for more
-        repositories under the Rust project generally, and possibly even
-        tracking other kinds of contributions, as they're also
-        important!
+        <a href="https://github.com/rust-lang/rust"><code>rust-lang/rust</code></a>,
+        together with most of its related submodules and subtrees,
+        and also the following projects:
+      <ul>
+        {{# each additional_projects as |project| }}
+          <li><a href="{{ project.url }}"><code>{{ project.name }}</code></a></li>
+        {{/each}}
+      </ul>
+      In the future, we have plans to add tracking for more
+      repositories under the Rust project generally, and possibly even
+      tracking other kinds of contributions, as they're also
+      important!
       </p>
       <p>
         This project was inspired by <a
