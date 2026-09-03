@@ -2,7 +2,7 @@ use clap::Parser;
 use git2::Repository;
 use mailmap::Mailmap;
 use reviewers::Reviewers;
-use std::collections::{BTreeMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::io::BufWriter;
 use std::path::{Path, PathBuf};
 use std::str;
@@ -102,6 +102,7 @@ fn run(
     mode: OutputMode,
     mailmap_path: Option<PathBuf>,
     selected_project: Option<&str>,
+    project_last_versions: HashMap<String, semver::Version>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut projects = get_all_projects();
     if let Some(selected) = selected_project {
@@ -113,7 +114,11 @@ fn run(
 
     let mut data = vec![];
     for project in projects {
-        data.push(compute_data(project, mailmap_path.clone())?);
+        data.push(compute_data(
+            project,
+            mailmap_path.clone(),
+            &project_last_versions,
+        )?);
     }
 
     match mode {
@@ -170,6 +175,14 @@ struct Args {
     /// The value should correspond to the project's lowercase name.
     #[arg(long)]
     project: Option<String>,
+
+    /// Render only contributions up to the selected semver version tag. This
+    /// is needed for tests where the all-time output is compared to what is
+    /// expected - the all-time output is based on the combined results from
+    /// all versions, and thus will change every time a new version is tagged.
+    /// Give in the form of comma separated values: {project}:{version}
+    #[arg(long, value_delimiter = ',')]
+    last_versions: Vec<String>,
 }
 
 #[derive(clap::ValueEnum, Copy, Clone)]
@@ -181,7 +194,24 @@ enum OutputMode {
 fn main() {
     let args = Args::parse();
 
-    if let Err(err) = run(args.mode, args.mailmap_path, args.project.as_deref()) {
+    let mut last_versions_map: HashMap<String, semver::Version> = HashMap::new();
+    for spec in args.last_versions {
+        let Some((project, version)) = spec.split_once(':') else {
+            eprintln!("Error: --last-versions contains invalid entry: {spec}");
+            std::process::exit(1);
+        };
+        last_versions_map.insert(
+            project.to_lowercase(),
+            semver::Version::parse(version).expect("--last-versions versions should be valid"),
+        );
+    }
+
+    if let Err(err) = run(
+        args.mode,
+        args.mailmap_path,
+        args.project.as_deref(),
+        last_versions_map,
+    ) {
         eprintln!("Error: {}", err);
         let mut cur = &*err;
         while let Some(cause) = cur.source() {
