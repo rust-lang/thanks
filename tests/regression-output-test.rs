@@ -19,23 +19,31 @@ use std::process::Command;
 
 /// Reference repositories and their commits against which we compare the stored snapshots.
 struct BaselineData {
+    name: &'static str,
     url: &'static str,
     dir: &'static str,
     commit: &'static str,
+    /// Latest version tag to include in all-time stats, does NOT need to match
+    /// the version for the commit
+    last_version: &'static str,
 }
 
 const BASELINES: &[BaselineData] = &[
     BaselineData {
+        name: "rust",
         url: "https://github.com/rust-lang/rust.git",
         dir: "rust-lang/rust",
         // Corresponds to ~Rust 1.95.0 in May 2026.
         commit: "0490dd938541ad996c5ad1ec6e274012afe3e1d4",
+        last_version: "1.98.0",
     },
     BaselineData {
+        name: "rustup",
         url: "https://github.com/rust-lang/rustup.git",
         dir: "rust-lang/rustup",
         // Corresponds to ~Rustup 1.30.0 in August 2026.
         commit: "54cbe77c2949d421573796414922722fced8c254",
+        last_version: "1.29.1",
     },
 ];
 
@@ -168,6 +176,8 @@ fn verify_generated_output() {
         let root_dir = tmp_dir.path();
         eprintln!("Generating thanks data in {}", root_dir.display());
 
+        let mut last_versions = vec![];
+
         // Prepare the baseline repositories
         for baseline in BASELINES {
             let relative_dir = Path::new("repos").join(baseline.dir);
@@ -183,9 +193,15 @@ fn verify_generated_output() {
             run(Command::new("git")
                 .current_dir(root_dir.join(&relative_dir))
                 .args(["branch", "-f", "main", baseline.commit]));
+
+            last_versions.push(format!("{}:{}", baseline.name, baseline.last_version));
         }
         // Run thanks
-        run(Command::new(binary).current_dir(root_dir).arg("csv"));
+        run(Command::new(binary)
+            .current_dir(root_dir)
+            .arg("csv")
+            .arg("--last-versions")
+            .arg(last_versions.join(",")));
 
         (root_dir.join("output").join("csv"), Some(tmp_dir))
     };

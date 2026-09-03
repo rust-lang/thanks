@@ -21,10 +21,24 @@ pub struct ProjectData {
 pub fn compute_data(
     project: Box<dyn Project>,
     mailmap_path: Option<PathBuf>,
+    project_last_versions: &HashMap<String, semver::Version>,
 ) -> Result<ProjectData, Box<dyn std::error::Error>> {
+    let last_version_filter: Option<&semver::Version> =
+        project_last_versions.get(&project.name().to_lowercase());
     let by_version = generate_thanks(project.as_ref(), mailmap_path)?;
     let by_version: BTreeMap<_, _> = by_version
         .into_iter()
+        .filter(|(k, _v)| {
+            last_version_filter
+                .as_ref()
+                .map(|filter| k.version <= **filter)
+                .inspect(|r| {
+                    if !r {
+                        println!("Ignoring newer version: {k}")
+                    }
+                })
+                .unwrap_or(true)
+        })
         .map(|(k, v)| (k, AuthorsWithScores::new(v)))
         .collect();
 
