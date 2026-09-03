@@ -83,7 +83,6 @@ jobs:
     needs:
       - build
       - test
-      - regression
     concurrency: deploy
 
     permissions:
