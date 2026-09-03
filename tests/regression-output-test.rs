@@ -43,7 +43,7 @@ const BASELINES: &[BaselineData] = &[
         dir: "rust-lang/rustup",
         // Corresponds to ~Rustup 1.30.0 in August 2026.
         commit: "54cbe77c2949d421573796414922722fced8c254",
-        last_version: "1.30.0",
+        last_version: "1.29.1",
     },
 ];
 
