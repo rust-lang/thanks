@@ -1,10 +1,10 @@
-1,bors,bors@rust-lang.org,56286
+1,bors,bors@rust-lang.org,56287
 2,Alex Crichton,alex@alexcrichton.com,17067
 3,Ralf Jung,post@ralfj.de,13510
 4,Oliver Scherer,oli-obk@users.noreply.github.com,10664
 5,Aleksey Kladov,aleksey.kladov@gmail.com,8648
 6,Guillaume Gomez,contact@guillaume-gomez.fr,8037
-7,Mark Rousskov,mark.simulacrum@gmail.com,8025
+7,Mark Rousskov,mark.simulacrum@gmail.com,8027
 8,Brian Anderson,banderson@mozilla.com,7385
 9,Lukas Wirth,lukastw97@gmail.com,7366
 10,Michael Goulet,michael@errs.io,6925
@@ -14,14 +14,14 @@
 14,Vadim Petrochenkov,vadim.petrochenkov@gmail.com,5060
 15,Nicholas Nethercote,n.nethercote@gmail.com,4934
 16,Esteban Küber,esteban@kuber.com.ar,4479
-17,Jakub Beránek,berykubik@gmail.com,4071
+17,Jakub Beránek,berykubik@gmail.com,4072
 18,Weihang Lo,me@weihanglo.tw,3859
 19,Carol (Nichols || Goulding),carol.nichols@gmail.com,3673
 20,Camille Gillot,gillot.camille@gmail.com,3619
 21,Ed Page,eopage@gmail.com,3582
 22,Steve Klabnik,steve@steveklabnik.com,3577
 23,Philipp Krones,hello@philkrones.com,3472
-24,lcnr,rust@lcnr.de,3418
+24,lcnr,rust@lcnr.de,3420
 25,Nick Cameron,nrc@ncameron.org,3399
 26,Patrick Walton,pcwalton@mimiga.net,3325
 27,Matthias Krüger,matthias.krueger@famsik.de,3112
@@ -454,6 +454,7 @@
 452,Piotr Czarnecki,pioczarn@gmail.com,72
 452,dfireBird,me@dfirebird.dev,72
 452,gwenn,gtreguier@gmail.com,72
+457,Adwin White,adwinw01@gmail.com,71
 457,Clar Charr,clar@charr.xyz,71
 457,Jade,software@lfcode.ca,71
 457,Kang Seonghoon,kang.seonghoon@mearie.org,71
@@ -462,15 +463,14 @@
 457,Roxane Fruytier,roxane.fruytier@hotmail.com,71
 457,Ryan Wiedemann,Ryan1729@gmail.com,71
 457,Walnut,39544927+Walnut356@users.noreply.github.com,71
-465,Adam Perry,adam.n.perry@gmail.com,70
-465,Adwin White,adwinw01@gmail.com,70
-465,Alice Ryhl,aliceryhl@google.com,70
-465,Daria Sukhonina,dariasukhonina@gmail.com,70
-465,Joshua Liebow-Feeser,joshlf@users.noreply.github.com,70
-465,Lukas Bergdoll,lukas.bergdoll@gmail.com,70
-465,Raoul Strackx,raoul.strackx@fortanix.com,70
-465,aerooneqq,aerooneq@yandex.ru,70
-465,asquared31415,34665709+asquared31415@users.noreply.github.com,70
+466,Adam Perry,adam.n.perry@gmail.com,70
+466,Alice Ryhl,aliceryhl@google.com,70
+466,Daria Sukhonina,dariasukhonina@gmail.com,70
+466,Joshua Liebow-Feeser,joshlf@users.noreply.github.com,70
+466,Lukas Bergdoll,lukas.bergdoll@gmail.com,70
+466,Raoul Strackx,raoul.strackx@fortanix.com,70
+466,aerooneqq,aerooneq@yandex.ru,70
+466,asquared31415,34665709+asquared31415@users.noreply.github.com,70
 474,Binlogo,binboy@live.com,69
 474,Bráulio Bezerra,brauliobezerra@gmail.com,69
 474,Dnreikronos,dnreikronos2@gmail.com,69
