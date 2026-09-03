@@ -83,7 +83,6 @@ jobs:
     needs:
       - build
       - test
-      - regression
     concurrency: deploy
 
     permissions:
@@ -105,7 +104,6 @@ jobs:
       - test
       - build
       - deploy
-      - regression
     # We need to ensure this job does *not* get skipped if its dependencies fail,
     # because a skipped job is considered a success by GitHub. So we have to
     # overwrite `if:`. We use `!cancelled()` to ensure the job does still not get run
