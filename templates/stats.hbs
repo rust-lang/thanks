@@ -5,8 +5,7 @@
         <h2>{{ release_title }} Contributors</h2>
         <div class="highlight"></div>
       </header>
-      <p class="mb3"><a href="{{#if is_homepage_project }}/{{else}}../{{/if}}">Back to all
-        releases</a></p>
+      <p class="mb3"><a href="../">Back to {{ backlink }}</a></p>
       <p class="mb3">
         {{#if in_progress }}
           We have had {{ count }} individuals contribute to {{ release }} so far.
