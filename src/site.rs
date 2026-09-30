@@ -129,15 +129,15 @@ fn render_project_index_page(
     releases.push(Release {
         name: "All time".into(),
         url: format!("/{}/all-time/", data.project.url_path()),
-        people: data.all_time.authors.iter().count(),
-        commits: data.all_time.authors.iter().map(|(_, count)| count).sum(),
+        people: data.all_time.scores.len(),
+        commits: data.all_time.scores.iter().map(|score| score.commits).sum(),
     });
     for (version, stats) in data.by_version.iter().rev() {
         releases.push(Release {
             name: version.name.clone(),
             url: format!("/{}/{}/", data.project.url_path(), version.version),
-            people: stats.authors.iter().count(),
-            commits: stats.authors.iter().map(|(_, count)| count).sum(),
+            people: stats.scores.len(),
+            commits: stats.scores.iter().map(|score| score.commits).sum(),
         });
     }
 
@@ -219,8 +219,8 @@ fn render_projects_page(
         .map(|data| ProjectInfo {
             name: data.project.name().to_string(),
             link: data.project.url_path().to_string(),
-            people: data.all_time.authors.iter().count(),
-            commits: data.all_time.authors.iter().map(|(_, count)| count).sum(),
+            people: data.all_time.scores.len(),
+            commits: data.all_time.scores.iter().map(|score| score.commits).sum(),
         })
         .collect();
 
@@ -229,8 +229,8 @@ fn render_projects_page(
         &Projects {
             common: CommonData::new("Rust toolchain projects".into()),
             projects,
-            all_time_people: all_time.authors.iter().count(),
-            all_time_commits: all_time.authors.iter().map(|(_, count)| count).sum(),
+            all_time_people: all_time.scores.len(),
+            all_time_commits: all_time.scores.iter().map(|score| score.commits).sum(),
         },
     )?;
 
