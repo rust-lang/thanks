@@ -44,7 +44,7 @@
 44,David Tolnay,dtolnay@gmail.com,1753
 45,Josh Stone,cuviper@gmail.com,1712
 45,Mara Bos,m-ou.se@m-ou.se,1712
-47,Jubilee Young,workingjubilee@gmail.com,1704
+47,Jubilee Young,workingjubilee@gmail.com,1705
 48,varkor,github@varkor.com,1594
 49,Seiichi Uchida,seuchida@gmail.com,1561
 50,Jorge Aparicio,japaric@linux.com,1538
@@ -97,7 +97,7 @@
 97,Huon Wilson,dbau.pp+github@gmail.com,828
 98,Fridtjof Stoldt,xFrednet@gmail.com,813
 99,Jacob Finkelman,eh2406@wayne.edu,808
-100,Trevor Gross,tg@trevorgross.com,797
+100,Trevor Gross,tg@trevorgross.com,798
 101,Erick Tryzelaar,erick.tryzelaar@gmail.com,783
 102,Chris Krycho,hello@chriskrycho.com,780
 103,Edwin Cheng,edwin0cheng@gmail.com,770
@@ -213,9 +213,9 @@
 213,James Miller,bladeon@gmail.com,217
 213,Mads Marquart,mads@marquart.dk,217
 215,Albert Larsan,albert.larsan@gmail.com,213
+216,Hanna Kruppe,hanna.kruppe@gmail.com,208
 216,Redddy,rust@redddy.com,208
-217,Hanna Kruppe,hanna.kruppe@gmail.com,207
-217,Tamir Duberstein,tamird@gmail.com,207
+218,Tamir Duberstein,tamird@gmail.com,207
 219,Ivan Tham,pickfire@riseup.net,204
 219,blake2-ppc,ulrik.sverdrup@gmail.com,204
 221,Alex Butler,alexheretic@gmail.com,202
@@ -300,13 +300,13 @@
 300,Yoshua Wuyts,yoshuawuyts@gmail.com,130
 301,David Carlier,devnexen@gmail.com,128
 302,DropDemBits,r3usrlnd@gmail.com,127
+302,beetrees,b@beetr.ee,127
 302,dswij,dharmasw@outlook.com,127
-304,Sébastien Marie,semarie@users.noreply.github.com,126
-304,lapla-cogito,me@lapla.dev,126
-306,Daniel Paoliello,danpao@microsoft.com,125
-306,Folkert de Vries,flokkievids@gmail.com,125
-306,Xmasreturns,j.l@utexas.edu,125
-306,beetrees,b@beetr.ee,125
+305,Sébastien Marie,semarie@users.noreply.github.com,126
+305,lapla-cogito,me@lapla.dev,126
+307,Daniel Paoliello,danpao@microsoft.com,125
+307,Folkert de Vries,flokkievids@gmail.com,125
+307,Xmasreturns,j.l@utexas.edu,125
 310,klutzy,klutzytheklutzy@gmail.com,124
 311,Arlo Siemsen,arkixml@gmail.com,123
 311,alexey semenyuk,alexsemenyuk88@gmail.com,123

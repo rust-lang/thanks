@@ -28,8 +28,8 @@ pub trait Project {
 
     /// Contributions from users with these e-mail addresses will be ignored.
     /// The addresses will be compared in a case-insensitive manner.
-    fn ignored_emails(&self) -> &'static [&'static str] {
-        &[]
+    fn ignored_emails(&self) -> Vec<&'static str> {
+        default_ignored_emails()
     }
 }
 
@@ -192,18 +192,25 @@ impl Project for DocsRs {
         }])
     }
 
-    fn ignored_emails(&self) -> &'static [&'static str] {
-        &[
-            // CI bot
-            "docs.rs@users.noreply.github.com",
-            // Renovatebot
-            "29139614+renovate[bot]@users.noreply.github.com",
-            // Dependabot
-            "49699333+dependabot[bot]@users.noreply.github.com",
-        ]
+    fn ignored_emails(&self) -> Vec<&'static str> {
+        let mut ignored = default_ignored_emails();
+        // CI bot
+        ignored.push("docs.rs@users.noreply.github.com");
+        ignored
     }
 
     fn is_versionless(&self) -> bool {
         true
     }
+}
+
+fn default_ignored_emails() -> Vec<&'static str> {
+    vec![
+        // Renovatebot
+        "29139614+renovate[bot]@users.noreply.github.com",
+        // Dependabot
+        "dependabot[bot]@users.noreply.github.com",
+        // github-actions bot
+        "41898282+github-actions[bot]@users.noreply.github.com",
+    ]
 }
