@@ -282,6 +282,7 @@ fn get_submodules(
             "https://github.com/rust-lang/compiler-rt.git",
             "https://github.com/rust-lang/hoedown.git",
             "https://github.com/rust-lang/gcc.git",
+            "https://github.com/rust-lang/tpde.git",
         ];
         let repo_name = s.repository.to_lowercase();
         is_rust
