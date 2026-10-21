@@ -262,6 +262,7 @@ pub fn get_team_people() -> Result<TeamPeople, Box<dyn Error>> {
     Ok(
         ureq::get("https://team-api.infra.rust-lang.org/v1/people.json")
             .call()?
-            .into_json::<TeamPeople>()?,
+            .into_body()
+            .read_json::<TeamPeople>()?,
     )
 }
