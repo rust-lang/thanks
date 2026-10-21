@@ -83,7 +83,6 @@ fn check_file(expected: &Path, actual: &Path) -> Result<(), String> {
 fn get_sorted_paths(dir: &Path) -> Vec<DirEntry> {
     let mut files = std::fs::read_dir(dir)
         .unwrap()
-        .into_iter()
         .collect::<Result<Vec<_>, _>>()
         .unwrap();
     files.sort_by_key(|e| e.path());
